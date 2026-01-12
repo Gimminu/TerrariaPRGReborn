@@ -1,0 +1,4 @@
+c:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net6.0\Rpg.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net6.0\Rpg.AssemblyInfoInputs.cache
+c:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net6.0\Rpg.AssemblyInfo.cs
+c:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net6.0\Rpg.csproj.CoreCompileInputs.cache

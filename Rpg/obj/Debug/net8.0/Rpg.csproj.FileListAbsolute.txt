@@ -1,0 +1,12 @@
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.csproj.AssemblyReference.cache
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.AssemblyInfoInputs.cache
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.AssemblyInfo.cs
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.csproj.CoreCompileInputs.cache
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\bin\Debug\net8.0\Rpg.deps.json
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\bin\Debug\net8.0\Rpg.dll
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\bin\Debug\net8.0\Rpg.pdb
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.dll
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\refint\Rpg.dll
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.pdb
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\ref\Rpg.dll

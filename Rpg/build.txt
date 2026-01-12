@@ -1,0 +1,9 @@
+displayName = Terraria RPG Reborn
+author = Your Name
+version = 0.1.0
+homepage = https://github.com/yourname/TerrariaPRGReborn
+hideCode = false
+hideResources = false
+includeSource = true
+buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .git\*, Docs\*
+includePDB = true

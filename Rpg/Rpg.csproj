@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Rpg</RootNamespace>
+    <AssemblyName>Rpg</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\" />
+    <Folder Include="Common\" />
+    <Folder Include="Content\" />
+    <Folder Include="Localization\" />
+  </ItemGroup>
+  <Import Project="..\tModLoader.targets" />
+</Project>

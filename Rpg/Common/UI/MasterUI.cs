@@ -1,0 +1,1177 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
+using Terraria;
+using Terraria.Audio;
+using Terraria.GameContent;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.UI;
+using Rpg.Common.Players;
+using Rpg.Common.Skills;
+using Rpg.Common.Base;
+using Rpg.Common.Systems;
+
+namespace Rpg.Common.UI
+{
+    /// <summary>
+    /// Master UI - Unified window for Stats, Job, Skills, and Achievements
+    /// Accessed with a single keybind (default: C)
+    /// </summary>
+    public class MasterUI : UIState
+    {
+        public enum Tab { Stats, Job, Skills, Achieve }
+        private enum JobFilter { All, Next, Available, Tier1, Tier2, Tier3 }
+        private enum SkillFilter { All, Novice, Tier1, Tier2, Tier3 }
+        
+        private RpgPlayer rpgPlayer;
+        private SkillManager skillManager;
+        
+        // UI State
+        private Tab currentTab = Tab.Stats;
+        private bool dragging = false;
+        private Vector2 dragOffset;
+        private static Rectangle? lastBounds;
+        private JobFilter jobFilter = JobFilter.Next;
+        private SkillFilter skillFilter = SkillFilter.All;
+        private SkillFilter lastSkillFilter = SkillFilter.All;
+        private JobType lastSkillJob = JobType.None;
+        
+        // Panel dimensions
+        private Rectangle bounds;
+        private const int PANEL_WIDTH = 500;
+        private const int PANEL_HEIGHT = 550;
+        private const int HEADER_HEIGHT = 50;
+        private const int TAB_HEIGHT = 40;
+        
+        // Tab buttons
+        private Rectangle tabStatsBtn;
+        private Rectangle tabJobBtn;
+        private Rectangle tabSkillsBtn;
+        private Rectangle tabAchieveBtn;
+        
+        // Stat allocation buttons
+        private Dictionary<StatType, Rectangle> statPlusBtns = new();
+        private Dictionary<StatType, Rectangle> statRowBounds = new();
+        
+        // Skill list scroll
+        private int skillScrollOffset = 0;
+        private List<BaseSkill> allSkills = new();
+        private List<BaseSkill> availableSkills = new();
+        
+        // Job selection
+        private List<JobType> availableJobs = new();
+        private int jobScrollOffset = 0;
+        
+        public override void OnInitialize()
+        {
+            if (lastBounds.HasValue)
+            {
+                bounds = lastBounds.Value;
+            }
+            else
+            {
+                bounds = new Rectangle(
+                    Main.screenWidth / 2 - PANEL_WIDTH / 2,
+                    Main.screenHeight / 2 - PANEL_HEIGHT / 2,
+                    PANEL_WIDTH,
+                    PANEL_HEIGHT
+                );
+            }
+        }
+        
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            
+            if (Main.LocalPlayer == null || !Main.LocalPlayer.active)
+                return;
+                
+            rpgPlayer = Main.LocalPlayer.GetModPlayer<RpgPlayer>();
+            skillManager = Main.LocalPlayer.GetModPlayer<SkillManager>();
+            
+            // Update available data based on current tab
+            if (currentTab == Tab.Skills)
+            {
+                UpdateSkillList();
+            }
+            else if (currentTab == Tab.Job)
+            {
+                availableJobs = Jobs.JobDatabase.GetAllJobs();
+            }
+            
+            // Handle dragging
+            HandleDragging();
+            
+            // Handle scrolling
+            if (bounds.Contains(Main.mouseX, Main.mouseY))
+            {
+                int scroll = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
+                if (currentTab == Tab.Skills)
+                {
+                    skillScrollOffset -= scroll / 30;
+                    skillScrollOffset = System.Math.Max(0, skillScrollOffset);
+                }
+                else if (currentTab == Tab.Job)
+                {
+                    jobScrollOffset -= scroll / 30;
+                    jobScrollOffset = System.Math.Max(0, jobScrollOffset);
+                }
+            }
+            
+            // Close on ESC
+            if (Main.keyState.IsKeyDown(Keys.Escape))
+            {
+                ModContent.GetInstance<MasterUISystem>().HideUI();
+            }
+        }
+        
+        private void HandleDragging()
+        {
+            Rectangle header = new Rectangle(bounds.X, bounds.Y, bounds.Width, HEADER_HEIGHT);
+            Rectangle closeBtn = new Rectangle(bounds.X + bounds.Width - 35, bounds.Y + 10, 25, 25);
+            
+            if (!dragging && Main.mouseLeft && header.Contains(Main.mouseX, Main.mouseY) && !closeBtn.Contains(Main.mouseX, Main.mouseY))
+            {
+                dragging = true;
+                dragOffset = new Vector2(Main.mouseX - bounds.X, Main.mouseY - bounds.Y);
+            }
+            else if (dragging && !Main.mouseLeft)
+            {
+                dragging = false;
+                lastBounds = bounds;
+            }
+            
+            if (dragging)
+            {
+                bounds.X = (int)(Main.mouseX - dragOffset.X);
+                bounds.Y = (int)(Main.mouseY - dragOffset.Y);
+                
+                // Clamp to screen
+                bounds.X = Utils.Clamp(bounds.X, 0, Main.screenWidth - PANEL_WIDTH);
+                bounds.Y = Utils.Clamp(bounds.Y, 0, Main.screenHeight - PANEL_HEIGHT);
+            }
+        }
+        
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            if (rpgPlayer == null || skillManager == null)
+                return;
+            
+            // Main panel background
+            DrawPanel(spriteBatch, bounds, new Color(20, 25, 40, 245), new Color(60, 70, 100));
+            
+            // Header
+            DrawHeader(spriteBatch);
+            
+            // Tabs
+            DrawTabs(spriteBatch);
+            
+            // Content area
+            Rectangle contentArea = new Rectangle(
+                bounds.X + 10,
+                bounds.Y + HEADER_HEIGHT + TAB_HEIGHT + 10,
+                bounds.Width - 20,
+                bounds.Height - HEADER_HEIGHT - TAB_HEIGHT - 20
+            );
+            
+            switch (currentTab)
+            {
+                case Tab.Stats:
+                    DrawStatsTab(spriteBatch, contentArea);
+                    break;
+                case Tab.Job:
+                    DrawJobTab(spriteBatch, contentArea);
+                    break;
+                case Tab.Skills:
+                    DrawSkillsTab(spriteBatch, contentArea);
+                    break;
+                case Tab.Achieve:
+                    DrawAchievementsTab(spriteBatch, contentArea);
+                    break;
+            }
+            
+            // Prevent clicking through
+            if (bounds.Contains(Main.mouseX, Main.mouseY))
+            {
+                Main.LocalPlayer.mouseInterface = true;
+            }
+        }
+        
+        private void DrawHeader(SpriteBatch spriteBatch)
+        {
+            Rectangle headerBounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, HEADER_HEIGHT);
+            DrawPanel(spriteBatch, headerBounds, new Color(30, 40, 60, 255), new Color(80, 100, 140));
+            
+            // Title
+            string title = "RPG Menu";
+            Vector2 titleSize = FontAssets.DeathText.Value.MeasureString(title) * 0.5f;
+            Vector2 titlePos = new Vector2(
+                bounds.X + bounds.Width / 2 - titleSize.X / 2,
+                bounds.Y + HEADER_HEIGHT / 2 - titleSize.Y / 2
+            );
+            Utils.DrawBorderString(spriteBatch, title, titlePos, Color.Gold, 0.6f);
+            
+            // Close button
+            Rectangle closeBtn = new Rectangle(bounds.X + bounds.Width - 35, bounds.Y + 10, 25, 25);
+            DrawPanel(spriteBatch, closeBtn, new Color(180, 50, 50), new Color(220, 80, 80));
+            
+            string x = "X";
+            Vector2 xSize = FontAssets.MouseText.Value.MeasureString(x);
+            Vector2 xPos = new Vector2(closeBtn.X + closeBtn.Width / 2 - xSize.X / 2, closeBtn.Y + closeBtn.Height / 2 - xSize.Y / 2);
+            Utils.DrawBorderString(spriteBatch, x, xPos, Color.White, 1f);
+            
+            if (closeBtn.Contains(Main.mouseX, Main.mouseY) && Main.mouseLeft && Main.mouseLeftRelease)
+            {
+                ModContent.GetInstance<MasterUISystem>().HideUI();
+                SoundEngine.PlaySound(SoundID.MenuClose);
+            }
+        }
+        
+        private void DrawTabs(SpriteBatch spriteBatch)
+        {
+            int tabWidth = (bounds.Width - 50) / 4;
+            int tabY = bounds.Y + HEADER_HEIGHT + 5;
+            
+            tabStatsBtn = new Rectangle(bounds.X + 10, tabY, tabWidth, TAB_HEIGHT - 10);
+            tabJobBtn = new Rectangle(bounds.X + 20 + tabWidth, tabY, tabWidth, TAB_HEIGHT - 10);
+            tabSkillsBtn = new Rectangle(bounds.X + 30 + tabWidth * 2, tabY, tabWidth, TAB_HEIGHT - 10);
+            tabAchieveBtn = new Rectangle(bounds.X + 40 + tabWidth * 3, tabY, tabWidth, TAB_HEIGHT - 10);
+            
+            DrawTabButton(spriteBatch, tabStatsBtn, "Stats", Tab.Stats);
+            DrawTabButton(spriteBatch, tabJobBtn, "Job", Tab.Job);
+            DrawTabButton(spriteBatch, tabSkillsBtn, "Skills", Tab.Skills);
+            DrawTabButton(spriteBatch, tabAchieveBtn, "Achieve", Tab.Achieve);
+        }
+        
+        private void DrawTabButton(SpriteBatch spriteBatch, Rectangle rect, string label, Tab tab)
+        {
+            bool active = currentTab == tab;
+            bool hover = rect.Contains(Main.mouseX, Main.mouseY);
+            
+            Color bg = active ? new Color(60, 80, 120) : (hover ? new Color(50, 60, 90) : new Color(35, 45, 70));
+            Color border = active ? new Color(100, 150, 220) : new Color(70, 80, 100);
+            
+            DrawPanel(spriteBatch, rect, bg, border);
+            
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(label);
+            Vector2 textPos = new Vector2(rect.X + rect.Width / 2 - textSize.X / 2, rect.Y + rect.Height / 2 - textSize.Y / 2);
+            Utils.DrawBorderString(spriteBatch, label, textPos, active ? Color.White : Color.LightGray, 1f);
+            
+            if (hover && Main.mouseLeft && Main.mouseLeftRelease)
+            {
+                currentTab = tab;
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+        }
+        
+        #region Stats Tab
+        
+        private void DrawStatsTab(SpriteBatch spriteBatch, Rectangle area)
+        {
+            int y = area.Y;
+            
+            // Available points
+            string pointsText = rpgPlayer.PendingStatPoints > 0
+                ? $"Stat Points: {rpgPlayer.StatPoints} (Pending: {rpgPlayer.PendingStatPoints})"
+                : $"Stat Points: {rpgPlayer.StatPoints}";
+            Utils.DrawBorderString(spriteBatch, pointsText, new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString(pointsText).X / 2, y), Color.Gold);
+            y += 30;
+            
+            // Instructions
+            string instr = "Click: +1 | Shift: +5 | Ctrl: +10 | Ctrl+Shift: All";
+            Utils.DrawBorderString(spriteBatch, instr, new Vector2(area.X + 10, y), Color.Gray, 0.7f);
+            y += 18;
+
+            string autoHint = "Auto growth shown as A (Base/Auto/Bonus).";
+            Utils.DrawBorderString(spriteBatch, autoHint, new Vector2(area.X + 10, y), Color.Gray, 0.65f);
+            y += 22;
+            
+            // Stats
+            statPlusBtns.Clear();
+            statRowBounds.Clear();
+            DrawStatRow(spriteBatch, area, ref y, StatType.Strength, rpgPlayer.Strength, rpgPlayer.AutoStrength, rpgPlayer.BonusStrength, "STR", Color.OrangeRed);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Dexterity, rpgPlayer.Dexterity, rpgPlayer.AutoDexterity, rpgPlayer.BonusDexterity, "DEX", Color.LightGreen);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Rogue, rpgPlayer.Rogue, rpgPlayer.AutoRogue, rpgPlayer.BonusRogue, "ROG", Color.Purple);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Intelligence, rpgPlayer.Intelligence, rpgPlayer.AutoIntelligence, rpgPlayer.BonusIntelligence, "INT", Color.Cyan);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Focus, rpgPlayer.Focus, rpgPlayer.AutoFocus, rpgPlayer.BonusFocus, "FOC", Color.MediumPurple);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Vitality, rpgPlayer.Vitality, rpgPlayer.AutoVitality, rpgPlayer.BonusVitality, "VIT", Color.Red);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Stamina, rpgPlayer.StaminaStat, rpgPlayer.AutoStamina, rpgPlayer.BonusStamina, "STA", Color.Yellow);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Defense, rpgPlayer.Defense, rpgPlayer.AutoDefense, rpgPlayer.BonusDefense, "DEF", Color.Gray);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Agility, rpgPlayer.Agility, rpgPlayer.AutoAgility, rpgPlayer.BonusAgility, "AGI", Color.LightBlue);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Wisdom, rpgPlayer.Wisdom, rpgPlayer.AutoWisdom, rpgPlayer.BonusWisdom, "WIS", Color.Blue);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Fortitude, rpgPlayer.Fortitude, rpgPlayer.AutoFortitude, rpgPlayer.BonusFortitude, "FOR", Color.Brown);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Luck, rpgPlayer.Luck, rpgPlayer.AutoLuck, rpgPlayer.BonusLuck, "LUK", Color.Gold);
+        }
+        
+        private void DrawStatRow(SpriteBatch spriteBatch, Rectangle area, ref int y, StatType stat, int baseVal, int autoVal, int bonus, string abbr, Color color)
+        {
+            int rowHeight = 32;
+            Rectangle rowRect = new Rectangle(area.X, y, area.Width, rowHeight);
+            
+            // Stat name
+            Utils.DrawBorderString(spriteBatch, abbr, new Vector2(area.X, y + 5), color);
+            
+            // Values
+            int totalValue = baseVal + autoVal + bonus;
+            string total = $"{totalValue}";
+            string detail = BuildStatDetail(baseVal, autoVal, bonus);
+            
+            Utils.DrawBorderString(spriteBatch, total, new Vector2(area.X + 60, y + 5), Color.White);
+            Utils.DrawBorderString(spriteBatch, detail, new Vector2(area.X + 110, y + 5), Color.Gray, 0.8f);
+            
+            // + Button
+            Rectangle plusBtn = new Rectangle(area.X + area.Width - 40, y, 35, rowHeight - 4);
+            bool hover = plusBtn.Contains(Main.mouseX, Main.mouseY);
+            bool canAllocate = rpgPlayer.StatPoints > 0;
+            
+            Color btnColor = canAllocate ? (hover ? new Color(80, 150, 80) : new Color(50, 120, 50)) : new Color(60, 60, 60);
+            DrawPanel(spriteBatch, plusBtn, btnColor, canAllocate ? new Color(100, 180, 100) : new Color(80, 80, 80));
+            
+            string plus = "+";
+            Vector2 plusSize = FontAssets.MouseText.Value.MeasureString(plus);
+            Utils.DrawBorderString(spriteBatch, plus, new Vector2(plusBtn.X + plusBtn.Width / 2 - plusSize.X / 2, plusBtn.Y + plusBtn.Height / 2 - plusSize.Y / 2), canAllocate ? Color.White : Color.Gray);
+            
+            statPlusBtns[stat] = plusBtn;
+
+            statRowBounds[stat] = rowRect;
+
+            if (rowRect.Contains(Main.mouseX, Main.mouseY))
+            {
+                DrawStatTooltip(spriteBatch, stat, baseVal, autoVal, bonus);
+            }
+            
+            // Handle click
+            if (hover && Main.mouseLeft && Main.mouseLeftRelease && canAllocate)
+            {
+                int amount = 1;
+                if (Main.keyState.IsKeyDown(Keys.LeftControl) && Main.keyState.IsKeyDown(Keys.LeftShift))
+                    amount = rpgPlayer.StatPoints;
+                else if (Main.keyState.IsKeyDown(Keys.LeftControl))
+                    amount = 10;
+                else if (Main.keyState.IsKeyDown(Keys.LeftShift))
+                    amount = 5;
+                    
+                rpgPlayer.AllocateStatPoint(stat, amount);
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+            
+            y += rowHeight;
+        }
+        
+        #endregion
+        
+        #region Job Tab
+        
+        private void DrawJobTab(SpriteBatch spriteBatch, Rectangle area)
+        {
+            int y = area.Y;
+            
+            // Current job
+            var currentJobData = Jobs.JobDatabase.GetJobData(rpgPlayer.CurrentJob);
+            if (currentJobData != null)
+            {
+                string currentText = $"Current: {currentJobData.DisplayName}";
+                Color tierColor = GetJobTierColor(currentJobData.Tier);
+                Utils.DrawBorderString(spriteBatch, currentText, new Vector2(area.X, y), tierColor);
+                y += 25;
+                
+                // Description
+                Utils.DrawBorderString(spriteBatch, currentJobData.Description, new Vector2(area.X, y), Color.LightGray, 0.75f);
+                y += 40;
+            }
+            
+            // Separator
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(area.X, y, area.Width, 2), new Color(60, 70, 90));
+            y += 10;
+            
+            // Filter row
+            DrawJobFilterRow(spriteBatch, area, ref y);
+            
+            // Job list (name-only)
+            int rowHeight = 32;
+            int rowSpacing = 4;
+            List<JobType> filteredJobs = GetFilteredJobs();
+            int visibleCards = (area.Y + area.Height - y) / (rowHeight + rowSpacing);
+            int maxOffset = System.Math.Max(0, filteredJobs.Count - visibleCards);
+            jobScrollOffset = System.Math.Min(jobScrollOffset, maxOffset);
+            
+            for (int i = jobScrollOffset; i < filteredJobs.Count && i < jobScrollOffset + visibleCards; i++)
+            {
+                var job = filteredJobs[i];
+                
+                var jobData = Jobs.JobDatabase.GetJobData(job);
+                if (jobData == null) continue;
+                
+                DrawJobRow(spriteBatch, new Rectangle(area.X, y, area.Width, rowHeight), jobData, job);
+                y += rowHeight + rowSpacing;
+            }
+
+            if (filteredJobs.Count == 0)
+            {
+                Utils.DrawBorderString(spriteBatch, "No jobs for this filter.", new Vector2(area.X, y), Color.Gray);
+            }
+        }
+        
+        private void DrawJobRow(SpriteBatch spriteBatch, Rectangle rect, Jobs.JobData jobData, JobType jobType)
+        {
+            bool hover = rect.Contains(Main.mouseX, Main.mouseY);
+            bool canChange = Jobs.JobDatabase.CanUnlockJob(rpgPlayer, jobType);
+            
+            Color bg = canChange
+                ? (hover ? new Color(50, 70, 100) : new Color(35, 50, 80))
+                : (hover ? new Color(45, 45, 55) : new Color(35, 35, 45));
+            Color border = canChange ? GetJobTierColor(jobData.Tier) : new Color(70, 70, 80);
+            
+            DrawPanel(spriteBatch, rect, bg, border);
+            
+            string tierText = GetJobTierLabel(jobData.Tier);
+            Vector2 tierSize = FontAssets.MouseText.Value.MeasureString(tierText) * 0.7f;
+            Vector2 tierPos = new Vector2(rect.Right - tierSize.X - 10, rect.Y + 6);
+            Color nameColor = canChange ? Color.White : Color.Gray;
+            
+            Utils.DrawBorderString(spriteBatch, jobData.DisplayName, new Vector2(rect.X + 10, rect.Y + 6), nameColor, 0.85f);
+            Utils.DrawBorderString(spriteBatch, tierText, tierPos, Color.Gray, 0.7f);
+            
+            if (hover)
+            {
+                Main.hoverItemName = BuildJobTooltip(jobData, canChange);
+                if (Main.mouseLeft && Main.mouseLeftRelease && canChange)
+                {
+                    var levelSystem = Main.LocalPlayer.GetModPlayer<Players.PlayerLevel>();
+                    if (levelSystem == null || !levelSystem.AdvanceJob(jobType))
+                    {
+                        Main.NewText("Cannot change job yet.", Color.Red);
+                    }
+                }
+            }
+        }
+
+        private void DrawJobFilterRow(SpriteBatch spriteBatch, Rectangle area, ref int y)
+        {
+            string label = "Filter:";
+            Utils.DrawBorderString(spriteBatch, label, new Vector2(area.X, y), Color.White, 0.8f);
+            float labelWidth = FontAssets.MouseText.Value.MeasureString(label).X * 0.8f;
+
+            JobFilter[] filters = { JobFilter.All, JobFilter.Next, JobFilter.Available, JobFilter.Tier1, JobFilter.Tier2, JobFilter.Tier3 };
+            string[] names = { "All", "Next", "Avail", "T1", "T2", "T3" };
+
+            int buttonWidth = 56;
+            int buttonHeight = 22;
+            int spacing = 6;
+            int startX = (int)(area.X + labelWidth + 10);
+            int top = y - 2;
+
+            for (int i = 0; i < filters.Length; i++)
+            {
+                Rectangle btn = new Rectangle(startX + i * (buttonWidth + spacing), top, buttonWidth, buttonHeight);
+                bool hovered = btn.Contains(Main.mouseX, Main.mouseY);
+                bool selected = jobFilter == filters[i];
+                Color bg = selected ? new Color(90, 120, 170) : (hovered ? new Color(70, 90, 130) : new Color(50, 70, 100));
+                Color border = selected ? new Color(140, 170, 220) : new Color(90, 110, 150);
+                DrawPanel(spriteBatch, btn, bg, border);
+
+                Utils.DrawBorderString(spriteBatch, names[i], new Vector2(btn.X + 8, btn.Y + 3), Color.White, 0.7f);
+
+                if (hovered && Main.mouseLeft && Main.mouseLeftRelease && jobFilter != filters[i])
+                {
+                    jobFilter = filters[i];
+                    jobScrollOffset = 0;
+                }
+            }
+
+            y += buttonHeight + 8;
+        }
+
+        private List<JobType> GetFilteredJobs()
+        {
+            var list = new List<JobType>();
+            foreach (var job in availableJobs)
+            {
+                if (job == rpgPlayer.CurrentJob)
+                    continue;
+
+                var jobData = Jobs.JobDatabase.GetJobData(job);
+                if (jobData == null)
+                    continue;
+
+                if (!MatchesJobFilter(job, jobData))
+                    continue;
+
+                list.Add(job);
+            }
+            return list;
+        }
+
+        private bool MatchesJobFilter(JobType job, Jobs.JobData jobData)
+        {
+            return jobFilter switch
+            {
+                JobFilter.All => true,
+                JobFilter.Next => jobData.Requirements != null && jobData.Requirements.RequiredJob == rpgPlayer.CurrentJob,
+                JobFilter.Available => Jobs.JobDatabase.CanUnlockJob(rpgPlayer, job),
+                JobFilter.Tier1 => jobData.Tier == JobTier.Tier1,
+                JobFilter.Tier2 => jobData.Tier == JobTier.Tier2,
+                JobFilter.Tier3 => jobData.Tier == JobTier.Tier3,
+                _ => true
+            };
+        }
+
+        private string BuildJobTooltip(Jobs.JobData jobData, bool canChange)
+        {
+            var lines = new List<string>
+            {
+                $"{jobData.DisplayName} ({GetJobTierLabel(jobData.Tier)})",
+                jobData.Description
+            };
+
+            if (jobData.StatBonuses != null && jobData.StatBonuses.Count > 0)
+            {
+                var bonusParts = new List<string>();
+                foreach (var bonus in jobData.StatBonuses)
+                {
+                    bonusParts.Add($"{GetStatShortName(bonus.Key)}+{bonus.Value}");
+                }
+                lines.Add("Bonuses: " + string.Join(", ", bonusParts));
+            }
+
+            string req = BuildRequirementsText(jobData, rpgPlayer);
+            if (!string.IsNullOrEmpty(req))
+                lines.Add(req);
+
+            if (canChange)
+                lines.Add("Click to select");
+
+            return string.Join("\n", lines);
+        }
+
+        private string GetJobTierLabel(JobTier tier)
+        {
+            return tier switch
+            {
+                JobTier.Novice => "Novice",
+                JobTier.Tier1 => "Tier 1",
+                JobTier.Tier2 => "Tier 2",
+                JobTier.Tier3 => "Tier 3",
+                _ => "Tier ?"
+            };
+        }
+
+        private string GetStatShortName(StatType stat)
+        {
+            return stat switch
+            {
+                StatType.Strength => "STR",
+                StatType.Dexterity => "DEX",
+                StatType.Rogue => "ROG",
+                StatType.Intelligence => "INT",
+                StatType.Focus => "FOC",
+                StatType.Vitality => "VIT",
+                StatType.Stamina => "STA",
+                StatType.Defense => "DEF",
+                StatType.Agility => "AGI",
+                StatType.Wisdom => "WIS",
+                StatType.Fortitude => "FOR",
+                StatType.Luck => "LUK",
+                _ => stat.ToString()
+            };
+        }
+        
+        private Color GetJobTierColor(JobTier tier)
+        {
+            return tier switch
+            {
+                JobTier.Novice => Color.White,
+                JobTier.Tier1 => new Color(150, 200, 255),
+                JobTier.Tier2 => new Color(100, 255, 100),
+                JobTier.Tier3 => new Color(255, 200, 100),
+                _ => Color.White
+            };
+        }
+        
+        #endregion
+        
+        #region Skills Tab
+
+        private void UpdateSkillList()
+        {
+            JobType currentJob = rpgPlayer.CurrentJob;
+            bool jobChanged = lastSkillJob != currentJob;
+            if (jobChanged || allSkills.Count == 0)
+            {
+                allSkills = SkillDatabase.GetSkillsForJob(currentJob);
+                lastSkillJob = currentJob;
+                skillScrollOffset = 0;
+            }
+
+            if (jobChanged || lastSkillFilter != skillFilter || availableSkills.Count == 0)
+            {
+                availableSkills = GetFilteredSkills(allSkills);
+                lastSkillFilter = skillFilter;
+            }
+        }
+
+        private List<BaseSkill> GetFilteredSkills(List<BaseSkill> source)
+        {
+            var list = new List<BaseSkill>();
+            foreach (var skill in source)
+            {
+                if (skill == null)
+                    continue;
+
+                if (!MatchesSkillFilter(skill))
+                    continue;
+
+                list.Add(skill);
+            }
+
+            list.Sort(CompareSkills);
+            return list;
+        }
+
+        private bool MatchesSkillFilter(BaseSkill skill)
+        {
+            JobTier tier = GetSkillTier(skill);
+            return skillFilter switch
+            {
+                SkillFilter.All => true,
+                SkillFilter.Novice => tier == JobTier.Novice,
+                SkillFilter.Tier1 => tier == JobTier.Tier1,
+                SkillFilter.Tier2 => tier == JobTier.Tier2,
+                SkillFilter.Tier3 => tier == JobTier.Tier3,
+                _ => true
+            };
+        }
+
+        private JobTier GetSkillTier(BaseSkill skill)
+        {
+            if (skill == null)
+                return JobTier.Novice;
+
+            JobType requiredJob = skill.RequiredJob;
+            if (requiredJob == JobType.None || requiredJob == JobType.Novice)
+                return JobTier.Novice;
+
+            return RpgFormulas.GetJobTier(requiredJob);
+        }
+
+        private int CompareSkills(BaseSkill left, BaseSkill right)
+        {
+            if (left == null && right == null)
+                return 0;
+            if (left == null)
+                return 1;
+            if (right == null)
+                return -1;
+
+            JobTier leftTier = GetSkillTier(left);
+            JobTier rightTier = GetSkillTier(right);
+            int tierCompare = leftTier.CompareTo(rightTier);
+            if (tierCompare != 0)
+                return tierCompare;
+
+            int jobCompare = left.RequiredJob.CompareTo(right.RequiredJob);
+            if (jobCompare != 0)
+                return jobCompare;
+
+            int levelCompare = left.RequiredLevel.CompareTo(right.RequiredLevel);
+            if (levelCompare != 0)
+                return levelCompare;
+
+            return string.Compare(left.DisplayName, right.DisplayName, System.StringComparison.OrdinalIgnoreCase);
+        }
+        
+        private void DrawSkillsTab(SpriteBatch spriteBatch, Rectangle area)
+        {
+            int y = area.Y;
+            
+            // Skill points
+            string pointsText = rpgPlayer.PendingSkillPoints > 0
+                ? $"Skill Points: {rpgPlayer.SkillPoints} (Pending: {rpgPlayer.PendingSkillPoints})"
+                : $"Skill Points: {rpgPlayer.SkillPoints}";
+            Utils.DrawBorderString(spriteBatch, pointsText, new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString(pointsText).X / 2, y), Color.Gold);
+            y += 28;
+
+            Rectangle macroBtn = new Rectangle(area.X + area.Width - 130, y - 26, 120, 20);
+            bool macroHover = macroBtn.Contains(Main.mouseX, Main.mouseY);
+            DrawPanel(spriteBatch, macroBtn, macroHover ? new Color(70, 90, 130) : new Color(50, 70, 100), new Color(90, 120, 170));
+            Utils.DrawBorderString(spriteBatch, "Open Macro Editor", new Vector2(macroBtn.X + 6, macroBtn.Y + 2), Color.White, 0.7f);
+            if (macroHover && Main.mouseLeft && Main.mouseLeftRelease)
+            {
+                ModContent.GetInstance<MacroUISystem>()?.ToggleUI();
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+
+            y += 8;
+
+            string instr = "Drag skill icon to slots or macro. Use the M button to add to a macro.";
+            Utils.DrawBorderString(spriteBatch, instr, new Vector2(area.X + 10, y), Color.Gray, 0.7f);
+            y += 22;
+
+            y = DrawSkillFilters(spriteBatch, area, y);
+            
+            // Skill cards
+            int cardHeight = 78;
+            int visibleCards = (area.Y + area.Height - y) / (cardHeight + 5);
+
+            if (visibleCards < 1)
+                visibleCards = 1;
+
+            int maxOffset = System.Math.Max(0, availableSkills.Count - visibleCards);
+            skillScrollOffset = Utils.Clamp(skillScrollOffset, 0, maxOffset);
+
+            Rectangle listArea = new Rectangle(area.X, y, area.Width, area.Y + area.Height - y);
+            DrawSkillScrollBar(spriteBatch, listArea, availableSkills.Count, visibleCards, skillScrollOffset);
+            
+            for (int i = skillScrollOffset; i < availableSkills.Count && i < skillScrollOffset + visibleCards; i++)
+            {
+                var skill = availableSkills[i];
+                DrawSkillCard(spriteBatch, new Rectangle(area.X, y, area.Width, cardHeight), skill);
+                y += cardHeight + 5;
+            }
+            
+            if (availableSkills.Count == 0)
+            {
+                Utils.DrawBorderString(spriteBatch, "No skills available for this filter.", new Vector2(area.X, y), Color.Gray);
+            }
+        }
+
+        private int DrawSkillFilters(SpriteBatch spriteBatch, Rectangle area, int y)
+        {
+            string label = "Filter:";
+            Utils.DrawBorderString(spriteBatch, label, new Vector2(area.X, y), Color.White, 0.8f);
+            float labelWidth = FontAssets.MouseText.Value.MeasureString(label).X * 0.8f;
+
+            SkillFilter[] filters = { SkillFilter.All, SkillFilter.Novice, SkillFilter.Tier1, SkillFilter.Tier2, SkillFilter.Tier3 };
+            string[] names = { "All", "Nov", "T1", "T2", "T3" };
+
+            int buttonWidth = 52;
+            int buttonHeight = 22;
+            int spacing = 6;
+            int startX = (int)(area.X + labelWidth + 10);
+            int top = y - 2;
+
+            for (int i = 0; i < filters.Length; i++)
+            {
+                Rectangle btn = new Rectangle(startX + i * (buttonWidth + spacing), top, buttonWidth, buttonHeight);
+                bool hovered = btn.Contains(Main.mouseX, Main.mouseY);
+                bool selected = skillFilter == filters[i];
+                Color bg = selected ? new Color(90, 120, 170) : (hovered ? new Color(70, 90, 130) : new Color(50, 70, 100));
+                Color border = selected ? new Color(140, 170, 220) : new Color(90, 110, 150);
+                DrawPanel(spriteBatch, btn, bg, border);
+
+                Utils.DrawBorderString(spriteBatch, names[i], new Vector2(btn.X + 8, btn.Y + 3), Color.White, 0.7f);
+
+                if (hovered && Main.mouseLeft && Main.mouseLeftRelease && skillFilter != filters[i])
+                {
+                    skillFilter = filters[i];
+                    skillScrollOffset = 0;
+                }
+            }
+
+            return y + buttonHeight + 8;
+        }
+
+        private void DrawSkillScrollBar(SpriteBatch spriteBatch, Rectangle area, int totalItems, int visibleItems, int offset)
+        {
+            if (totalItems <= visibleItems || visibleItems <= 0)
+                return;
+
+            int trackWidth = 10;
+            int trackX = area.Right - trackWidth - 2;
+            int trackY = area.Y;
+            int trackHeight = area.Height;
+
+            Rectangle track = new Rectangle(trackX, trackY, trackWidth, trackHeight);
+            DrawPanel(spriteBatch, track, new Color(30, 40, 60), new Color(70, 90, 120));
+
+            float ratio = visibleItems / (float)totalItems;
+            int thumbHeight = (int)System.Math.Max(16, ratio * trackHeight);
+            int maxOffset = totalItems - visibleItems;
+            float scrollRatio = maxOffset > 0 ? offset / (float)maxOffset : 0f;
+            int thumbY = trackY + (int)((trackHeight - thumbHeight) * scrollRatio);
+
+            Rectangle thumb = new Rectangle(trackX + 1, thumbY + 1, trackWidth - 2, thumbHeight - 2);
+            DrawPanel(spriteBatch, thumb, new Color(120, 150, 200), new Color(160, 190, 230));
+        }
+        
+        private void DrawSkillCard(SpriteBatch spriteBatch, Rectangle rect, BaseSkill skill)
+        {
+            bool isLearned = skillManager.LearnedSkills.ContainsKey(skill.InternalName);
+            bool hover = rect.Contains(Main.mouseX, Main.mouseY);
+            bool canLearn = isLearned
+                ? skillManager.LearnedSkills[skill.InternalName].CanLearn(Main.LocalPlayer)
+                : skill.CanLearn(Main.LocalPlayer);
+            
+            Color bg = isLearned ? new Color(40, 60, 40) : (canLearn ? (hover ? new Color(50, 60, 80) : new Color(35, 45, 65)) : new Color(40, 40, 50));
+            Color border = isLearned ? new Color(100, 180, 100) : (canLearn ? new Color(80, 100, 140) : new Color(60, 60, 70));
+            
+            DrawPanel(spriteBatch, rect, bg, border);
+
+            Rectangle iconRect = new Rectangle(rect.X + 8, rect.Y + 8, 32, 32);
+            DrawPanel(spriteBatch, iconRect, new Color(30, 40, 60), new Color(70, 90, 120));
+            var icon = AssetLoader.GetSkillIcon(skill.InternalName);
+            spriteBatch.Draw(icon, iconRect, isLearned ? Color.White : Color.Gray);
+
+            if (isLearned && iconRect.Contains(Main.mouseX, Main.mouseY))
+            {
+                Main.hoverItemName = "Drag to slot or macro";
+                if (Main.mouseLeft && Main.mouseLeftRelease)
+                {
+                    SkillDragDropSystem.StartDrag(skill.InternalName);
+                }
+            }
+            
+            // Skill name
+            string name = skill.DisplayName;
+            if (isLearned)
+            {
+                var learned = skillManager.LearnedSkills[skill.InternalName];
+                name += $" (Rank {learned.CurrentRank}/{learned.MaxRank})";
+            }
+            int contentX = rect.X + 50;
+            Utils.DrawBorderString(spriteBatch, name, new Vector2(contentX, rect.Y + 8), isLearned ? Color.LightGreen : Color.White);
+            
+            // Type
+            string type = skill.SkillType.ToString();
+            Utils.DrawBorderString(spriteBatch, type, new Vector2(rect.X + rect.Width - 80, rect.Y + 8), Color.Gray, 0.75f);
+            
+            // Description
+            string desc = skill.Description.Length > 70 ? skill.Description.Substring(0, 67) + "..." : skill.Description;
+            Utils.DrawBorderString(spriteBatch, desc, new Vector2(contentX, rect.Y + 30), Color.LightGray, 0.65f);
+
+            string reqJob = skill.RequiredJob == JobType.None ? "Any" : skill.RequiredJob.ToString();
+            string reqText = $"Req: {reqJob} Lv {skill.RequiredLevel}";
+            Utils.DrawBorderString(spriteBatch, reqText, new Vector2(contentX, rect.Y + 46), Color.Gray, 0.6f);
+            
+            // Learn/Upgrade button
+            bool showLearnButton = canLearn && rpgPlayer.SkillPoints >= skill.SkillPointCost;
+            if (showLearnButton)
+            {
+                Rectangle learnBtn = new Rectangle(rect.X + rect.Width - 70, rect.Y + rect.Height - 25, 60, 20);
+                DrawPanel(spriteBatch, learnBtn, hover ? new Color(80, 120, 180) : new Color(50, 90, 150), new Color(100, 150, 220));
+                
+                string btnText = isLearned ? "Upgrade" : "Learn";
+                Utils.DrawBorderString(spriteBatch, btnText, new Vector2(learnBtn.X + 5, learnBtn.Y + 2), Color.White, 0.7f);
+                
+                if (hover && learnBtn.Contains(Main.mouseX, Main.mouseY) && Main.mouseLeft && Main.mouseLeftRelease)
+                {
+                    skillManager.LearnSkill(skill);
+                    SoundEngine.PlaySound(SoundID.Item4);
+                }
+            }
+
+            bool showSlots = isLearned && skill.SkillType != SkillType.Passive;
+            if (showSlots)
+            {
+                DrawSkillSlotsRow(spriteBatch, rect, skill, showLearnButton, contentX);
+            }
+            else
+            {
+                // Cost
+                string cost = $"Cost: {skill.SkillPointCost} SP";
+                Utils.DrawBorderString(spriteBatch, cost, new Vector2(contentX, rect.Y + rect.Height - 18), rpgPlayer.SkillPoints >= skill.SkillPointCost ? Color.Yellow : Color.Red, 0.65f);
+            }
+        }
+
+        private void DrawSkillSlotsRow(SpriteBatch spriteBatch, Rectangle rect, BaseSkill skill, bool showLearnButton, int contentX)
+        {
+            string slotLabel = "Slots:";
+            float labelScale = 0.6f;
+            Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(slotLabel) * labelScale;
+
+            int buttonSize = 14;
+            int spacing = 2;
+            float rowY = rect.Bottom - 20f;
+
+            Vector2 labelPos = new Vector2(contentX, rowY - 2f);
+            Utils.DrawBorderString(spriteBatch, slotLabel, labelPos, Color.LightGray, labelScale);
+
+            int startX = (int)(contentX + labelSize.X + 6f);
+            int slotRowWidth = (buttonSize * 9) + (spacing * 8);
+            int reservedRight = showLearnButton ? 80 : 12;
+            int maxRight = rect.Right - reservedRight;
+
+            for (int i = 0; i < 9; i++)
+            {
+                int x = startX + i * (buttonSize + spacing);
+                Rectangle slotRect = new Rectangle(x, (int)rowY - 2, buttonSize, buttonSize);
+                if (slotRect.Right > maxRight)
+                    break;
+
+                bool assigned = skillManager.SkillHotbar[i] == skill.InternalName;
+                Color bg = assigned ? new Color(220, 200, 80) : new Color(60, 70, 90);
+                Color border = assigned ? new Color(255, 230, 120) : new Color(90, 110, 140);
+                DrawPanel(spriteBatch, slotRect, bg, border);
+
+                string label = (i + 1).ToString();
+                Vector2 numSize = FontAssets.MouseText.Value.MeasureString(label) * 0.55f;
+                Vector2 numPos = new Vector2(
+                    slotRect.X + slotRect.Width / 2 - numSize.X / 2,
+                    slotRect.Y + slotRect.Height / 2 - numSize.Y / 2
+                );
+                Utils.DrawBorderString(spriteBatch, label, numPos, Color.White, 0.55f);
+
+                if (slotRect.Contains(Main.mouseX, Main.mouseY))
+                {
+                    Main.hoverItemName = $"Assign to slot {i + 1}";
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        skillManager.AssignSkillToSlot(skill.InternalName, i);
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                }
+            }
+
+            int macroX = startX + slotRowWidth + 6;
+            int macroSize = 16;
+            if (macroX + macroSize <= maxRight)
+            {
+                Rectangle macroRect = new Rectangle(macroX, (int)rowY - 2, macroSize, macroSize);
+                bool macroHover = macroRect.Contains(Main.mouseX, Main.mouseY);
+                DrawPanel(spriteBatch, macroRect, macroHover ? new Color(80, 60, 120) : new Color(60, 50, 90), new Color(110, 90, 160));
+                Utils.DrawBorderString(spriteBatch, "M", new Vector2(macroRect.X + 4, macroRect.Y + 1), Color.Cyan, 0.6f);
+
+                if (macroHover)
+                {
+                    Main.hoverItemName = "Add to macro";
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        MacroEditorUI.PendingSkillToAdd = skill.InternalName;
+                        var macroUISystem = ModContent.GetInstance<MacroUISystem>();
+                        if (macroUISystem != null && !macroUISystem.IsUIOpen)
+                        {
+                            macroUISystem.ToggleUI();
+                        }
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                }
+            }
+        }
+        
+        #endregion
+        
+        #region Achievements Tab
+        
+        private int achievementScrollOffset = 0;
+        
+        private void DrawAchievementsTab(SpriteBatch spriteBatch, Rectangle area)
+        {
+            // AchievementSystem is a ModPlayer, get from local player
+            var achievementPlayer = Main.LocalPlayer.GetModPlayer<AchievementSystem>();
+            if (achievementPlayer == null)
+            {
+                Utils.DrawBorderString(spriteBatch, "Achievement system not loaded.", new Vector2(area.X, area.Y), Color.Gray);
+                return;
+            }
+            
+            int y = area.Y;
+            
+            // Progress header - count unlocked achievements
+            var achievements = AchievementSystem.Achievements;
+            var unlockedSet = achievementPlayer.UnlockedAchievements;
+            int unlocked = unlockedSet.Count;
+            int total = achievements.Count;
+            
+            string progressText = $"Achievements: {unlocked}/{total}";
+            Utils.DrawBorderString(spriteBatch, progressText, new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString(progressText).X / 2, y), Color.Gold);
+            y += 30;
+            
+            // Achievement list
+            int cardHeight = 50;
+            int visibleCards = (area.Y + area.Height - y) / (cardHeight + 5);
+            
+            // Convert to list for indexed access
+            var achievementList = new List<KeyValuePair<string, AchievementData>>(achievements);
+            
+            // Handle scroll
+            if (area.Contains(Main.mouseX, Main.mouseY))
+            {
+                int scroll = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
+                achievementScrollOffset -= scroll / 30;
+                achievementScrollOffset = System.Math.Max(0, System.Math.Min(achievementScrollOffset, System.Math.Max(0, achievementList.Count - visibleCards)));
+            }
+            
+            for (int i = achievementScrollOffset; i < achievementList.Count && i < achievementScrollOffset + visibleCards; i++)
+            {
+                var kvp = achievementList[i];
+                bool isUnlocked = unlockedSet.Contains(kvp.Key);
+                DrawAchievementCard(spriteBatch, new Rectangle(area.X, y, area.Width, cardHeight), kvp.Value, isUnlocked);
+                y += cardHeight + 5;
+            }
+            
+            if (achievementList.Count == 0)
+            {
+                Utils.DrawBorderString(spriteBatch, "No achievements available.", new Vector2(area.X, y), Color.Gray);
+            }
+        }
+        
+        private void DrawAchievementCard(SpriteBatch spriteBatch, Rectangle rect, AchievementData ach, bool isUnlocked)
+        {
+            Color bg = isUnlocked ? new Color(40, 60, 40) : new Color(35, 40, 50);
+            Color border = isUnlocked ? new Color(100, 180, 100) : new Color(60, 70, 90);
+            
+            DrawPanel(spriteBatch, rect, bg, border);
+            
+            // Name
+            Utils.DrawBorderString(spriteBatch, ach.Name, new Vector2(rect.X + 10, rect.Y + 6), isUnlocked ? Color.LightGreen : Color.White);
+            
+            // Status and reward
+            string status = isUnlocked ? "✓ Complete" : $"+{ach.XpReward} XP";
+            Color statusColor = isUnlocked ? Color.LightGreen : Color.Yellow;
+            Utils.DrawBorderString(spriteBatch, status, new Vector2(rect.X + rect.Width - 90, rect.Y + 6), statusColor, 0.8f);
+            
+            // Description
+            string desc = ach.Description.Length > 70 ? ach.Description.Substring(0, 67) + "..." : ach.Description;
+            Utils.DrawBorderString(spriteBatch, desc, new Vector2(rect.X + 10, rect.Y + 28), Color.LightGray, 0.65f);
+        }
+        
+        #endregion
+        
+        #region Helpers
+
+        private void DrawStatTooltip(SpriteBatch spriteBatch, StatType stat, int baseVal, int autoVal, int bonusVal)
+        {
+            List<string> lines = GetStatTooltipLines(stat, baseVal, autoVal, bonusVal);
+            if (lines.Count == 0)
+                return;
+
+            int width = 320;
+            int height = lines.Count * 18 + 10;
+
+            Rectangle tooltipBounds = new Rectangle(
+                Main.mouseX + 20,
+                Main.mouseY - height / 2,
+                width,
+                height
+            );
+
+            if (tooltipBounds.Right > Main.screenWidth)
+                tooltipBounds.X = Main.mouseX - width - 20;
+            if (tooltipBounds.Bottom > Main.screenHeight)
+                tooltipBounds.Y = Main.screenHeight - height;
+            if (tooltipBounds.Y < 0)
+                tooltipBounds.Y = 0;
+
+            DrawPanel(spriteBatch, tooltipBounds, new Color(10, 15, 30, 240), new Color(60, 80, 120));
+
+            int y = tooltipBounds.Y + 5;
+            foreach (string line in lines)
+            {
+                Utils.DrawBorderStringFourWay(
+                    spriteBatch,
+                    FontAssets.MouseText.Value,
+                    line,
+                    tooltipBounds.X + 6,
+                    y,
+                    Color.White,
+                    Color.Black,
+                    Vector2.Zero,
+                    0.75f
+                );
+                y += 18;
+            }
+        }
+
+        private List<string> GetStatTooltipLines(StatType stat, int baseVal, int autoVal, int bonusVal)
+        {
+            var lines = new List<string>
+            {
+                $"{stat}  (Base {baseVal} / Auto {autoVal} / Bonus {bonusVal})"
+            };
+
+            switch (stat)
+            {
+                case StatType.Strength:
+                    lines.Add("+1% Melee Damage per point");
+                    break;
+                case StatType.Dexterity:
+                    lines.Add("+1% Ranged Damage per point");
+                    lines.Add("+0.3% Attack Speed per point");
+                    lines.Add("+0.3% Ranged Crit per point");
+                    break;
+                case StatType.Rogue:
+                    lines.Add("+0.8% Melee/Ranged Damage per point");
+                    lines.Add("+0.3% Critical Chance per point");
+                    break;
+                case StatType.Intelligence:
+                    lines.Add("+1.5% Magic Damage per point");
+                    lines.Add("+0.7% Magic Critical per point");
+                    lines.Add("+0.5% Spell Power per point");
+                    lines.Add("+0.2% Mana Cost Reduction per point");
+                    break;
+                case StatType.Focus:
+                    lines.Add("+1.2% Summon Damage per point");
+                    lines.Add("+1 Minion Slot at 10/30/60/100 FOC");
+                    break;
+                case StatType.Vitality:
+                    lines.Add("+5 Max HP per point");
+                    lines.Add("+0.02 HP Regen per point");
+                    break;
+                case StatType.Stamina:
+                    lines.Add("+2 Max Stamina per point");
+                    lines.Add("+0.05 Stamina Regen per point");
+                    break;
+                case StatType.Defense:
+                    lines.Add("+0.3% Damage Reduction per point");
+                    lines.Add("+1 Armor per 5 points");
+                    break;
+                case StatType.Agility:
+                    lines.Add("+0.3% Move Speed per point");
+                    lines.Add("+0.2% Dodge Chance per point");
+                    break;
+                case StatType.Wisdom:
+                    lines.Add("+5 Max Mana per point");
+                    lines.Add("+0.03 Mana Regen per point");
+                    break;
+                case StatType.Fortitude:
+                    lines.Add("+0.5% Debuff Duration Reduction per point");
+                    break;
+                case StatType.Luck:
+                    lines.Add("+0.5% Critical Chance per point");
+                    lines.Add("+0.2% Luck (drops/variance) per point");
+                    lines.Add("+0.2% All Damage per point");
+                    break;
+            }
+
+            return lines;
+        }
+        
+        /// <summary>
+        /// Build detailed requirements text for job advancement
+        /// </summary>
+        private string BuildRequirementsText(Jobs.JobData jobData, RpgPlayer player)
+        {
+            var missing = Jobs.JobDatabase.GetMissingRequirementDescriptions(player, jobData.Type);
+            return missing.Count > 0 ? "Req: " + string.Join(", ", missing) : "Requirements met!";
+        }
+
+        private string BuildStatDetail(int baseVal, int autoVal, int bonus)
+        {
+            if (autoVal == 0 && bonus == 0)
+                return $"(B{baseVal})";
+
+            return $"(B{baseVal} A{autoVal} +{bonus})";
+        }
+        
+        private void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, Color bg, Color border)
+        {
+            // Background
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, rect, bg);
+            
+            // Border
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(rect.X, rect.Y, rect.Width, 2), border);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(rect.X, rect.Y + rect.Height - 2, rect.Width, 2), border);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(rect.X, rect.Y, 2, rect.Height), border);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(rect.X + rect.Width - 2, rect.Y, 2, rect.Height), border);
+        }
+        
+        private void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, Color bg)
+        {
+            DrawPanel(spriteBatch, rect, bg, new Color(60, 70, 90));
+        }
+        
+        #endregion
+    }
+}
