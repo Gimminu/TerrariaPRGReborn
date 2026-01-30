@@ -1,0 +1,14 @@
+*.csproj
+*.user
+obj/
+bin/
+.vs/
+.git/
+Docs/
+*.log
+*.pdb
+*.dll
+*.exe
+*.tmp
+Thumbs.db
+.DS_Store

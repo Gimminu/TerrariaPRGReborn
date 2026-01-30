@@ -1,0 +1,65 @@
+using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
+using Rpg.Common.Base;
+
+namespace Rpg.Common.Skills.Tier1.Ranger
+{
+    /// <summary>
+    /// Camouflage - 위장.
+    /// 투명해지며 이동속도 증가. 공격하면 해제됨.
+    /// 만렙 시 쿨타임 = 지속시간 (20초)
+    /// </summary>
+    public class Camouflage : BaseSkill
+    {
+        public override string InternalName => "Camouflage";
+        public override string DisplayName => "Camouflage";
+        public override string Description => "Blend into your surroundings, becoming invisible and moving faster.";
+
+        public override SkillType SkillType => SkillType.Buff;
+        public override JobType RequiredJob => JobType.Ranger;
+        public override int RequiredLevel => 24;
+        public override int SkillPointCost => 1;
+        public override int MaxRank => 10;
+        public override string IconTexture => $"{RpgConstants.ICON_PATH}Skills/Camouflage";
+        
+        // 만렙 시 쿨 = 지속 (20초)
+        public override float CooldownSeconds => 35f - (CurrentRank * 1.5f); // 35 -> 20초
+        public override int ResourceCost => 30 - CurrentRank;
+        public override ResourceType ResourceType => ResourceType.Stamina;
+
+        private static readonly int[] DURATION_SECONDS = { 10, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+
+        protected override void OnActivate(Player player)
+        {
+            int rank = System.Math.Max(1, CurrentRank);
+            int duration = DURATION_SECONDS[rank - 1] * 60;
+
+            player.AddBuff(BuffID.Invisibility, duration);
+            player.AddBuff(BuffID.Swiftness, duration);
+
+            PlayEffects(player);
+            ShowMessage(player, "Camouflaged!", Color.DarkGray);
+        }
+
+        private void PlayEffects(Player player)
+        {
+            SoundEngine.PlaySound(SoundID.Item25, player.position);
+            
+            for (int i = 0; i < 20; i++)
+            {
+                Dust dust = Dust.NewDustDirect(player.position, player.width, player.height,
+                    DustID.Smoke, Main.rand.NextFloat(-2f, 2f), Main.rand.NextFloat(-2f, 0f), 200, Color.DarkGray, 0.8f);
+                dust.noGravity = true;
+                dust.fadeIn = 1.2f;
+            }
+        }
+
+        private void ShowMessage(Player player, string text, Color color)
+        {
+            if (Main.netMode != NetmodeID.Server)
+                CombatText.NewText(player.Hitbox, color, text);
+        }
+    }
+}

@@ -1,0 +1,733 @@
+Mods: {
+	Rpg: {
+		# Mod Info
+		ModName: RPG Mod
+
+		# Keybinds
+		Keybinds: {
+			OpenStats.DisplayName: Open Stats
+			OpenSkills.DisplayName: Open Skills
+			OpenMacros.DisplayName: Open Macros
+			OpenAchievements.DisplayName: Open Achievements
+			SkillSlot1.DisplayName: Skill Slot 1
+			SkillSlot2.DisplayName: Skill Slot 2
+			SkillSlot3.DisplayName: Skill Slot 3
+			SkillSlot4.DisplayName: Skill Slot 4
+			SkillSlot5.DisplayName: Skill Slot 5
+			MacroSlot1.DisplayName: Macro Slot 1
+			MacroSlot2.DisplayName: Macro Slot 2
+			MacroSlot3.DisplayName: Macro Slot 3
+			MacroSlot4.DisplayName: Macro Slot 4
+			MacroSlot5.DisplayName: Macro Slot 5
+			"Open Achievements.DisplayName": Open  Achievements
+			"Macro 1.DisplayName": Macro 1
+			"Macro 2.DisplayName": Macro 2
+			"Macro 3.DisplayName": Macro 3
+			"Macro 4.DisplayName": Macro 4
+			"Macro 5.DisplayName": Macro 5
+			"Open Macro Editor.DisplayName": Open  Macro  Editor
+			"Open Skills.DisplayName": Open  Skills
+			"Open Stats.DisplayName": Open  Stats
+			Dash.DisplayName: Dash
+			"Skill Slot 1.DisplayName": Skill  Slot 1
+			"Skill Slot 2.DisplayName": Skill  Slot 2
+			"Skill Slot 3.DisplayName": Skill  Slot 3
+			"Skill Slot 4.DisplayName": Skill  Slot 4
+			"Skill Slot 5.DisplayName": Skill  Slot 5
+			"Skill Slot 6.DisplayName": Skill  Slot 6
+			"Skill Slot 7.DisplayName": Skill  Slot 7
+			"Skill Slot 8.DisplayName": Skill  Slot 8
+			"Skill Slot 9.DisplayName": Skill  Slot 9
+			"Open Job UI.DisplayName": Open  Job  U I
+			"Open Skill Learning.DisplayName": Open  Skill  Learning
+			"Open Stat UI.DisplayName": Open  Stat  U I
+			"Open RPG Menu.DisplayName": Open  R P G  Menu
+			"Toggle RPG Test Panel.DisplayName": Toggle  R P G  Test  Panel
+			"Toggle Quest UI.DisplayName": Toggle  Quest  U I
+		}
+
+		# Config
+		Configs: {
+			RpgClientConfig: {
+				DisplayName: RPG Client Config
+
+				Headers: {
+					Experience: Experience Settings
+					WorldLevel: World Level Settings
+					MonsterInfo: Monster Info Settings
+					UI: U I Header
+					QuestUI: Quest U I Header
+					LayoutMode: Layout Mode Header
+					RpgMenu: Rpg Menu Header
+					SkillBar: Skill Bar Header
+					UIVisibility: U I Visibility Header
+				}
+
+				ShowXPGainText: {
+					Label: Show XP Gain Text
+					Tooltip: Display floating XP numbers when gaining experience
+				}
+
+				ShowCapInfo: {
+					Label: Show Level Cap Info
+					Tooltip: Display level cap information in the status UI
+				}
+
+				ShowWorldLevelUI: {
+					Label: Show World Level UI
+					Tooltip: Display the world level indicator on screen
+				}
+
+				ShowMonsterLevel: {
+					Label: Show Monster Level
+					Tooltip: Display monster levels above their heads
+				}
+
+				ColorCodeMonsterLevel: {
+					Label: Color Code Monster Level
+					Tooltip: Color monster names based on level difference
+				}
+
+				HideVanillaResourceBars: {
+					Label: Hide Vanilla Resource Bars
+					Tooltip: ""
+				}
+
+				ShowQuestUI: {
+					Label: Show Quest U I
+					Tooltip: ""
+				}
+
+				HideQuestUIWhenEmpty: {
+					Label: Hide Quest U I When Empty
+					Tooltip: ""
+				}
+
+				QuestUIScale: {
+					Label: Quest U I Scale
+					Tooltip: ""
+				}
+
+				QuestUIPosX: {
+					Label: Quest U I Pos X
+					Tooltip: ""
+				}
+
+				QuestUIPosY: {
+					Label: Quest U I Pos Y
+					Tooltip: ""
+				}
+
+				EnableUILayoutMode: {
+					Label: Enable U I Layout Mode
+					Tooltip: ""
+				}
+
+				RpgMenuPosX: {
+					Label: Rpg Menu Pos X
+					Tooltip: ""
+				}
+
+				RpgMenuPosY: {
+					Label: Rpg Menu Pos Y
+					Tooltip: ""
+				}
+
+				ShowSkillBar: {
+					Label: Show Skill Bar
+					Tooltip: ""
+				}
+
+				ShowJobUI: {
+					Label: Show Job U I
+					Tooltip: ""
+				}
+
+				ShowSkillUI: {
+					Label: Show Skill U I
+					Tooltip: ""
+				}
+			}
+
+			RpgServerConfig: {
+				DisplayName: RPG Server Config
+
+				Headers: {
+					ExperienceSettings: Experience Settings
+					ScalingSettings: Monster Scaling
+					LevelCapSettings: Level Cap Settings
+					StatSettings: Stat & Skill Settings
+					DifficultyAdjustments: Difficulty Adjustments
+					ModCompatibility: Mod Compatibility
+					FeatureToggles: Feature Toggles Header
+				}
+
+				GlobalXPMultiplier: {
+					Label: Global XP Multiplier
+					Tooltip: Multiplier for all XP gained (1.0 = normal)
+				}
+
+				EventXPMultiplier: {
+					Label: Event XP Multiplier
+					Tooltip: XP multiplier for event enemies
+				}
+
+				StatueSpawnsGiveXP: {
+					Label: Statue Spawns Give XP
+					Tooltip: Whether statue-spawned enemies give XP
+				}
+
+				MultiplayerXPShareRange: {
+					Label: Multiplayer XP Share Range
+					Tooltip: Range (in pixels) for sharing XP with party members
+				}
+
+				MonsterHPScalePerLevel: {
+					Label: Monster HP Scale Per Level
+					Tooltip: How much monster HP increases per world level
+				}
+
+				MonsterDamageScalePerLevel: {
+					Label: Monster Damage Scale Per Level
+					Tooltip: How much monster damage increases per world level
+				}
+
+				ScaleMonsterDefense: {
+					Label: Scale Monster Defense
+					Tooltip: Whether monsters gain defense from world level
+				}
+
+				MonsterDefenseScalePerLevel: {
+					Label: Monster Defense Scale Per Level
+					Tooltip: How much monster defense increases per world level
+				}
+
+				EnableBossLevelCaps: {
+					Label: Enable Boss Level Caps
+					Tooltip: Limit player level based on boss progression
+				}
+
+				MaxLevelAfterMoonLord: {
+					Label: Max Level After Moon Lord
+					Tooltip: Maximum level after defeating Moon Lord
+				}
+
+				InfiniteLevelingAfterMoonLord: {
+					Label: Infinite Leveling After Moon Lord
+					Tooltip: Remove level cap after Moon Lord
+				}
+
+				StatPointMultiplier: {
+					Label: Stat Point Multiplier
+					Tooltip: Multiplier for stat points gained per level
+				}
+
+				SkillPointMultiplier: {
+					Label: Skill Point Multiplier
+					Tooltip: Multiplier for skill points gained per level
+				}
+
+				EnableAutoGrowth: {
+					Label: Enable Auto Growth
+					Tooltip: Automatically allocate a portion of stats based on job
+				}
+
+				AutoGrowthPercent: {
+					Label: Auto Growth Percent
+					Tooltip: Percentage of stats automatically allocated
+				}
+
+				AdjustForExpertMode: {
+					Label: Adjust For Expert Mode
+					Tooltip: Reduce RPG scaling in Expert mode
+				}
+
+				AdjustForMasterMode: {
+					Label: Adjust For Master Mode
+					Tooltip: Reduce RPG scaling in Master mode
+				}
+
+				ExpertModeScaleReduction: {
+					Label: Expert Mode Scale Reduction
+					Tooltip: RPG scaling reduction in Expert mode
+				}
+
+				MasterModeScaleReduction: {
+					Label: Master Mode Scale Reduction
+					Tooltip: RPG scaling reduction in Master mode
+				}
+
+				EnableCalamityCompatibility: {
+					Label: Enable Calamity Compatibility
+					Tooltip: Apply special balancing for Calamity Mod
+				}
+
+				EnableThoriumCompatibility: {
+					Label: Enable Thorium Compatibility
+					Tooltip: Apply special balancing for Thorium Mod
+				}
+
+				AutoDetectModBosses: {
+					Label: Auto Detect Mod Bosses
+					Tooltip: Automatically detect and integrate mod bosses
+				}
+
+				BossHPScalePerLevel: {
+					Label: Boss H P Scale Per Level
+					Tooltip: ""
+				}
+
+				BossDamageScalePerLevel: {
+					Label: Boss Damage Scale Per Level
+					Tooltip: ""
+				}
+
+				EnableJobSystem: {
+					Label: Enable Job System
+					Tooltip: ""
+				}
+
+				EnableSkillSystem: {
+					Label: Enable Skill System
+					Tooltip: ""
+				}
+			}
+		}
+
+		# NPCs
+		NPCs: {
+			RpgMerchant: {
+				DisplayName: RPG Merchant
+
+				TownNPCMood: {
+					Content: I am content.
+					NoHome: I need a proper home.
+					FarFromHome: I am too far from home.
+					LoveSpace: I love having space.
+					DislikeCrowded: It's too crowded here.
+					HateCrowded: I absolutely hate how crowded it is!
+					LikeBiome: I like this biome.
+					LoveBiome: I love this biome!
+					DislikeBiome: I dislike this biome.
+					HateBiome: I hate this biome!
+					LikeNPC: I like {NPCName}.
+					LoveNPC: I love {NPCName}!
+					DislikeNPC: I dislike {NPCName}.
+					HateNPC: I hate {NPCName}!
+					LikeNPC_Princess: I like {NPCName}.
+					Princess_LovesNPC: I like {NPCName}.
+				}
+			}
+		}
+
+		# Items
+		Items: {
+			# Job Advancement Items
+			FirstJobScroll: {
+				DisplayName: First Job Scroll
+				Tooltip:
+					'''
+					Use to advance to your first job
+					Requires: Level 10+, Tier 0 (Novice)
+					'''
+			}
+
+			SecondJobScroll: {
+				DisplayName: Second Job Scroll
+				Tooltip:
+					'''
+					Use to advance to your second job
+					Requires: Level 50+, Tier 1
+					'''
+			}
+
+			ThirdJobScroll: {
+				DisplayName: Third Job Scroll
+				Tooltip:
+					'''
+					Use to advance to your third job
+					Requires: Level 100+, Tier 2
+					'''
+			}
+
+			JobManual: {
+				DisplayName: Job Manual
+				Tooltip:
+					'''
+					Learn about job advancement
+					Right-click to open job selection UI
+					'''
+			}
+
+			# Reset Items
+			StatResetOrb: {
+				DisplayName: Stat Reset Orb
+				Tooltip:
+					'''
+					Resets all allocated stat points
+					Points will be returned for reallocation
+					'''
+			}
+
+			SkillResetScroll: {
+				DisplayName: Skill Reset Scroll
+				Tooltip:
+					'''
+					Resets all learned skills
+					Skill points will be returned
+					'''
+			}
+
+			CompleteResetCrystal: {
+				DisplayName: Complete Reset Crystal
+				Tooltip:
+					'''
+					Completely resets your character
+					Returns to Level 1 Novice
+					[c/FF0000:WARNING: This cannot be undone!]
+					'''
+			}
+
+			MonsterMagnet: {
+				DisplayName: Monster Magnet
+				Tooltip: ""
+			}
+		}
+
+		# Jobs
+		Jobs: {
+			Novice: Novice
+			Warrior: Warrior
+			Ranger: Ranger
+			Mage: Mage
+			Summoner: Summoner
+			Knight: Knight
+			Berserker: Berserker
+			Paladin: Paladin
+			DeathKnight: Death Knight
+			Sniper: Sniper
+			Gunslinger: Gunslinger
+			Assassin: Assassin
+			Sorcerer: Sorcerer
+			Cleric: Cleric
+			Archmage: Archmage
+			Warlock: Warlock
+			Spellblade: Spellblade
+			BattleMage: Battle Mage
+			Beastmaster: Beastmaster
+			Necromancer: Necromancer
+			Druid: Druid
+			Shadow: Shadow
+			Spellthief: Spellthief
+			Guardian: Guardian
+			BloodKnight: Blood Knight
+			Deadeye: Deadeye
+			Gunmaster: Gunmaster
+			Archbishop: Archbishop
+			Overlord: Overlord
+			LichKing: Lich King
+		}
+
+		# Stats
+		Stats: {
+			Strength: Strength
+			Dexterity: Dexterity
+			Rogue: Rogue
+			Intelligence: Intelligence
+			Focus: Focus
+			Vitality: Vitality
+			Stamina: Stamina
+			Defense: Defense
+			Agility: Agility
+			Wisdom: Wisdom
+			Fortitude: Fortitude
+			Luck: Luck
+		}
+
+		# UI Text
+		UI: {
+			Level: Level
+			Experience: Experience
+			StatPoints: Stat Points
+			SkillPoints: Skill Points
+			CurrentJob: Current Job
+			JobTier: Job Tier
+			WorldLevel: World Level
+			LevelCap: Level Cap
+			NextBoss: Next Boss
+			# Buttons
+			Allocate: Allocate
+			Reset: Reset
+			Learn: Learn
+			Close: Close
+			Confirm: Confirm
+			Cancel: Cancel
+			# Stat Allocation
+			PointsRemaining: Points Remaining: {0}
+			AllocatePoint: Click to allocate 1 point
+			ShiftClickFor5: Shift+Click for 5 points
+			# Skills
+			SkillLevel: Skill Level: {0}/{1}
+			Cooldown: Cooldown: {0}s
+			ManaCost: Mana Cost: {0}
+			StaminaCost: Stamina Cost: {0}
+			Passive: Passive
+			Active: Active
+			RequiredLevel: Required Level: {0}
+			RequiredJob: Required Job: {0}
+			# Achievements
+			AchievementUnlocked: "[Achievement Unlocked]"
+			Progress: Progress
+			Completed: Completed
+			Locked: Locked
+			# Party
+			PartyBonus: +{0}% Party Bonus!
+			PartyMembers: Party Members: {0}
+		}
+
+		# Achievements
+		Achievements: {
+			# Level
+			level_10: {
+				Name: Novice Adventurer
+				Description: Reach Level 10
+			}
+
+			level_25: {
+				Name: Seasoned Warrior
+				Description: Reach Level 25
+			}
+
+			level_50: {
+				Name: Veteran Hero
+				Description: Reach Level 50
+			}
+
+			level_75: {
+				Name: Elite Champion
+				Description: Reach Level 75
+			}
+
+			level_100: {
+				Name: Legendary Master
+				Description: Reach Level 100
+			}
+
+			level_max: {
+				Name: Transcendent
+				Description: Reach Maximum Level
+			}
+
+			# Jobs
+			first_job: {
+				Name: First Steps
+				Description: Complete your first job advancement
+			}
+
+			second_job: {
+				Name: Rising Power
+				Description: Complete second job advancement
+			}
+
+			third_job: {
+				Name: True Mastery
+				Description: Complete third job advancement
+			}
+
+			# Combat
+			first_kill: {
+				Name: First Blood
+				Description: Defeat your first enemy
+			}
+
+			kill_100: {
+				Name: Slayer
+				Description: Defeat 100 enemies
+			}
+
+			kill_1000: {
+				Name: Executioner
+				Description: Defeat 1,000 enemies
+			}
+
+			kill_10000: {
+				Name: Annihilator
+				Description: Defeat 10,000 enemies
+			}
+
+			# Bosses
+			boss_eye: {
+				Name: Eye Opener
+				Description: Defeat the Eye of Cthulhu
+			}
+
+			boss_wof: {
+				Name: Hell Breaker
+				Description: Defeat the Wall of Flesh
+			}
+
+			boss_mech: {
+				Name: Machine Breaker
+				Description: Defeat all Mechanical Bosses
+			}
+
+			boss_plantera: {
+				Name: Jungle Conqueror
+				Description: Defeat Plantera
+			}
+
+			boss_golem: {
+				Name: Temple Raider
+				Description: Defeat Golem
+			}
+
+			boss_cultist: {
+				Name: Cult Breaker
+				Description: Defeat the Lunatic Cultist
+			}
+
+			boss_moonlord: {
+				Name: Moon's End
+				Description: Defeat the Moon Lord
+			}
+
+			# Skills
+			skill_first: {
+				Name: Skill Apprentice
+				Description: Learn your first skill
+			}
+
+			skill_5: {
+				Name: Skill Student
+				Description: Learn 5 skills
+			}
+
+			skill_10: {
+				Name: Skill Expert
+				Description: Learn 10 skills
+			}
+
+			skill_max: {
+				Name: Skill Master
+				Description: Max out a skill
+			}
+
+			# Stats
+			stat_50: {
+				Name: Stat Builder
+				Description: Allocate 50 stat points
+			}
+
+			stat_100: {
+				Name: Stat Specialist
+				Description: Allocate 100 stat points
+			}
+
+			stat_200: {
+				Name: Stat Master
+				Description: Allocate 200 stat points
+			}
+
+			# Special
+			party_play: {
+				Name: Teamwork
+				Description: Gain XP while in a party
+			}
+
+			macro_master: {
+				Name: Combo King
+				Description: Create and use a skill macro
+			}
+		}
+
+		# Messages
+		Messages: {
+			LevelUp: Level Up! You are now Level {0}!
+			JobAdvanced: Job Advanced! You are now a {0}!
+			SkillLearned: Learned: {0}
+			SkillLevelUp: "{0} is now Level {1}!"
+			NotEnoughPoints: Not enough points!
+			RequirementNotMet: Requirements not met!
+			LevelCapReached: Level cap reached! Defeat more bosses to raise the cap.
+			BossDefeated: "{0} defeated! Level cap increased to {1}!"
+			WorldLevelUp: World Level increased to {0}!
+			# Errors
+			CannotUseHere: Cannot use this here.
+			AlreadyMaxLevel: Already at maximum level.
+			WrongJobTier: Wrong job tier for this item.
+			NoJobsAvailable: No job advancement available.
+		}
+
+		# Skill Names (organized by tier/job)
+		Skills: {
+			# Novice Skills
+			Novice: {
+				BasicStrike: {
+					Name: Basic Strike
+					Description: A simple attack dealing bonus damage
+				}
+
+				SecondWind: {
+					Name: Second Wind
+					Description: Recover HP when below 30% health
+				}
+
+				Resourceful: {
+					Name: Resourceful
+					Description: Increased resource regeneration
+				}
+
+				Perseverance: {
+					Name: Perseverance
+					Description: Increased defense when HP is low
+				}
+
+				QuickRecovery: {
+					Name: Quick Recovery
+					Description: Faster recovery from debuffs
+				}
+
+				Focus: {
+					Name: Focus
+					Description: Increased critical hit chance
+				}
+
+				Toughness: {
+					Name: Toughness
+					Description: Increased maximum HP
+				}
+
+				Nimble: {
+					Name: Nimble
+					Description: Increased movement speed
+				}
+
+				AdventurerSpirit: {
+					Name: Adventurer Spirit
+					Description: Increased experience gain
+				}
+
+				LuckyFind: {
+					Name: Lucky Find
+					Description: Increased drop rate
+				}
+			}
+
+			# Generic skill descriptions
+			Generic: {
+				Passive: "[Passive]"
+				Active: "[Active]"
+				Buff: "[Buff]"
+				Debuff: "[Debuff]"
+				Ultimate: "[Ultimate]"
+			}
+		}
+
+		Buffs: {
+			MonsterMagnetBuff: {
+				DisplayName: Monster Magnet Buff
+				Description: Mods.Rpg.Buffs.MonsterMagnetBuff.Description
+			}
+		}
+	}
+}
