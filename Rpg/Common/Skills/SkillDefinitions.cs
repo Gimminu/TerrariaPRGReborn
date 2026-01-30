@@ -31,6 +31,7 @@ namespace Rpg.Common.Skills
         public int PassiveLifeRegenBonus { get; set; }
         public int PassiveMaxLifeBonus { get; set; }
         public int PassiveMaxManaBonus { get; set; }
+        public float PassiveLuckBonus { get; set; }
 
         public int[] BuffIds { get; set; }
         public int BuffDurationSeconds { get; set; }
@@ -70,25 +71,41 @@ namespace Rpg.Common.Skills
 
             var skills = new List<SkillDefinition>
             {
+                // Novice
+                CreateAoeSkill("BasicStrike", "Basic Strike", "A powerful melee strike that deals bonus weapon damage and knocks back enemies.", JobType.Novice, 1, ResourceType.Stamina, 15, 3f, 0, 60f, DamageClass.Melee, maxRank, skillPointCost),
+                CreateBuffSkill("SecondWind", "Second Wind", "Regenerate stamina over time.", JobType.Novice, 1, ResourceType.Stamina, 0, 0f, new[] { BuffID.Regeneration }, 10, maxRank, skillPointCost),
+                CreatePassiveSkill("Resourceful", "Resourceful", "Reduce resource costs.", JobType.Novice, 1, maxRank, skillPointCost, manaCostReduction: 0.05f),
+                CreatePassiveSkill("Perseverance", "Perseverance", "Increase max life.", JobType.Novice, 1, maxRank, skillPointCost, maxLifeBonus: 10),
+                CreatePassiveSkill("QuickRecovery", "Quick Recovery", "Increase life regeneration.", JobType.Novice, 1, maxRank, skillPointCost, lifeRegenBonus: 1),
+                CreatePassiveSkill("Focus", "Focus", "Increase critical chance.", JobType.Novice, 1, maxRank, skillPointCost, critBonus: 2f),
+                CreatePassiveSkill("Toughness", "Toughness", "Increase defense.", JobType.Novice, 1, maxRank, skillPointCost, defenseBonus: 2),
+                CreatePassiveSkill("Nimble", "Nimble", "Increase movement speed.", JobType.Novice, 1, maxRank, skillPointCost, moveSpeedBonus: 0.05f),
+                CreatePassiveSkill("AdventurerSpirit", "Adventurer Spirit", "Increase damage.", JobType.Novice, 1, maxRank, skillPointCost, damageBonus: 0.05f),
+                CreatePassiveSkill("LuckyFind", "Lucky Find", "Fortune favors the bold. Increases luck for better drops.", JobType.Novice, 6, maxRank, skillPointCost, luckBonus: 0.02f),
+
                 // Warrior
                 CreateAoeSkill("PowerStrike", "Power Strike", "A heavy swing that hits nearby enemies.", JobType.Warrior, t1Skill1, ResourceType.Stamina, 20, 6f, 35, 90f, DamageClass.Melee, maxRank, skillPointCost),
                 CreateBuffSkill("Fortify", "Fortify", "Boost defense for a short time.", JobType.Warrior, t1Skill2, ResourceType.Stamina, 20, 20f, new[] { BuffID.Ironskin, BuffID.Endurance }, 12, maxRank, skillPointCost),
                 CreatePassiveSkill("BattleRage", "Battle Rage", "Increase damage and crit chance.", JobType.Warrior, t1Skill3, maxRank, skillPointCost, damageBonus: 0.05f, critBonus: 4f),
+                CreateAoeSkill("GroundSlam", "Ground Slam", "Slam the ground with tremendous force, damaging nearby enemies.", JobType.Warrior, 22, ResourceType.Stamina, 35, 10f, 0, 80f, DamageClass.Melee, 10, skillPointCost),
 
                 // Ranger
                 CreateBuffSkill("RapidFire", "Rapid Fire", "Increase ranged tempo temporarily.", JobType.Ranger, t1Skill1, ResourceType.Stamina, 20, 20f, new[] { BuffID.Swiftness, BuffID.Archery }, 10, maxRank, skillPointCost),
                 CreateBuffSkill("EvasiveRoll", "Evasive Roll", "Quickly evade incoming danger.", JobType.Ranger, t1Skill2, ResourceType.Stamina, 15, 15f, new[] { BuffID.Swiftness }, 6, maxRank, skillPointCost),
                 CreatePassiveSkill("SteadyAim", "Steady Aim", "Increase crit chance and ranged damage.", JobType.Ranger, t1Skill3, maxRank, skillPointCost, damageBonus: 0.05f, critBonus: 6f),
+                CreateAoeSkill("ExplosiveArrow", "Explosive Arrow", "Fire an arrow that explodes on impact, dealing area damage.", JobType.Ranger, 28, ResourceType.Stamina, 30, 8f, 40, 60f, DamageClass.Ranged, 10, skillPointCost),
 
                 // Mage
                 CreateAoeSkill("Fireball", "Fireball", "Explode arcane fire around you.", JobType.Mage, t1Skill1, ResourceType.Mana, 20, 6f, 40, 120f, DamageClass.Magic, maxRank, skillPointCost),
                 CreateBuffSkill("ManaShield", "Mana Shield", "Reduce damage taken with magical protection.", JobType.Mage, t1Skill2, ResourceType.Mana, 25, 20f, new[] { BuffID.Endurance, BuffID.ManaRegeneration }, 12, maxRank, skillPointCost),
                 CreatePassiveSkill("ArcaneIntellect", "Arcane Intellect", "Increase magic output and mana efficiency.", JobType.Mage, t1Skill3, maxRank, skillPointCost, damageBonus: 0.05f, manaCostReduction: 0.04f),
+                CreateAoeSkill("FrostNova", "Frost Nova", "Release a wave of frost, damaging and slowing nearby enemies.", JobType.Mage, 22, ResourceType.Mana, 40, 12f, 35, 80f, DamageClass.Magic, 10, skillPointCost),
 
                 // Summoner
                 CreateBuffSkill("SummonAlly", "Summon Ally", "Empower your summoning for a short time.", JobType.Summoner, t1Skill1, ResourceType.Mana, 20, 20f, new[] { BuffID.Summoning, BuffID.Bewitched }, 10, maxRank, skillPointCost),
                 CreateBuffSkill("CommandMinions", "Command Minions", "Boost minion damage temporarily.", JobType.Summoner, t1Skill2, ResourceType.Mana, 15, 18f, new[] { BuffID.Summoning }, 12, maxRank, skillPointCost),
                 CreatePassiveSkill("SummonMastery", "Summon Mastery", "Increase maximum minion slots.", JobType.Summoner, t1Skill3, maxRank, skillPointCost, minionSlots: 1),
+                CreateBuffSkill("GuardianSpirit", "Guardian Spirit", "Summon a protective spirit that shields you, increasing defense.", JobType.Summoner, 14, ResourceType.Mana, 40, 45f, new[] { BuffID.Ironskin }, 15, 10, skillPointCost),
 
                 // Knight
                 CreateBuffSkill("ShieldWall", "Shield Wall", "Brace behind a solid defense.", JobType.Knight, t2Skill1, ResourceType.Stamina, 25, 25f, new[] { BuffID.Endurance, BuffID.Ironskin }, 12, maxRank, skillPointCost),
@@ -197,7 +214,7 @@ namespace Rpg.Common.Skills
 
                 // Gunmaster
                 CreateAoeSkill("BulletStorm", "Bullet Storm", "Fire a barrage of bullets.", JobType.Gunmaster, t3Skill1, ResourceType.Stamina, 35, 20f, 60, 140f, DamageClass.Ranged, maxRank, skillPointCost),
-                CreateBuffSkill("QuickReload", "Quick Reload", "Reload instantly for rapid fire.", JobType.Gunmaster, t3Skill2, ResourceType.Stamina, 20, 18f, new[] { BuffID.Swiftness, BuffID.AmmoBox }, 10, maxRank, skillPointCost),
+                CreateBuffSkill("QuickReload", "Quick Reload", "Reload instantly for rapid fire.", JobType.Gunmaster, t3Skill2, ResourceType.Stamina, 20, 18f, new[] { BuffID.Swiftness, BuffID.AmmoReservation }, 10, maxRank, skillPointCost),
                 CreatePassiveSkill("RicochetMastery", "Ricochet Mastery", "Boost attack speed and damage.", JobType.Gunmaster, t3Skill3, maxRank, skillPointCost, attackSpeedBonus: 0.12f, damageBonus: 0.04f),
 
                 // Archbishop
@@ -211,9 +228,9 @@ namespace Rpg.Common.Skills
                 CreatePassiveSkill("OverlordCommand", "Overlord Command", "Increase summon potency.", JobType.Overlord, t3Skill3, maxRank, skillPointCost, minionSlots: 2, damageBonus: 0.05f),
 
                 // Lich King
-                CreateAoeHealSkill("SoulHarvest", "Soul Harvest", "Drain souls to heal yourself.", JobType.Lichking, t3Skill1, ResourceType.Mana, 30, 20f, 50, 140f, DamageClass.Magic, 35, maxRank, skillPointCost),
-                CreateBuffSkill("UndeadLegion", "Undead Legion", "Summon a legion of undead.", JobType.Lichking, t3Skill2, ResourceType.Mana, 40, 25f, new[] { BuffID.Summoning, BuffID.Bewitched }, 15, maxRank, skillPointCost),
-                CreatePassiveSkill("Phylactery", "Phylactery", "Improve defense and mana efficiency.", JobType.Lichking, t3Skill3, maxRank, skillPointCost, defenseBonus: 8, manaCostReduction: 0.05f)
+                CreateAoeHealSkill("SoulHarvest", "Soul Harvest", "Drain souls to heal yourself.", JobType.LichKing, t3Skill1, ResourceType.Mana, 30, 20f, 50, 140f, DamageClass.Magic, 35, maxRank, skillPointCost),
+                CreateBuffSkill("UndeadLegion", "Undead Legion", "Summon a legion of undead.", JobType.LichKing, t3Skill2, ResourceType.Mana, 40, 25f, new[] { BuffID.Summoning, BuffID.Bewitched }, 15, maxRank, skillPointCost),
+                CreatePassiveSkill("Phylactery", "Phylactery", "Improve defense and mana efficiency.", JobType.LichKing, t3Skill3, maxRank, skillPointCost, defenseBonus: 8, manaCostReduction: 0.05f)
             };
 
             return skills;
@@ -265,25 +282,24 @@ namespace Rpg.Common.Skills
             int skillPointCost,
             int restoreMana = 0)
         {
-            return new SkillDefinition
-            {
-                InternalName = internalName,
-                DisplayName = displayName,
-                Description = description,
-                RequiredJob = requiredJob,
-                RequiredLevel = requiredLevel,
-                SkillType = SkillType.Active,
-                ResourceType = resourceType,
-                ResourceCost = resourceCost,
-                CooldownSeconds = cooldownSeconds,
-                MaxRank = maxRank,
-                SkillPointCost = skillPointCost,
-                IconTexture = $"{RpgConstants.ICON_PATH}Skills/{internalName}",
-                AoEDamage = aoeDamage,
-                AoERadius = aoeRadius,
-                AoEDamageClass = damageClass,
-                RestoreMana = restoreMana
-            };
+            SkillDefinition def = CreateBase(
+                internalName,
+                displayName,
+                description,
+                requiredJob,
+                requiredLevel,
+                SkillType.Active,
+                resourceType,
+                resourceCost,
+                cooldownSeconds,
+                maxRank,
+                skillPointCost);
+
+            def.AoEDamage = aoeDamage;
+            def.AoERadius = aoeRadius;
+            def.AoEDamageClass = damageClass;
+            def.RestoreMana = restoreMana;
+            return def;
         }
 
         private static SkillDefinition CreateBuffSkill(
@@ -403,7 +419,10 @@ namespace Rpg.Common.Skills
             int defenseBonus = 0,
             int minionSlots = 0,
             float manaCostReduction = 0f,
-            int lifeRegenBonus = 0)
+            int lifeRegenBonus = 0,
+            int maxLifeBonus = 0,
+            int maxManaBonus = 0,
+            float luckBonus = 0f)
         {
             SkillDefinition def = CreateBase(
                 internalName,
@@ -426,6 +445,9 @@ namespace Rpg.Common.Skills
             def.PassiveMinionSlots = minionSlots;
             def.PassiveManaCostReduction = manaCostReduction;
             def.PassiveLifeRegenBonus = lifeRegenBonus;
+            def.PassiveMaxLifeBonus = maxLifeBonus;
+            def.PassiveMaxManaBonus = maxManaBonus;
+            def.PassiveLuckBonus = luckBonus;
             return def;
         }
     }

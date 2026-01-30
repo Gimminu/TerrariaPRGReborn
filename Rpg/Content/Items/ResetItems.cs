@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Rpg.Common.Players;
+using Rpg.Common.Config;
 
 namespace Rpg.Content.Items
 {
@@ -112,6 +113,13 @@ namespace Rpg.Content.Items
 
         public override bool CanUseItem(Player player)
         {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null && !serverConfig.EnableSkillSystem)
+            {
+                Main.NewText("Skill system is disabled on this server.", Color.Red);
+                return false;
+            }
+            
             var rpgPlayer = player.GetModPlayer<RpgPlayer>();
             // Only allow if player has learned skills
             return rpgPlayer.GetTotalAllocatedSkillPoints() > 0;

@@ -23,8 +23,8 @@ namespace Rpg.Common.UI
         private const int UI_X = 20;
         private int panelHeight;
         private int UI_Y => Main.screenHeight - panelHeight - 60; // Bottom-left, above hotbar
-        private const int PANEL_WIDTH = 280;
-        private const int BASE_PANEL_HEIGHT = 108;
+        private const int PANEL_WIDTH = 300;
+        private const int BASE_PANEL_HEIGHT = 134;
         
         // Bar dimensions - compact
         private const int BAR_WIDTH = 250;
@@ -34,14 +34,14 @@ namespace Rpg.Common.UI
         // Colors
         private static readonly Color BG_COLOR = new Color(20, 25, 35, 220);
         private static readonly Color BORDER_COLOR = new Color(60, 70, 90, 255);
-        private static readonly Color XP_BAR_COLOR = new Color(100, 200, 255);
-        private static readonly Color XP_BG_COLOR = new Color(30, 50, 70);
-        private static readonly Color HP_BAR_COLOR = new Color(255, 80, 80);
-        private static readonly Color HP_BG_COLOR = new Color(80, 20, 20);
-        private static readonly Color MANA_BAR_COLOR = new Color(80, 120, 255);
-        private static readonly Color MANA_BG_COLOR = new Color(20, 30, 80);
-        private static readonly Color STAMINA_BAR_COLOR = new Color(255, 200, 80);
-        private static readonly Color STAMINA_BG_COLOR = new Color(80, 60, 20);
+        private static readonly Color XP_BAR_COLOR = new Color(90, 180, 255);
+        private static readonly Color XP_BG_COLOR = new Color(26, 38, 58);
+        private static readonly Color HP_BAR_COLOR = new Color(255, 95, 95);
+        private static readonly Color HP_BG_COLOR = new Color(80, 24, 24);
+        private static readonly Color MANA_BAR_COLOR = new Color(110, 140, 255);
+        private static readonly Color MANA_BG_COLOR = new Color(28, 36, 92);
+        private static readonly Color STAMINA_BAR_COLOR = new Color(255, 210, 100);
+        private static readonly Color STAMINA_BG_COLOR = new Color(76, 60, 28);
         
         public override void OnInitialize()
         {
@@ -58,8 +58,8 @@ namespace Rpg.Common.UI
         
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            // Hide when ESC menu, inventory, or other menus are open
-            if (Main.gameMenu || Main.ingameOptionsWindow || Main.playerInventory || Main.inFancyUI)
+            // Hide in main menu only
+            if (Main.gameMenu)
                 return;
             
             if (rpgPlayer == null)
@@ -67,26 +67,35 @@ namespace Rpg.Common.UI
             
             if (Main.LocalPlayer == null || !Main.LocalPlayer.active)
                 return;
-                
+
+            // Compact mode when inventory/options/fancy UI are open: only show header & WL
+            bool compactMode = Main.ingameOptionsWindow || Main.playerInventory || Main.inFancyUI;
+
             Player player = Main.LocalPlayer;
             
             bool showPoints = rpgPlayer.StatPoints > 0 || rpgPlayer.SkillPoints > 0;
             bool showPending = rpgPlayer.PendingStatPoints > 0 || rpgPlayer.PendingSkillPoints > 0;
-            panelHeight = BASE_PANEL_HEIGHT;
-            if (showPoints)
-                panelHeight += 16;
-            if (showPending)
-                panelHeight += 14;
+            panelHeight = compactMode ? 64 : BASE_PANEL_HEIGHT;
+            if (!compactMode)
+            {
+                if (showPoints)
+                    panelHeight += 16;
+                if (showPending)
+                    panelHeight += 14;
+            }
 
             // Draw main panel
             Rectangle panelBounds = new Rectangle(UI_X, UI_Y, PANEL_WIDTH, panelHeight);
-            DrawPanel(spriteBatch, panelBounds, BG_COLOR, BORDER_COLOR);
+            DrawPanel(spriteBatch, panelBounds, BG_COLOR, BORDER_COLOR, new Color(90, 150, 255, 140));
             
             int yOffset = UI_Y + 8;
             
             // === HEADER: Level & Job (compact) ===
             DrawHeaderCompact(spriteBatch, ref yOffset);
-            
+
+            if (compactMode)
+                return;
+
             // === XP BAR ===
             DrawXPBarCompact(spriteBatch, ref yOffset);
             
@@ -129,13 +138,37 @@ namespace Rpg.Common.UI
             string levelText = $"Lv.{rpgPlayer.Level}";
             string jobText = GetJobDisplayName(rpgPlayer.CurrentJob);
             
-            DrawText(spriteBatch, levelText, new Vector2(UI_X + 10, yOffset), Color.Gold, 0.9f);
+            DrawTextWithOutline(spriteBatch, levelText, new Vector2(UI_X + 10, yOffset), Color.Gold, Color.Black, 1.0f);
             
             Color jobColor = GetJobColor(rpgPlayer.CurrentTier);
-            Vector2 jobSize = FontAssets.MouseText.Value.MeasureString(jobText) * 0.9f;
-            DrawText(spriteBatch, jobText, new Vector2(UI_X + PANEL_WIDTH - jobSize.X - 10, yOffset), jobColor, 0.9f);
+            Vector2 jobSize = FontAssets.MouseText.Value.MeasureString(jobText) * 0.95f;
+            DrawTextWithOutline(spriteBatch, jobText, new Vector2(UI_X + PANEL_WIDTH - jobSize.X - 12, yOffset), jobColor, Color.Black, 0.95f);
             
-            yOffset += 22;
+            yOffset += 24;
+
+            DrawWorldLevelBadge(spriteBatch, ref yOffset);
+        }
+
+        private void DrawWorldLevelBadge(SpriteBatch spriteBatch, ref int yOffset)
+        {
+            int worldLevel = RpgWorld.GetWorldLevel();
+            int effectiveLevel = RpgWorld.GetEffectiveWorldLevel();
+            int cap = RpgWorld.GetProgressionWorldLevelCap();
+            string stage = RpgWorld.GetProgressionStageName();
+
+            string wlText = effectiveLevel == worldLevel
+                ? $"WL {worldLevel} · {stage}"
+                : $"WL {worldLevel} (eff. {effectiveLevel}/{cap})";
+
+            // Badge background for clarity
+            Texture2D pixel = TextureAssets.MagicPixel.Value;
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(wlText) * 0.7f;
+            Rectangle badge = new Rectangle(UI_X + 8, yOffset - 2, (int)textSize.X + 12, (int)textSize.Y + 6);
+            spriteBatch.Draw(pixel, badge, new Color(18, 24, 38, 200));
+            DrawPanel(spriteBatch, badge, Color.Transparent, new Color(80, 120, 180), Color.Transparent);
+
+            DrawTextWithOutline(spriteBatch, wlText, new Vector2(UI_X + 12, yOffset), new Color(120, 190, 255), Color.Black, 0.7f);
+            yOffset += (int)textSize.Y + 10;
         }
         
         private void DrawXPBarCompact(SpriteBatch spriteBatch, ref int yOffset)
@@ -147,6 +180,19 @@ namespace Rpg.Common.UI
             
             string xpText = $"XP: {xpPercent:P0}";
             DrawTextWithOutline(spriteBatch, xpText, new Vector2(barBounds.X + 5, barBounds.Y + 1), Color.White, Color.Black, 0.7f);
+            
+            // Level cap info on right
+            int maxLevel = RpgFormulas.GetMaxLevel();
+            string capText = maxLevel == int.MaxValue ? "Cap: ∞" : $"Cap: {maxLevel}";
+            Vector2 capSize = FontAssets.MouseText.Value.MeasureString(capText) * 0.65f;
+            DrawTextWithOutline(
+                spriteBatch,
+                capText,
+                new Vector2(barBounds.Right - capSize.X - 6, barBounds.Y + 1),
+                Color.LightGray,
+                Color.Black,
+                0.65f
+            );
             
             yOffset += BAR_HEIGHT;
         }
@@ -443,18 +489,26 @@ namespace Rpg.Common.UI
             }
             
             // Border
-            DrawBorder(spriteBatch, bounds, Color.Black, 2);
+            DrawBorder(spriteBatch, bounds, Color.Black * 0.6f, 1);
         }
         
         /// <summary>
         /// Draw panel with border
         /// </summary>
-        private void DrawPanel(SpriteBatch spriteBatch, Rectangle bounds, Color bgColor, Color borderColor)
+        private void DrawPanel(SpriteBatch spriteBatch, Rectangle bounds, Color bgColor, Color borderColor, Color? accentColor = null)
         {
             Texture2D pixel = TextureAssets.MagicPixel.Value;
             
-            // Background
+            // Background with left accent
             spriteBatch.Draw(pixel, bounds, bgColor);
+            if (accentColor.HasValue)
+            {
+                spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y, 6, bounds.Height), accentColor.Value);
+            }
+            else
+            {
+                spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y, 6, bounds.Height), borderColor * 0.6f);
+            }
             
             // Border
             DrawBorder(spriteBatch, bounds, borderColor, 2);
@@ -541,7 +595,7 @@ namespace Rpg.Common.UI
                 JobType.Gunmaster => "Gunmaster",
                 JobType.Archbishop => "Archbishop",
                 JobType.Overlord => "Overlord",
-                JobType.Lichking => "Lich King",
+                JobType.LichKing => "Lich King",
                 _ => "Unknown"
             };
         }

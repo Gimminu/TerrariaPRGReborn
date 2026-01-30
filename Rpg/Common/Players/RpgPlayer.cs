@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Rpg.Common.Skills;
 using Rpg.Common.Systems;
+using Rpg.Common.Config;
 
 namespace Rpg.Common.Players
 {
@@ -17,7 +19,17 @@ namespace Rpg.Common.Players
 
         public int Level { get; set; } = 1;
         public long CurrentXP { get; set; } = 0;
-        public long RequiredXP => RpgFormulas.GetRequiredXP(Level);
+        public long RequiredXP 
+        {
+            get
+            {
+                long baseXP = RpgFormulas.GetRequiredXP(Level);
+                // Increase requirement for higher levels
+                if (Level >= 100) return (long)(baseXP * 1.5f);
+                if (Level >= 50) return (long)(baseXP * 1.2f);
+                return baseXP;
+            }
+        }
 
         #endregion
 
@@ -192,6 +204,11 @@ namespace Rpg.Common.Players
             autoGrowthRemainders = new float[System.Enum.GetValues(typeof(StatType)).Length];
         }
 
+        public override void OnEnterWorld()
+        {
+            RequestProgressSync();
+        }
+
         public override void ResetEffects()
         {
             // Reset temporary bonuses each frame (all 12 stats)
@@ -289,6 +306,17 @@ namespace Rpg.Common.Players
                 Player.endurance += damageReduction;
             }
 
+            // Fortitude auxiliary defense
+            float fortitudeReduction = TotalFortitude * RpgConstants.FORTITUDE_DEFENSE_PER_POINT;
+            if (fortitudeReduction > 0f)
+            {
+                Player.endurance += fortitudeReduction;
+            }
+
+            // Damage/crit bonuses from stats (applies to weapons, skills, and minions)
+            ApplyStatDamageBonuses();
+            ApplyStatCritBonuses();
+
             // Apply temporary skill buffs
             ApplyTemporaryBuffs();
 
@@ -333,79 +361,73 @@ namespace Rpg.Common.Players
             CooldownReduction = System.Math.Min(totalCdrPercent / 100f, RpgConstants.MAX_COOLDOWN_REDUCTION);
         }
 
-        public override void ModifyWeaponDamage(Item item, ref StatModifier damage)
+        private void ApplyStatDamageBonuses()
         {
-            // Apply damage bonuses based on weapon type and stats (12-stat system)
-            
-            if (item.CountsAsClass(DamageClass.Melee))
+            float strBonus = RpgFormulas.GetStrengthDamageBonus(TotalStrength, CurrentJob);
+            if (strBonus != 0f)
             {
-                // Strength for melee
-                float strBonus = RpgFormulas.GetStrengthDamageBonus(TotalStrength, CurrentJob);
-                damage += strBonus;
-            }
-            
-            if (item.CountsAsClass(DamageClass.Ranged))
-            {
-                // Dexterity for ranged
-                float dexBonus = RpgFormulas.GetDexterityDamageBonus(TotalDexterity, CurrentJob);
-                damage += dexBonus;
+                Player.GetDamage(DamageClass.Melee) += strBonus;
             }
 
-            if (item.CountsAsClass(DamageClass.Melee) || item.CountsAsClass(DamageClass.Ranged))
+            float dexBonus = RpgFormulas.GetDexterityDamageBonus(TotalDexterity, CurrentJob);
+            if (dexBonus != 0f)
             {
-                // Rogue finesse damage for physical weapons
-                float rogueBonus = RpgFormulas.GetRogueDamageBonus(TotalRogue, CurrentJob);
-                damage += rogueBonus;
-            }
-            
-            if (item.CountsAsClass(DamageClass.Magic))
-            {
-                // Intelligence for magic damage
-                float intBonus = RpgFormulas.GetIntelligenceDamageBonus(TotalIntelligence, CurrentJob);
-                damage += intBonus;
-
-                // Intelligence also boosts spell power
-                float spellPower = TotalIntelligence * RpgConstants.INTELLIGENCE_SPELL_POWER_PER_POINT;
-                damage += spellPower;
-            }
-            
-            if (item.CountsAsClass(DamageClass.Summon))
-            {
-                // Focus for summon damage
-                float focBonus = RpgFormulas.GetSummonDamageBonus(TotalFocus, CurrentJob);
-                damage += focBonus;
+                Player.GetDamage(DamageClass.Ranged) += dexBonus;
             }
 
-            // Luck bonus (all weapons)
+            float rogueBonus = RpgFormulas.GetRogueDamageBonus(TotalRogue, CurrentJob);
+            if (rogueBonus != 0f)
+            {
+                Player.GetDamage(DamageClass.Melee) += rogueBonus;
+                Player.GetDamage(DamageClass.Ranged) += rogueBonus;
+            }
+
+            float intBonus = RpgFormulas.GetIntelligenceDamageBonus(TotalIntelligence, CurrentJob);
+            float spellPower = TotalIntelligence * RpgConstants.INTELLIGENCE_SPELL_POWER_PER_POINT;
+            float magicBonus = intBonus + spellPower;
+            if (magicBonus != 0f)
+            {
+                Player.GetDamage(DamageClass.Magic) += magicBonus;
+            }
+
+            float focBonus = RpgFormulas.GetSummonDamageBonus(TotalFocus, CurrentJob);
+            if (focBonus != 0f)
+            {
+                Player.GetDamage(DamageClass.Summon) += focBonus;
+            }
+
             float lukBonus = TotalLuck * RpgConstants.LUCK_ALL_DAMAGE_PER_POINT;
-            damage += lukBonus;
+            if (lukBonus != 0f)
+            {
+                Player.GetDamage(DamageClass.Generic) += lukBonus;
+            }
         }
 
-        public override void ModifyWeaponCrit(Item item, ref float crit)
+        private void ApplyStatCritBonuses()
         {
-            // Apply crit bonuses (12-stat system)
-            
-            // DEX ranged crit
-            if (item.CountsAsClass(DamageClass.Ranged))
+            float dexCrit = TotalDexterity * RpgConstants.DEXTERITY_RANGED_CRIT_PER_POINT;
+            if (dexCrit != 0f)
             {
-                float dexCrit = TotalDexterity * RpgConstants.DEXTERITY_RANGED_CRIT_PER_POINT;
-                crit += dexCrit;
-            }
-            
-            // Rogue crit bonus (all weapons)
-            float rogueCrit = TotalRogue * RpgConstants.ROGUE_CRIT_CHANCE_PER_POINT;
-            crit += rogueCrit;
-            
-            // Intelligence magic crit
-            if (item.CountsAsClass(DamageClass.Magic))
-            {
-                float intCrit = TotalIntelligence * RpgConstants.INTELLIGENCE_MAGIC_CRIT_PER_POINT;
-                crit += intCrit;
+                Player.GetCritChance(DamageClass.Ranged) += dexCrit;
             }
 
-            // LUK crit bonus (all weapons)
+            float rogueCrit = TotalRogue * RpgConstants.ROGUE_CRIT_CHANCE_PER_POINT;
+            if (rogueCrit != 0f)
+            {
+                Player.GetCritChance(DamageClass.Generic) += rogueCrit;
+            }
+
+            float intCrit = TotalIntelligence * RpgConstants.INTELLIGENCE_MAGIC_CRIT_PER_POINT;
+            if (intCrit != 0f)
+            {
+                Player.GetCritChance(DamageClass.Magic) += intCrit;
+            }
+
             float lukCrit = TotalLuck * RpgConstants.LUCK_CRIT_PER_POINT;
-            crit += lukCrit;
+            if (lukCrit != 0f)
+            {
+                Player.GetCritChance(DamageClass.Generic) += lukCrit;
+            }
         }
 
         public override void ModifyManaCost(Item item, ref float reduce, ref float mult)
@@ -618,6 +640,16 @@ namespace Rpg.Common.Players
             }
         }
 
+        private void ApplyFortitudeKnockbackResistance(ref Player.HurtModifiers modifiers)
+        {
+            float resist = TotalFortitude * RpgConstants.FORTITUDE_KNOCKBACK_RESIST_PER_POINT;
+            if (resist <= 0f)
+                return;
+
+            resist = System.Math.Min(resist, 0.5f);
+            modifiers.Knockback *= (1f - resist);
+        }
+
         private bool TryDodgeHit()
         {
             float chance = GetTotalDodgeChance();
@@ -668,6 +700,8 @@ namespace Rpg.Common.Players
                 return;
             }
 
+            ApplyFortitudeKnockbackResistance(ref modifiers);
+
             // Apply damage taken multiplier (berserk)
             if (tempDamageTakenMult > 0f)
             {
@@ -688,6 +722,8 @@ namespace Rpg.Common.Players
                 modifiers.FinalDamage *= 0f;
                 return;
             }
+
+            ApplyFortitudeKnockbackResistance(ref modifiers);
 
             // Apply damage taken multiplier (berserk)
             if (tempDamageTakenMult > 0f)
@@ -881,6 +917,13 @@ namespace Rpg.Common.Players
         {
             if (amount <= 0f)
                 return;
+
+            // Apply auto growth percentage from config
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null)
+            {
+                amount *= serverConfig.AutoGrowthPercent;
+            }
 
             if (autoGrowthRemainders == null)
             {
@@ -1081,6 +1124,52 @@ namespace Rpg.Common.Players
 
         #region Experience & Leveling
         // XP and level-up logic lives in Players.PlayerLevel to avoid duplicate awarding.
+        #endregion
+
+        #region Networking
+
+        internal void ApplyProgressSync(int level, long currentXP, JobType job)
+        {
+            Level = System.Math.Max(1, level);
+            CurrentXP = System.Math.Max(0, currentXP);
+            CurrentJob = System.Enum.IsDefined(typeof(JobType), job) && job != JobType.None
+                ? job
+                : JobType.Novice;
+        }
+
+        internal void ApplyJobSync(JobType job)
+        {
+            CurrentJob = System.Enum.IsDefined(typeof(JobType), job) && job != JobType.None
+                ? job
+                : JobType.Novice;
+        }
+
+        internal void RequestProgressSync()
+        {
+            if (Main.netMode != NetmodeID.MultiplayerClient || Player.whoAmI != Main.myPlayer)
+                return;
+
+            ModPacket packet = Mod.GetPacket();
+            packet.Write((byte)global::Rpg.RpgMessageType.SyncPlayerProgress);
+            packet.Write((byte)Player.whoAmI);
+            packet.Write(Level);
+            packet.Write(CurrentXP);
+            packet.Write((int)CurrentJob);
+            packet.Send();
+        }
+
+        internal void RequestJobSync()
+        {
+            if (Main.netMode != NetmodeID.MultiplayerClient || Player.whoAmI != Main.myPlayer)
+                return;
+
+            ModPacket packet = Mod.GetPacket();
+            packet.Write((byte)global::Rpg.RpgMessageType.SyncPlayerJob);
+            packet.Write((byte)Player.whoAmI);
+            packet.Write((int)CurrentJob);
+            packet.Send();
+        }
+
         #endregion
     }
 }

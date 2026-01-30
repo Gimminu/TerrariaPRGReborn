@@ -10,3 +10,4 @@ C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\ne
 C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\refint\Rpg.dll
 C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.pdb
 C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\ref\Rpg.dll
+C:\Users\HOME\Documents\My Games\Terraria\tModLoader\ModSources\Rpg\obj\Debug\net8.0\Rpg.sourcelink.json

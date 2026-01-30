@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Rpg.Common.Config;
 
 namespace Rpg.Common.UI
 {
@@ -122,6 +123,10 @@ namespace Rpg.Common.UI
         
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
+            var config = ModContent.GetInstance<RpgClientConfig>();
+            if (config != null && !config.ShowSkillBar)
+                return;
+
             int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
             if (mouseTextIndex != -1)
             {

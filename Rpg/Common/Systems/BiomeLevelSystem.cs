@@ -85,122 +85,122 @@ namespace Rpg.Common.Systems
         {
             // ========== SURFACE BIOMES (Easy Start) ==========
             // Forest - safest starting area
-            [BiomeType.Forest] = new(1, 15, 25, 35, 45, 60, 0.4f),
+            [BiomeType.Forest] = new(1, 30, 50, 70, 90, 150, 0.8f),
             
             // Desert - slightly harder
-            [BiomeType.Desert] = new(3, 18, 28, 40, 50, 65, 0.5f),
+            [BiomeType.Desert] = new(5, 35, 55, 75, 95, 160, 0.9f),
             
             // Snow - cold environment
-            [BiomeType.Snow] = new(4, 20, 30, 42, 52, 68, 0.5f),
+            [BiomeType.Snow] = new(5, 35, 55, 75, 100, 160, 0.9f),
             
             // Ocean - mid-difficulty surface
-            [BiomeType.Ocean] = new(6, 22, 35, 48, 58, 72, 0.6f),
+            [BiomeType.Ocean] = new(8, 40, 60, 80, 100, 170, 1.0f),
             
             // Space - floating islands
-            [BiomeType.Space] = new(10, 28, 40, 55, 68, 85, 0.7f),
+            [BiomeType.Space] = new(15, 45, 65, 85, 110, 180, 1.1f),
             
             // Graveyards - spooky
-            [BiomeType.Graveyard] = new(8, 25, 38, 52, 65, 80, 0.6f),
+            [BiomeType.Graveyard] = new(10, 40, 60, 80, 100, 170, 1.0f),
 
             // Meteor crash sites
-            [BiomeType.Meteor] = new(10, 28, 42, 56, 70, 88, 0.7f),
+            [BiomeType.Meteor] = new(15, 45, 65, 85, 110, 180, 1.1f),
             
             // ========== SURFACE SPECIAL BIOMES ==========
             // Surface Jungle - dangerous early game
-            [BiomeType.SurfaceJungle] = new(12, 32, 45, 60, 75, 95, 0.8f),
+            [BiomeType.SurfaceJungle] = new(15, 50, 70, 90, 110, 190, 1.2f),
             
             // Surface Evil (Corruption/Crimson)
-            [BiomeType.SurfaceCorruption] = new(10, 28, 42, 56, 70, 88, 0.7f),
-            [BiomeType.SurfaceCrimson] = new(10, 28, 42, 56, 70, 88, 0.7f),
-            [BiomeType.SurfaceEvil] = new(10, 28, 42, 56, 70, 88, 0.7f),
+            [BiomeType.SurfaceCorruption] = new(12, 40, 60, 80, 100, 180, 1.1f),
+            [BiomeType.SurfaceCrimson] = new(12, 40, 60, 80, 100, 180, 1.1f),
+            [BiomeType.SurfaceEvil] = new(12, 40, 60, 80, 100, 180, 1.1f),
             
             // Surface Hallow (Hardmode only)
-            [BiomeType.SurfaceHallow] = new(35, 35, 50, 65, 80, 100, 0.9f, true),
+            [BiomeType.SurfaceHallow] = new(50, 50, 70, 90, 110, 190, 1.3f, true),
             
             // ========== UNDERGROUND BIOMES ==========
             // Underground (just below surface)
-            [BiomeType.Underground] = new(6, 22, 35, 48, 60, 75, 0.6f),
+            [BiomeType.Underground] = new(8, 35, 55, 75, 95, 160, 0.9f),
             
             // Caverns (deeper)
-            [BiomeType.Caverns] = new(10, 28, 42, 58, 72, 90, 0.7f),
+            [BiomeType.Caverns] = new(12, 40, 60, 80, 100, 170, 1.0f),
             
             // Ice Caves
-            [BiomeType.IceCaves] = new(12, 30, 45, 60, 75, 92, 0.75f),
+            [BiomeType.IceCaves] = new(15, 45, 65, 85, 105, 175, 1.1f),
             
             // Underground Desert
-            [BiomeType.UndergroundDesert] = new(14, 32, 48, 65, 80, 98, 0.8f),
+            [BiomeType.UndergroundDesert] = new(18, 45, 65, 85, 105, 180, 1.15f),
             
             // Marble Caves
-            [BiomeType.Marble] = new(15, 35, 50, 68, 82, 100, 0.8f),
+            [BiomeType.Marble] = new(20, 45, 65, 85, 105, 180, 1.15f),
             
             // Granite Caves
-            [BiomeType.Granite] = new(15, 35, 50, 68, 82, 100, 0.8f),
+            [BiomeType.Granite] = new(20, 45, 65, 85, 105, 180, 1.15f),
             
             // Spider Caves
-            [BiomeType.SpiderNest] = new(16, 36, 52, 70, 85, 102, 0.85f),
+            [BiomeType.SpiderNest] = new(22, 50, 70, 90, 110, 185, 1.2f),
             
             // Glowing Mushroom Biome
-            [BiomeType.MushroomBiome] = new(18, 38, 55, 72, 88, 105, 0.85f),
+            [BiomeType.MushroomBiome] = new(20, 50, 70, 90, 110, 190, 1.2f),
             
             // Bee Hive
-            [BiomeType.BeeHive] = new(15, 35, 50, 65, 80, 95, 0.75f),
+            [BiomeType.BeeHive] = new(25, 45, 65, 85, 105, 170, 1.1f),
             
             // ========== UNDERGROUND SPECIAL ==========
             // Underground Jungle - very dangerous
-            [BiomeType.UndergroundJungle] = new(20, 42, 58, 78, 95, 115, 0.95f),
+            [BiomeType.UndergroundJungle] = new(25, 55, 75, 95, 120, 200, 1.3f),
             
             // Underground Evil
-            [BiomeType.UndergroundCorruption] = new(18, 38, 55, 72, 88, 108, 0.9f),
-            [BiomeType.UndergroundCrimson] = new(18, 38, 55, 72, 88, 108, 0.9f),
-            [BiomeType.UndergroundEvil] = new(18, 38, 55, 72, 88, 108, 0.9f),
+            [BiomeType.UndergroundCorruption] = new(20, 50, 70, 90, 115, 190, 1.25f),
+            [BiomeType.UndergroundCrimson] = new(20, 50, 70, 90, 115, 190, 1.25f),
+            [BiomeType.UndergroundEvil] = new(20, 50, 70, 90, 115, 190, 1.25f),
             
             // Underground Hallow (Hardmode only)
-            [BiomeType.UndergroundHallow] = new(40, 40, 58, 75, 92, 112, 1.0f, true),
+            [BiomeType.UndergroundHallow] = new(55, 55, 75, 95, 120, 200, 1.4f, true),
             
             // ========== DANGEROUS BIOMES ==========
             // Dungeon - Pre-Skeletron is death
-            [BiomeType.Dungeon] = new(30, 45, 62, 80, 98, 120, 1.1f),
+            [BiomeType.Dungeon] = new(35, 60, 80, 100, 125, 200, 1.5f),
             
             // Post-Plantera Dungeon (harder)
-            [BiomeType.DungeonPostPlantera] = new(70, 70, 70, 85, 105, 130, 1.2f, true),
+            [BiomeType.DungeonPostPlantera] = new(80, 80, 80, 110, 135, 220, 1.6f, true),
             
             // Hell/Underworld
-            [BiomeType.Hell] = new(25, 42, 58, 75, 92, 115, 1.0f),
+            [BiomeType.Hell] = new(30, 55, 75, 95, 120, 200, 1.4f),
             
             // Lihzahrd Temple (Post-Golem area)
-            [BiomeType.Temple] = new(55, 55, 55, 75, 100, 135, 1.3f),
+            [BiomeType.Temple] = new(70, 70, 70, 100, 130, 210, 1.7f),
             
             // ========== EVENT/INVASION BIOMES ==========
             // Blood Moon
-            [BiomeType.BloodMoon] = new(8, 25, 40, 55, 70, 90, 0.7f),
+            [BiomeType.BloodMoon] = new(10, 35, 55, 75, 100, 180, 1.1f),
             
             // Goblin Army
-            [BiomeType.GoblinInvasion] = new(12, 30, 45, 60, 75, 95, 0.8f),
+            [BiomeType.GoblinInvasion] = new(15, 40, 60, 80, 100, 170, 1.2f),
             
             // Pirate Invasion (Hardmode)
-            [BiomeType.PirateInvasion] = new(45, 45, 55, 70, 85, 105, 0.9f, true),
+            [BiomeType.PirateInvasion] = new(55, 55, 75, 95, 120, 190, 1.3f, true),
             
             // Solar Eclipse (Hardmode)
-            [BiomeType.SolarEclipse] = new(50, 50, 60, 78, 95, 118, 1.0f, true),
+            [BiomeType.SolarEclipse] = new(60, 60, 80, 100, 130, 210, 1.4f, true),
             
             // Pumpkin Moon
-            [BiomeType.PumpkinMoon] = new(65, 65, 65, 80, 100, 125, 1.1f, true),
+            [BiomeType.PumpkinMoon] = new(70, 70, 70, 100, 125, 200, 1.5f, true),
             
             // Frost Moon
-            [BiomeType.FrostMoon] = new(70, 70, 70, 85, 105, 130, 1.15f, true),
+            [BiomeType.FrostMoon] = new(75, 75, 75, 105, 130, 210, 1.6f, true),
             
             // Martian Madness
-            [BiomeType.MartianInvasion] = new(72, 72, 72, 88, 108, 135, 1.2f, true),
+            [BiomeType.MartianInvasion] = new(80, 80, 80, 110, 135, 220, 1.6f, true),
             
             // Lunar Events (Post-Cultist)
-            [BiomeType.LunarEvent] = new(90, 90, 90, 95, 115, 145, 1.3f, true),
+            [BiomeType.LunarEvent] = new(100, 100, 100, 120, 150, 250, 2.0f, true),
             
             // Old One's Army
-            [BiomeType.OldOnesArmy] = new(20, 35, 50, 70, 90, 115, 0.9f),
+            [BiomeType.OldOnesArmy] = new(20, 45, 65, 85, 110, 180, 1.3f),
         };
         
         // Default fallback
-        private static readonly BiomeLevelData DefaultBiomeData = new(5, 20, 35, 50, 65, 80, 0.6f);
+        private static readonly BiomeLevelData DefaultBiomeData = new(5, 30, 50, 70, 90, 150, 0.8f);
 
         private static readonly Dictionary<int, BiomeLevelData> ModBiomeData = new();
         private static readonly BiomeLevelData ModBiomeLowData = DefaultBiomeData;
@@ -546,6 +546,39 @@ namespace Rpg.Common.Systems
                 _ => ModBiomeLowData
             };
         }
+
+        private static (int min, int max) GetBiomeLevelRangeForData(BiomeLevelData data, NPC npc = null)
+        {
+            if (data.IsHardmodeOnly && !Main.hardMode)
+                return (1, 1);
+
+            int baseMin = (int)MathF.Round(data.BaseLevel * RpgConstants.BIOME_BASE_LEVEL_MULT);
+            int cap = (int)MathF.Round(data.GetCurrentCap() * RpgConstants.BIOME_CAP_MULT);
+
+            baseMin = Math.Max(1, baseMin);
+            cap = Math.Max(baseMin, cap);
+
+            int worldLevel = RpgWorld.GetEffectiveWorldLevel();
+            float growthRate = data.GrowthRate * RpgConstants.BIOME_GROWTH_MULT;
+            int worldBonus = (int)MathF.Round((worldLevel - 1) * growthRate);
+
+            int min = Math.Min(cap, baseMin + worldBonus);
+            int rangeWidth = Math.Max(1, (int)MathF.Round((cap - baseMin) * RpgConstants.BIOME_RANGE_WIDTH_MULT));
+            int max = Math.Min(cap, min + rangeWidth);
+
+            if (npc != null && Main.hardMode && !IsHardmodeMonster(npc))
+            {
+                int prehardMax = (int)MathF.Round(data.PreHardmodeCap * RpgConstants.BIOME_CAP_MULT);
+                max = Math.Min(max, prehardMax);
+                if (min > max)
+                    min = max;
+            }
+
+            if (max < min)
+                max = min;
+
+            return (min, max);
+        }
         
         /// <summary>
         /// Calculate monster level with all factors
@@ -556,25 +589,19 @@ namespace Rpg.Common.Systems
             if (eventBiome != BiomeType.None)
             {
                 BiomeLevelData eventData = GetBiomeData(eventBiome);
-                int eventLevel = CalculateMonsterLevelForData(eventData);
-                int eventMinLevel = GetMonsterMinimumLevel(npc, eventData.BaseLevel);
-                return Math.Max(eventMinLevel, eventLevel);
+                return CalculateMonsterLevelForData(eventData, npc);
             }
 
             ModBiome modBiome = GetActiveModBiomeAt(npc);
             if (modBiome != null)
             {
                 BiomeLevelData modData = GetModBiomeData(modBiome);
-                int modLevel = CalculateMonsterLevelForData(modData);
-                int modMinLevel = GetMonsterMinimumLevel(npc, modData.BaseLevel);
-                return Math.Max(modMinLevel, modLevel);
+                return CalculateMonsterLevelForData(modData, npc);
             }
 
             BiomeType biome = GetBiomeAt(npc);
             BiomeLevelData data = GetBiomeData(biome);
-            int level = CalculateMonsterLevelForData(data);
-            int minLevel = GetMonsterMinimumLevel(npc, data.BaseLevel);
-            return Math.Max(minLevel, level);
+            return CalculateMonsterLevelForData(data, npc);
         }
         
         /// <summary>
@@ -590,33 +617,14 @@ namespace Rpg.Common.Systems
             return CalculateMonsterLevelForData(GetModBiomeData(biome));
         }
 
-        private static int CalculateMonsterLevelForData(BiomeLevelData data)
+        private static int CalculateMonsterLevelForData(BiomeLevelData data, NPC npc = null)
         {
             // Hardmode-only biomes don't exist in pre-hardmode
             if (data.IsHardmodeOnly && !Main.hardMode)
                 return 1;
-            
-            // Base level for this biome (바이옴 기본 레벨)
-            int baseLevel = data.BaseLevel;
-            
-            // Apply random variation to base level (바이옴 레벨 ±2 랜덤)
-            int randomOffset = Main.rand.Next(-RpgConstants.MONSTER_LEVEL_RANDOM_RANGE, 
-                                              RpgConstants.MONSTER_LEVEL_RANDOM_RANGE + 1);
-            int randomizedBase = Math.Max(1, baseLevel + randomOffset);
-            
-            // World level contribution (scaled by biome's growth rate)
-            int worldLevel = RpgWorld.GetWorldLevel();
-            int worldLevelBonus = (int)((worldLevel - 1) * data.GrowthRate);
-            
-            // Total before cap
-            int totalLevel = randomizedBase + worldLevelBonus;
-            
-            // Apply current progression cap (레벨 캡 제한)
-            int currentCap = data.GetCurrentCap();
-            totalLevel = Math.Min(totalLevel, currentCap);
-            
-            // Ensure minimum of base level (최소 레벨 보장)
-            return Math.Max(Math.Max(1, baseLevel - RpgConstants.MONSTER_LEVEL_RANDOM_RANGE), totalLevel);
+
+            var (minLevel, maxLevel) = GetBiomeLevelRangeForData(data, npc);
+            return Main.rand.Next(minLevel, maxLevel + 1);
         }
 
         private static int GetMonsterMinimumLevel(NPC npc, int baseLevel)
@@ -657,10 +665,7 @@ namespace Rpg.Common.Systems
         /// </summary>
         public static (int min, int max) GetBiomeLevelRange(BiomeType biome)
         {
-            BiomeLevelData data = GetBiomeData(biome);
-            int min = data.BaseLevel;
-            int max = data.GetCurrentCap();
-            return (min, max);
+            return GetBiomeLevelRangeForData(GetBiomeData(biome));
         }
         
         /// <summary>
@@ -676,7 +681,7 @@ namespace Rpg.Common.Systems
         /// </summary>
         public static int GetBiomeLevelCap(BiomeType biome)
         {
-            return GetBiomeData(biome).GetCurrentCap();
+            return GetBiomeLevelRange(biome).max;
         }
         
         /// <summary>
@@ -698,52 +703,43 @@ namespace Rpg.Common.Systems
         public static float GetLevelDifferenceXPMultiplier(int playerLevel, int monsterLevel)
         {
             int levelDiff = monsterLevel - playerLevel;
-            
-            // === 높은 레벨 몬스터 (High Level Monsters) ===
-            // 너무 높으면 위험하지만 경험치도 적음 (폭업 방지)
-            if (levelDiff >= 10)
-                return RpgConstants.LEVEL_DIFF_PLUS_10_MULT;  // 10% XP - 너무 높은 몬스터
-            if (levelDiff >= 7)
-                return RpgConstants.LEVEL_DIFF_PLUS_7_MULT;   // 30% XP - 매우 높은 몬스터
-            if (levelDiff >= 5)
-                return RpgConstants.LEVEL_DIFF_PLUS_5_MULT;   // 60% XP - 높은 몬스터
-            
-            // === 스위트 스팟 (Sweet Spot) ===
-            // +1~+3 레벨: 최적 난이도, 보너스 경험치 (110~120%)
-            if (levelDiff >= RpgConstants.LEVEL_DIFF_SWEETSPOT_START && 
-                levelDiff <= RpgConstants.LEVEL_DIFF_SWEETSPOT_END)
+            float globalBoost = 1.35f; // overall XP uplift
+
+            // High above player: heavy penalties but not zeroed
+            if (levelDiff >= 15) return 0.15f * globalBoost; // 20% after boost
+            if (levelDiff >= 10) return 0.35f * globalBoost; // ~47% after boost
+            if (levelDiff >= 7)  return 0.5f  * globalBoost; // 67%
+            if (levelDiff >= 5)  return 0.7f  * globalBoost; // 95%
+
+            // Sweet spot +1~+4: escalating bonus
+            if (levelDiff >= RpgConstants.LEVEL_DIFF_SWEETSPOT_START && levelDiff <= 4)
             {
-                // 레벨 차이에 비례한 보너스 (1.10 → 1.15 → 1.20)
-                float bonusStep = (RpgConstants.LEVEL_DIFF_SWEETSPOT_BONUS - 1.0f) / 
-                                  (RpgConstants.LEVEL_DIFF_SWEETSPOT_END - RpgConstants.LEVEL_DIFF_SWEETSPOT_START);
-                return 1.10f + (levelDiff - RpgConstants.LEVEL_DIFF_SWEETSPOT_START) * bonusStep;
+                // 1.15 → 1.35 range before global boost
+                float bonus = 1.15f + (levelDiff - RpgConstants.LEVEL_DIFF_SWEETSPOT_START) * 0.05f;
+                return bonus * globalBoost;
             }
-            
-            // === 동등/약간 낮은 레벨 (Equal/Slightly Lower) ===
-            // -2~+1: 표준 경험치 (100~110%)
+
+            // Even to slightly below (-2 to 0): near full XP
             if (levelDiff >= -2)
-                return 1.0f + (levelDiff * 0.025f); // -2레벨: 95%, 0레벨: 100%, +1레벨: 102.5%
-            
-            // === 낮은 레벨 몬스터 (Low Level Monsters) ===
-            // 레벨이 많이 낮으면 경험치 감소 (하위 사냥 방지)
+                return (0.95f + (levelDiff * 0.02f)) * globalBoost;
+
+            // Lower mobs: taper but keep some gain
             if (levelDiff >= -5)
             {
-                // -3 ~ -5: 선형 감소 (90% → 70%)
-                float ratio = (levelDiff + 5) / 3f; // -5일 때 0, -3일 때 0.667, -2일 때 1
-                return RpgConstants.LEVEL_DIFF_MINUS_5_MULT + 
-                       (RpgConstants.LEVEL_DIFF_MINUS_2_MULT - RpgConstants.LEVEL_DIFF_MINUS_5_MULT) * ratio;
+                float ratio = (levelDiff + 5) / 3f; // -5 -> 0, -2 -> 1
+                float scaled = 0.55f + (0.9f - 0.55f) * ratio; // 55% → 90%
+                return scaled * globalBoost;
             }
-            
+
             if (levelDiff >= -8)
             {
-                // -6 ~ -8: 선형 감소 (70% → 40%)
-                float ratio = (levelDiff + 8) / 3f;
-                return RpgConstants.LEVEL_DIFF_MINUS_8_MULT + 
-                       (RpgConstants.LEVEL_DIFF_MINUS_5_MULT - RpgConstants.LEVEL_DIFF_MINUS_8_MULT) * ratio;
+                float ratio = (levelDiff + 8) / 3f; // -8 ->0, -5 ->1
+                float scaled = 0.25f + (0.55f - 0.25f) * ratio; // 25% → 55%
+                return scaled * globalBoost;
             }
-            
-            // -9 이하: 극단적으로 낮음, 최소 경험치 (10%)
-            return RpgConstants.LEVEL_DIFF_MINUS_10_MULT;
+
+            // Very low mobs
+            return 0.2f * globalBoost;
         }
         
         /// <summary>
@@ -761,6 +757,30 @@ namespace Rpg.Common.Systems
             
             // Can gain (reduced) XP from lower level monsters
             return true;
+        }
+        
+        /// <summary>
+        /// Get minimum XP for a monster level to prevent 0 XP issues
+        /// </summary>
+        public static long GetMinimumXP(int monsterLevel)
+        {
+            // Minimum 5 XP, plus 2 per level
+            return 5 + (monsterLevel * 2);
+        }
+        
+        /// <summary>
+        /// Get formatted level string for UI (e.g. "[Lv.10] Zombie")
+        /// </summary>
+        public static string GetMonsterLevelUIString(NPC npc)
+        {
+            int level = CalculateMonsterLevel(npc);
+            string name = npc.FullName;
+            
+            // 보스는 별도 표시
+            if (npc.boss)
+                return $"[BOSS Lv.{level}] {name}";
+                
+            return $"[Lv.{level}] {name}";
         }
         
         #endregion

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Rpg.Common.Config;
 using Rpg.Common.Systems;
 
@@ -26,6 +27,8 @@ namespace Rpg.Common.Compatibility
         /// Key: NPC type ID, Value: (World Level Increase, Level Cap Increase)
         /// </summary>
         private static readonly Dictionary<int, (int worldLevel, int levelCap)> modBossData = new();
+        private static readonly HashSet<int> defeatedModBosses = new();
+        private static int totalModLevelCapBonus = 0;
         
         public override void Load()
         {
@@ -50,6 +53,39 @@ namespace Rpg.Common.Compatibility
             modBossData.Clear();
             calamityMod = null;
             thoriumMod = null;
+            defeatedModBosses.Clear();
+            totalModLevelCapBonus = 0;
+        }
+
+        public override void OnWorldLoad()
+        {
+            defeatedModBosses.Clear();
+            totalModLevelCapBonus = 0;
+        }
+
+        public override void OnWorldUnload()
+        {
+            defeatedModBosses.Clear();
+            totalModLevelCapBonus = 0;
+        }
+
+        public override void SaveWorldData(Terraria.ModLoader.IO.TagCompound tag)
+        {
+            tag["DefeatedModBosses"] = new List<int>(defeatedModBosses);
+        }
+
+        public override void LoadWorldData(Terraria.ModLoader.IO.TagCompound tag)
+        {
+            defeatedModBosses.Clear();
+            totalModLevelCapBonus = 0;
+
+            if (tag.ContainsKey("DefeatedModBosses"))
+            {
+                foreach (int bossId in tag.GetList<int>("DefeatedModBosses"))
+                {
+                    RegisterModBossKill(bossId, silent: true);
+                }
+            }
         }
         
         private void LogModCompatibility()
@@ -155,6 +191,31 @@ namespace Rpg.Common.Compatibility
             if (modBossData.TryGetValue(npcType, out var data))
                 return data;
             return null;
+        }
+
+        public static int GetTotalModLevelCapBonus()
+        {
+            return totalModLevelCapBonus;
+        }
+
+        public static bool RegisterModBossKill(int npcType, bool silent = false)
+        {
+            if (!modBossData.TryGetValue(npcType, out var data))
+                return false;
+
+            if (!defeatedModBosses.Add(npcType))
+                return false;
+
+            if (data.levelCap > 0)
+                totalModLevelCapBonus += data.levelCap;
+
+            if (!silent)
+            {
+                var logger = ModContent.GetInstance<Rpg>().Logger;
+                logger?.Info($"Registered mod boss kill ({npcType}), level cap +{data.levelCap}");
+            }
+
+            return true;
         }
         
         /// <summary>

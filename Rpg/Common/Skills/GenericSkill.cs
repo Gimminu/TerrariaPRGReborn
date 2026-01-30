@@ -36,7 +36,7 @@ namespace Rpg.Common.Skills
             if (CurrentRank <= 0)
                 return;
 
-            float scale = 1f + (CurrentRank - 1) * 0.2f;
+            float scale = 1f + (CurrentRank - 1) * 0.25f;
 
             if (definition.PassiveDamageBonus > 0f)
                 player.GetDamage(DamageClass.Generic) += definition.PassiveDamageBonus * scale;
@@ -71,11 +71,14 @@ namespace Rpg.Common.Skills
 
             if (definition.PassiveMaxManaBonus > 0)
                 player.statManaMax2 += (int)System.Math.Round(definition.PassiveMaxManaBonus * scale);
+
+            if (definition.PassiveLuckBonus > 0f)
+                player.luck += definition.PassiveLuckBonus * scale;
         }
 
         protected override void OnActivate(Player player)
         {
-            float scale = 1f + (CurrentRank - 1) * 0.2f;
+            float scale = 1f + (CurrentRank - 1) * 0.25f;
 
             if (definition.BuffIds != null && definition.BuffIds.Length > 0)
             {

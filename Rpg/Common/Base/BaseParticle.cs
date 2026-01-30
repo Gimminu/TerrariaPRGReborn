@@ -169,11 +169,27 @@ namespace Rpg.Common.Base
         /// </summary>
         public static BaseParticle CreateSparkle(Vector2 position, Vector2 velocity, Color color)
         {
-            // Example factory method
-            // return new SparkleParticle().Initialize(position, velocity, color, 1f, 60);
-            return null; // Placeholder
+            var particle = new SparkleParticle();
+            particle.Initialize(position, velocity, color, 0.9f, 45);
+            return particle;
         }
 
         #endregion
+    }
+
+    internal class SparkleParticle : BaseParticle
+    {
+        public override string TexturePath => "Terraria/Images/UI/Star";
+
+        public override ParticleType ParticleType => ParticleType.Sparkle;
+
+        protected override void UpdateVisuals()
+        {
+            // Gentle fade and slight rotation for a soft sparkle
+            float lifeRatio = (float)TimeLeft / MaxTime;
+            Color *= 0.94f;
+            Rotation += 0.12f;
+            Scale *= lifeRatio > 0.5f ? 1.01f : 0.98f;
+        }
     }
 }

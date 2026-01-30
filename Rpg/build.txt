@@ -1,7 +1,7 @@
 displayName = Terraria RPG Reborn
-author = Your Name
-version = 0.1.0
-homepage = https://github.com/yourname/TerrariaPRGReborn
+author = Gimminwoo 
+version = 0.1.8
+homepage = https://github.com/Gimminu/TerrariaPRGReborn
 hideCode = false
 hideResources = false
 includeSource = true

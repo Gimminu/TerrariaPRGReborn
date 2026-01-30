@@ -6,6 +6,7 @@ using Rpg.Common;
 using Rpg.Common.Players;
 using Rpg.Common.UI;
 using Rpg.Common.Jobs;
+using Rpg.Common.Config;
 
 namespace Rpg.Content.Items
 {
@@ -58,6 +59,13 @@ namespace Rpg.Content.Items
         
         public override bool CanUseItem(Player player)
         {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null && !serverConfig.EnableJobSystem)
+            {
+                Main.NewText("Job system is disabled on this server.", Color.Red);
+                return false;
+            }
+            
             var rpgPlayer = player.GetModPlayer<RpgPlayer>();
             
             // Check if player is at correct tier

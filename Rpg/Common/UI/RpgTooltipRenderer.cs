@@ -37,13 +37,22 @@ namespace Rpg.Common.UI
             var font = FontAssets.MouseText.Value;
             var smallFont = FontAssets.MouseText.Value;
             
-            // Calculate tooltip size
-            int width = 280;
-            int lineCount = 5; // Name, desc, rank, cooldown, requirements
-            if (skillType == SkillType.Passive) lineCount--;
-            if (description.Length > 40) lineCount++;
+            // Dynamic sizing
+            float nameWidth = font.MeasureString(name).X;
+            int baseWidth = 320;
+            int maxWidth = 440;
+            int width = (int)MathHelper.Clamp(nameWidth + PADDING * 2, baseWidth, maxWidth);
             
-            int height = PADDING * 2 + HEADER_HEIGHT + LINE_HEIGHT * lineCount;
+            // Pre-wrap description to know height
+            string[] descLines = WrapText(description, width - PADDING * 2, smallFont, 0.88f);
+
+            int height = PADDING * 2 // top/bottom padding
+                        + HEADER_HEIGHT
+                        + LINE_HEIGHT // type badges
+                        + (descLines.Length * (LINE_HEIGHT - 4)) + 8
+                        + LINE_HEIGHT // rank
+                        + (skillType != SkillType.Passive ? LINE_HEIGHT : 0) // cooldown/cost
+                        + LINE_HEIGHT; // requirements
             
             // Clamp to screen bounds
             if (position.X + width > Main.screenWidth)
@@ -59,7 +68,7 @@ namespace Rpg.Common.UI
                 height
             );
             
-            DrawTooltipBackground(spriteBatch, bgRect);
+            DrawTooltipBackground(spriteBatch, bgRect, GetSkillTypeColor(skillType));
             
             // Draw content
             float y = position.Y + PADDING;
@@ -72,39 +81,41 @@ namespace Rpg.Common.UI
                 x, y, nameColor, Color.Black,
                 Vector2.Zero, 1.0f
             );
-            y += HEADER_HEIGHT;
+            y += HEADER_HEIGHT - 2;
             
-            // Type indicator
-            string typeStr = skillType == SkillType.Passive ? "[Passive]" : "[Active]";
-            Utils.DrawBorderStringFourWay(
-                spriteBatch, smallFont, typeStr,
-                x, y, Color.Gray, Color.Black,
-                Vector2.Zero, 0.85f
-            );
+            // Type + skill tag badges
+            string typeStr = skillType == SkillType.Passive ? "Passive" : "Active";
+            DrawBadge(spriteBatch, typeStr, new Color(70, 100, 140), x, y, 0.85f);
+            
+            if (resourceCost > 0 && skillType != SkillType.Passive)
+            {
+                string costBadge = $"{resourceCost} {GetResourceName(resourceType)}";
+                float badgeX = x + 80;
+                DrawBadge(spriteBatch, costBadge, GetResourceColor(resourceType) * 0.8f, badgeX, y, 0.85f);
+            }
             y += LINE_HEIGHT;
             
             // Description
-            string[] descLines = WrapText(description, width - PADDING * 2, smallFont);
             foreach (string line in descLines)
             {
                 Utils.DrawBorderStringFourWay(
                     spriteBatch, smallFont, line,
                     x, y, Color.White, Color.Black,
-                    Vector2.Zero, 0.85f
+                    Vector2.Zero, 0.88f
                 );
                 y += LINE_HEIGHT - 4;
             }
             y += 4;
             
             // Rank
-            string rankStr = $"Rank: {currentRank}/{maxRank}";
+            string rankStr = $"Rank {currentRank}/{maxRank}";
             Color rankColor = currentRank >= maxRank ? Color.Gold : Color.LightGreen;
             Utils.DrawBorderStringFourWay(
                 spriteBatch, smallFont, rankStr,
                 x, y, rankColor, Color.Black,
-                Vector2.Zero, 0.85f
+                Vector2.Zero, 0.9f
             );
-            y += LINE_HEIGHT;
+            y += LINE_HEIGHT - 2;
             
             // Cooldown & Cost (only for active skills)
             if (skillType != SkillType.Passive)
@@ -113,7 +124,7 @@ namespace Rpg.Common.UI
                 Utils.DrawBorderStringFourWay(
                     spriteBatch, smallFont, cdStr,
                     x, y, Color.Cyan, Color.Black,
-                    Vector2.Zero, 0.85f
+                    Vector2.Zero, 0.9f
                 );
                 
                 // Resource cost on same line, right side
@@ -121,22 +132,22 @@ namespace Rpg.Common.UI
                 {
                     string costStr = $"{resourceCost} {GetResourceName(resourceType)}";
                     Color costColor = GetResourceColor(resourceType);
-                    float costX = position.X + width - PADDING - smallFont.MeasureString(costStr).X * 0.85f;
+                    float costX = position.X + width - PADDING - smallFont.MeasureString(costStr).X * 0.9f;
                     Utils.DrawBorderStringFourWay(
                         spriteBatch, smallFont, costStr,
                         costX, y, costColor, Color.Black,
-                        Vector2.Zero, 0.85f
+                        Vector2.Zero, 0.9f
                     );
                 }
-                y += LINE_HEIGHT;
+                y += LINE_HEIGHT - 2;
             }
             
             // Requirements
-            string reqStr = $"Requires: Lv.{requiredLevel} {requiredJob}";
+            string reqStr = $"Requires Lv.{requiredLevel} · {requiredJob}";
             Utils.DrawBorderStringFourWay(
                 spriteBatch, smallFont, reqStr,
                 x, y, Color.Orange, Color.Black,
-                Vector2.Zero, 0.85f
+                Vector2.Zero, 0.88f
             );
         }
         
@@ -169,7 +180,7 @@ namespace Rpg.Common.UI
                 height
             );
             
-            DrawTooltipBackground(spriteBatch, bgRect);
+            DrawTooltipBackground(spriteBatch, bgRect, new Color(80, 150, 255));
             
             float y = position.Y + PADDING;
             float x = position.X + PADDING;
@@ -232,7 +243,7 @@ namespace Rpg.Common.UI
                 height
             );
             
-            DrawTooltipBackground(spriteBatch, bgRect);
+            DrawTooltipBackground(spriteBatch, bgRect, Color.Gray);
             
             Utils.DrawBorderStringFourWay(
                 spriteBatch, font, text,
@@ -244,29 +255,18 @@ namespace Rpg.Common.UI
         
         #region Helper Methods
         
-        private static void DrawTooltipBackground(SpriteBatch spriteBatch, Rectangle rect)
+        private static void DrawTooltipBackground(SpriteBatch spriteBatch, Rectangle rect, Color accent)
         {
-            // Main background
-            spriteBatch.Draw(
-                TextureAssets.MagicPixel.Value,
-                rect,
-                new Color(20, 25, 45) * 0.95f
-            );
-            
+            Texture2D pixel = TextureAssets.MagicPixel.Value;
+
+            // Main background with subtle gradient (top accent)
+            spriteBatch.Draw(pixel, rect, new Color(16, 18, 28) * 0.96f);
+
+            Rectangle accentBar = new Rectangle(rect.X, rect.Y, rect.Width, 4);
+            spriteBatch.Draw(pixel, accentBar, accent * 0.8f);
+
             // Border
-            DrawBorder(spriteBatch, rect, new Color(60, 80, 120) * 0.9f);
-            
-            // Inner highlight (top-left)
-            spriteBatch.Draw(
-                TextureAssets.MagicPixel.Value,
-                new Rectangle(rect.X + 1, rect.Y + 1, rect.Width - 2, 1),
-                new Color(100, 120, 160) * 0.3f
-            );
-            spriteBatch.Draw(
-                TextureAssets.MagicPixel.Value,
-                new Rectangle(rect.X + 1, rect.Y + 1, 1, rect.Height - 2),
-                new Color(100, 120, 160) * 0.3f
-            );
+            DrawBorder(spriteBatch, rect, new Color(70, 90, 130) * 0.9f);
         }
         
         private static void DrawBorder(SpriteBatch spriteBatch, Rectangle rect, Color color)
@@ -283,6 +283,16 @@ namespace Rpg.Common.UI
             // Right
             spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(rect.X + rect.Width - 1, rect.Y, 1, rect.Height), color);
+        }
+
+        private static void DrawBadge(SpriteBatch spriteBatch, string text, Color color, float x, float y, float scale)
+        {
+            var font = FontAssets.MouseText.Value;
+            Vector2 size = font.MeasureString(text) * scale;
+            Rectangle bg = new Rectangle((int)x - 4, (int)y - 2, (int)size.X + 8, (int)size.Y + 4);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, bg, color * 0.8f);
+            DrawBorder(spriteBatch, bg, color * 1.1f);
+            Utils.DrawBorderStringFourWay(spriteBatch, font, text, x, y, Color.White, Color.Black, Vector2.Zero, scale);
         }
         
         private static Color GetSkillTypeColor(SkillType type)
@@ -324,12 +334,11 @@ namespace Rpg.Common.UI
             };
         }
         
-        private static string[] WrapText(string text, float maxWidth, ReLogic.Graphics.DynamicSpriteFont font)
+        private static string[] WrapText(string text, float maxWidth, ReLogic.Graphics.DynamicSpriteFont font, float scale = 0.85f)
         {
             if (string.IsNullOrEmpty(text))
                 return new[] { "" };
             
-            float scale = 0.85f;
             var words = text.Split(' ');
             var lines = new System.Collections.Generic.List<string>();
             string currentLine = "";

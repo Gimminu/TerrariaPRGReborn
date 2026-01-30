@@ -62,7 +62,7 @@ namespace Rpg.Common
         Gunmaster,      // Gunslinger ultimate
         Archbishop,     // Cleric ultimate
         Overlord,       // Beastmaster ultimate
-        Lichking        // Necromancer ultimate
+        LichKing        // Necromancer ultimate
     }
 
     /// <summary>

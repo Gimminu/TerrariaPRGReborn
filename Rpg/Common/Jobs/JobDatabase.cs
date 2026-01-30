@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Terraria;
 using Rpg.Common;
 using Rpg.Common.Players;
+using Rpg.Common.Skills;
 
 namespace Rpg.Common.Jobs
 {
@@ -52,14 +53,8 @@ namespace Rpg.Common.Jobs
                         RequiredBossKills = new List<int>() // No requirements
                     },
                     StatBonuses = new Dictionary<StatType, int>(), // No bonuses
-                    SkillUnlocks = new List<string>
-                    {
-                        "BasicStrike",
-                        "SecondWind",
-                        "Resourceful",
-                        "Perseverance"
-                    }
-                },
+                    SkillUnlocks = GetSkillUnlocks(JobType.Novice)
+                  },
                 
                 // === FIRST CLASS ===
                 
@@ -76,12 +71,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Vitality, 10 },
                         { StatType.Defense, 3 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "PowerStrike",      // Active: Heavy melee attack
-                        "Fortify",          // Active: Temporary defense boost
-                        "BattleRage"        // Passive: Gain rage on hit
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Warrior)
                 },
                 
                 JobType.Ranger => new JobData
@@ -97,12 +87,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Agility, 5 },
                         { StatType.Rogue, 3 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "RapidFire",        // Active: Fast attack burst
-                        "EvasiveRoll",      // Active: Quick dodge
-                        "SteadyAim"         // Passive: Bonus accuracy
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Ranger)
                 },
                 
                 JobType.Mage => new JobData
@@ -117,12 +102,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Intelligence, 15 },
                         { StatType.Wisdom, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "Fireball",         // Active: Fire spell
-                        "ManaShield",       // Active: Absorb damage with mana
-                        "ArcaneIntellect"   // Passive: Bonus mana regen
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Mage)
                 },
                 
                 JobType.Summoner => new JobData
@@ -137,12 +117,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Focus, 15 },
                         { StatType.Wisdom, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "SummonAlly",       // Active: Summon helper
-                        "CommandMinions",   // Active: Boost minion damage
-                        "SummonMastery"     // Passive: +1 minion slot
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Summoner)
                 },
                 
                 // === SECOND CLASS: WARRIOR ===
@@ -161,12 +136,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Defense, 10 },
                         { StatType.Fortitude, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "ShieldWall",       // Active: Block all damage briefly
-                        "Taunt",            // Active: Force enemies to target you
-                        "IronSkin"          // Passive: +20% defense
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Knight)
                 },
                 
                 JobType.Berserker => new JobData
@@ -182,12 +152,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Vitality, 10 },
                         { StatType.Agility, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "Berserk",          // Active: Huge damage, take more damage
-                        "Bloodlust",        // Active: Heal on kill
-                        "LowHPPower"        // Passive: +50% damage below 30% HP
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Berserker)
                 },
                 
                 JobType.Paladin => new JobData
@@ -204,12 +169,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Wisdom, 8 },
                         { StatType.Fortitude, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "LayOnHands",       // Active: Instant heal
-                        "DivineBless",      // Active: Party buff
-                        "HolyAura"          // Passive: Regen nearby allies
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Paladin)
                 },
                 
                 JobType.DeathKnight => new JobData
@@ -225,12 +185,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Intelligence, 8 },
                         { StatType.Vitality, 12 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "DeathCoil",        // Active: Damage + heal
-                        "UnholyAura",       // Active: Lifesteal buff
-                        "Lichdom"           // Passive: Convert 10% max HP to mana
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.DeathKnight)
                 },
                 
                 // === SECOND CLASS: RANGER ===
@@ -247,12 +202,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Dexterity, 20 },
                         { StatType.Rogue, 10 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "Headshot",         // Active: Guaranteed crit
-                        "SteadyBreath",     // Active: +100% crit for next shot
-                        "Sharpshooter"      // Passive: +20% crit damage
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Sniper)
                 },
                 
                 JobType.Assassin => new JobData
@@ -268,12 +218,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Dexterity, 10 },
                         { StatType.Agility, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "Backstab",         // Active: Huge damage from behind
-                        "Vanish",           // Active: Stealth mode
-                        "PoisonMastery"     // Passive: Attacks apply poison
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Assassin)
                 },
                 
                 JobType.Gunslinger => new JobData
@@ -289,12 +234,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Rogue, 8 },
                         { StatType.Luck, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "FanTheHammer",     // Active: 6 instant shots
-                        "ExplosiveRound",   // Active: AoE shot
-                        "QuickDraw"         // Passive: +30% attack speed with guns
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Gunslinger)
                 },
                 
                 // === SECOND CLASS: MAGE ===
@@ -311,12 +251,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Intelligence, 30 },
                         { StatType.Wisdom, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "ElementalBurst",   // Active: Elemental AoE
-                        "ElementalBarrier", // Active: Defensive ward
-                        "ElementalMastery"  // Passive: Elemental damage boost
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Sorcerer)
                 },
                 
                 JobType.Cleric => new JobData
@@ -333,12 +268,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Vitality, 10 },
                         { StatType.Fortitude, 6 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "HealingPrayer",    // Active: Heal self/ally
-                        "Sanctuary",        // Active: Protective aura
-                        "DivineGrace"       // Passive: Bonus healing power
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Cleric)
                 },
                 
                 JobType.Archmage => new JobData
@@ -353,12 +283,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Intelligence, 30 },
                         { StatType.Wisdom, 10 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "Meteor",           // Active: Massive AoE damage
-                        "TimeWarp",         // Active: Slow enemies
-                        "ArcaneMastery"     // Passive: -20% mana cost
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Archmage)
                 },
                 
                 JobType.Warlock => new JobData
@@ -374,12 +299,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Wisdom, 12 },
                         { StatType.Vitality, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "Corruption",       // Active: DoT curse
-                        "DrainLife",        // Active: Damage + heal
-                        "CurseExpert"       // Passive: Curses last 50% longer
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Warlock)
                 },
                 
                 JobType.Spellblade => new JobData
@@ -394,12 +314,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Intelligence, 20 },
                         { StatType.Strength, 10 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "EnchantWeapon",    // Active: +50% magic damage on melee
-                        "ArcaneSlash",      // Active: Melee + magic projectile
-                        "SpellStrike"       // Passive: Melee hits restore mana
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Spellblade)
                 },
                 
                 JobType.BattleMage => new JobData
@@ -415,12 +330,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Vitality, 10 },
                         { StatType.Defense, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "MagicArmor",       // Active: Temporary defense
-                        "CounterSpell",     // Active: Reflect projectiles
-                        "BattleCaster"      // Passive: Cast while moving
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.BattleMage)
                 },
                 
                 // === SECOND CLASS: SUMMONER ===
@@ -440,12 +350,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Agility, 8 },
                         { StatType.Luck, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "BeastCall",        // Active: Summon beast ally
-                        "PackTactics",      // Active: Boost pet damage
-                        "WildBond"          // Passive: Pets gain bonuses
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Beastmaster)
                 },
                 
                 JobType.Necromancer => new JobData
@@ -462,12 +367,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Intelligence, 10 },
                         { StatType.Fortitude, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "RaiseUndead",      // Active: Summon skeleton
-                        "BoneArmor",        // Active: Defense from minions
-                        "UndeadMastery"     // Passive: +2 minion slots
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Necromancer)
                 },
                 
                 JobType.Druid => new JobData
@@ -484,12 +384,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Vitality, 10 },
                         { StatType.Intelligence, 5 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "SummonBeast",      // Active: Summon animal
-                        "NaturesWrath",     // Active: Vine AoE
-                        "Shapeshifter"      // Passive: Transform bonuses
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Druid)
                 },
                 
                 // === HYBRID ===
@@ -508,12 +403,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Rogue, 12 },
                         { StatType.Agility, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "ShadowStep",      // Active: Short blink
-                        "Ambush",          // Active: Bonus damage from stealth
-                        "SilentBlades"     // Passive: Increased crit from behind
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Shadow)
                 },
                 
                 JobType.Spellthief => new JobData
@@ -529,12 +419,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Rogue, 10 },
                         { StatType.Agility, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "StealBuff",        // Active: Steal enemy buff
-                        "ArcaneTheft",      // Active: Mana drain
-                        "MagicRogue"        // Passive: Magic damage can crit
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Spellthief)
                 },
 
                 // === THIRD CLASS ===
@@ -558,12 +443,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Defense, 20 },
                         { StatType.Fortitude, 12 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "AegisWall",        // Active: Massive damage reduction
-                        "GuardianSpirit",   // Active: Save allies from lethal damage
-                        "Unbreakable"       // Passive: Greatly increased defense
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Guardian)
                 },
 
                 JobType.BloodKnight => new JobData
@@ -585,12 +465,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Rogue, 10 },
                         { StatType.Fortitude, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "BloodRite",        // Active: Sacrifice HP for power
-                        "CrimsonFrenzy",    // Active: Rapid attack burst
-                        "SanguineArmor"     // Passive: Lifesteal scaling
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.BloodKnight)
                 },
 
                 JobType.Deadeye => new JobData
@@ -610,12 +485,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Dexterity, 30 },
                         { StatType.Rogue, 15 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "MarkedShot",       // Active: Mark target for bonus damage
-                        "DeadeyeFocus",     // Active: Boost crit chance
-                        "SniperInstinct"    // Passive: Increased crit damage
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Deadeye)
                 },
 
                 JobType.Gunmaster => new JobData
@@ -637,12 +507,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Agility, 12 },
                         { StatType.Luck, 8 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "BulletStorm",      // Active: Sustained gunfire
-                        "QuickReload",      // Active: Reset gun cooldowns
-                        "RicochetMastery"   // Passive: Shots can ricochet
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Gunmaster)
                 },
 
                 JobType.Archbishop => new JobData
@@ -664,12 +529,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Vitality, 15 },
                         { StatType.Fortitude, 12 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "MassHeal",         // Active: Heal all allies
-                        "SacredWard",       // Active: Barrier field
-                        "DivineBlessing"    // Passive: Increased healing
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Archbishop)
                 },
 
                 JobType.Overlord => new JobData
@@ -692,17 +552,12 @@ namespace Rpg.Common.Jobs
                         { StatType.Agility, 12 },
                         { StatType.Luck, 10 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "AlphaRoar",        // Active: Buff all summons
-                        "BeastStampede",    // Active: Charge attack
-                        "OverlordCommand"   // Passive: Summons gain bonuses
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.Overlord)
                 },
 
-                JobType.Lichking => new JobData
+                JobType.LichKing => new JobData
                 {
-                    Type = JobType.Lichking,
+                    Type = JobType.LichKing,
                     Tier = JobTier.Tier3,
                     DisplayName = "Lich King",
                     Description = "An undead sovereign who commands legions and drains souls.",
@@ -720,12 +575,7 @@ namespace Rpg.Common.Jobs
                         { StatType.Fortitude, 12 },
                         { StatType.Vitality, 12 }
                     },
-                    SkillUnlocks = new List<string>
-                    {
-                        "SoulHarvest",      // Active: Drain life to heal
-                        "UndeadLegion",     // Active: Summon multiple undead
-                        "Phylactery"        // Passive: Bonus survivability
-                    }
+                    SkillUnlocks = GetSkillUnlocks(JobType.LichKing)
                 },
                 
                 _ => GetDefaultJobData()
@@ -752,6 +602,11 @@ namespace Rpg.Common.Jobs
                 StatBonuses = new Dictionary<StatType, int>(),
                 SkillUnlocks = new List<string>()
             };
+        }
+
+        private static List<string> GetSkillUnlocks(JobType jobType)
+        {
+            return SkillDatabase.GetRegisteredSkillNamesForJob(jobType);
         }
         
         #endregion

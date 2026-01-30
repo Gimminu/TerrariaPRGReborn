@@ -40,7 +40,8 @@ namespace Rpg.Common.NPCs
             NPC.friendly = true;
             NPC.width = 18;
             NPC.height = 40;
-            NPC.aiStyle = NPCID.Sets.AttackType[NPCID.Guide];
+            NPC.aiStyle = NPCAIStyleID.Passive; // Town NPC walk/idle behavior
+            AIType = NPCID.Guide; // Use Guide movement/AI (prevents slime hopping)
             NPC.damage = 10;
             NPC.defense = 15;
             NPC.lifeMax = 250;

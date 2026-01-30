@@ -6,7 +6,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Rpg.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Lichking
+namespace Rpg.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Soul Harvest - Lich King's signature skill.
@@ -14,12 +14,12 @@ namespace Rpg.Common.Skills.Tier3.Lichking
     /// </summary>
     public class SoulHarvest : BaseSkill
     {
-        public override string InternalName => "LichkingSoulHarvest";
+        public override string InternalName => "LichKingSoulHarvest";
         public override string DisplayName => "Soul Harvest";
         public override string Description => "Drain souls from nearby enemies to heal yourself.";
 
         public override SkillType SkillType => SkillType.Active;
-        public override JobType RequiredJob => JobType.Lichking;
+        public override JobType RequiredJob => JobType.LichKing;
         public override int RequiredLevel => RpgConstants.THIRD_JOB_LEVEL;
         public override int SkillPointCost => 1;
         public override int MaxRank => 5;

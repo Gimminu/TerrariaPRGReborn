@@ -157,7 +157,7 @@ namespace Rpg.Common.Players
                 JobType.Gunmaster => RangerGrowth,
                 JobType.Archbishop => MergeGrowthCurves(MageGrowth, SummonerGrowth, 0.4f, 0.6f),
                 JobType.Overlord => MergeGrowthCurves(SummonerGrowth, RangerGrowth, 0.8f, 0.2f),
-                JobType.Lichking => MergeGrowthCurves(SummonerGrowth, MageGrowth, 0.7f, 0.3f),
+                JobType.LichKing => MergeGrowthCurves(SummonerGrowth, MageGrowth, 0.7f, 0.3f),
 
                 // Novice or unknown
                 _ => NoviceGrowth

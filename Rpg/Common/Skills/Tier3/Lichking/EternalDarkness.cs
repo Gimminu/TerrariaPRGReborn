@@ -1,7 +1,7 @@
 using Terraria;
 using Rpg.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Lichking
+namespace Rpg.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Eternal Darkness - 영원한 어둠.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier3.Lichking
         public override string Description => "Embrace eternal darkness, greatly increasing minion slots and mana.";
 
         public override SkillType SkillType => SkillType.Passive;
-        public override JobType RequiredJob => JobType.Lichking;
+        public override JobType RequiredJob => JobType.LichKing;
         public override int RequiredLevel => 135;
         public override int SkillPointCost => 1;
         public override int MaxRank => 10;

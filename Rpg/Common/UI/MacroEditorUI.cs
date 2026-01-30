@@ -107,6 +107,13 @@ namespace Rpg.Common.UI
         private bool _dragging;
         private Vector2 _dragOffset;
         private Vector2 _panelPosition;
+        private Vector2 MouseUi => GetScaledMouse();
+        private Point MouseUiPoint => MouseUi.ToPoint();
+        private Vector2 MouseScreen => Main.MouseScreen;
+        private Vector2 ScreenTopLeftUi => UiInput.ScreenTopLeftUi;
+        private Vector2 ScreenBottomRightUi => UiInput.ScreenBottomRightUi;
+        private float ScreenWidthUi => ScreenBottomRightUi.X - ScreenTopLeftUi.X;
+        private float ScreenHeightUi => ScreenBottomRightUi.Y - ScreenTopLeftUi.Y;
         
         private const float PANEL_WIDTH = 500f;
         private const float PANEL_HEIGHT = 420f;
@@ -130,9 +137,10 @@ namespace Rpg.Common.UI
             _mainPanel.BackgroundColor = new Color(73, 94, 171) * 0.9f;
             Append(_mainPanel);
 
+            Vector2 topLeft = ScreenTopLeftUi;
             _panelPosition = _lastPosition ?? new Vector2(
-                Main.screenWidth / 2f - PANEL_WIDTH / 2f,
-                Main.screenHeight / 2f - PANEL_HEIGHT / 2f
+                topLeft.X + ScreenWidthUi / 2f - PANEL_WIDTH / 2f,
+                topLeft.Y + ScreenHeightUi / 2f - PANEL_HEIGHT / 2f
             );
             SetPanelPosition(_panelPosition);
             
@@ -438,10 +446,10 @@ namespace Rpg.Common.UI
                     (int)HEADER_HEIGHT
                 );
 
-                if (!_dragging && Main.mouseLeft && header.Contains(Main.mouseX, Main.mouseY))
+                if (!_dragging && Main.mouseLeft && header.Contains(MouseUiPoint))
                 {
                     _dragging = true;
-                    _dragOffset = new Vector2(Main.mouseX - dims.X, Main.mouseY - dims.Y);
+                    _dragOffset = new Vector2(MouseUi.X - dims.X, MouseUi.Y - dims.Y);
                 }
                 else if (_dragging && !Main.mouseLeft)
                 {
@@ -451,12 +459,12 @@ namespace Rpg.Common.UI
 
                 if (_dragging)
                 {
-                    SetPanelPosition(new Vector2(Main.mouseX - _dragOffset.X, Main.mouseY - _dragOffset.Y));
+                    SetPanelPosition(new Vector2(MouseUi.X - _dragOffset.X, MouseUi.Y - _dragOffset.Y));
                 }
             }
 
             // Keep panel on screen
-            if (_mainPanel.ContainsPoint(Main.MouseScreen))
+            if (_mainPanel.ContainsPoint(MouseScreen))
             {
                 Main.LocalPlayer.mouseInterface = true;
             }
@@ -465,7 +473,7 @@ namespace Rpg.Common.UI
             {
                 for (int i = 0; i < _macroHotbarButtons.Count; i++)
                 {
-                    if (_macroHotbarButtons[i].ContainsPoint(Main.MouseScreen))
+                    if (_macroHotbarButtons[i].ContainsPoint(MouseScreen))
                     {
                         if (SkillDragDropSystem.TryConsumeMacroDrop(out int macroIndex))
                         {
@@ -498,12 +506,19 @@ namespace Rpg.Common.UI
             _needsRefresh = true;
         }
 
+        private Vector2 GetScaledMouse()
+        {
+            return UiInput.GetUiMouse();
+        }
+
         private void SetPanelPosition(Vector2 position)
         {
-            float maxX = Main.screenWidth - PANEL_WIDTH;
-            float maxY = Main.screenHeight - PANEL_HEIGHT;
-            position.X = MathHelper.Clamp(position.X, 0f, maxX);
-            position.Y = MathHelper.Clamp(position.Y, 0f, maxY);
+            float minX = ScreenTopLeftUi.X;
+            float minY = ScreenTopLeftUi.Y;
+            float maxX = ScreenTopLeftUi.X + ScreenWidthUi - PANEL_WIDTH;
+            float maxY = ScreenTopLeftUi.Y + ScreenHeightUi - PANEL_HEIGHT;
+            position.X = MathHelper.Clamp(position.X, minX, maxX);
+            position.Y = MathHelper.Clamp(position.Y, minY, maxY);
             _panelPosition = position;
             _mainPanel.Left.Set(_panelPosition.X, 0f);
             _mainPanel.Top.Set(_panelPosition.Y, 0f);

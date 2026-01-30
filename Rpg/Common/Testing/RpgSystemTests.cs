@@ -23,12 +23,8 @@ namespace Rpg.Common.Testing
         
         public static void RunAllTests(bool verbose = true)
         {
-            _results.Clear();
-            _stopwatch.Restart();
-            
-            Log("=== RPG System Test Suite ===", ConsoleColor.Cyan);
-            Log($"Started at: {DateTime.Now:HH:mm:ss}");
-            
+            StartTestRun("=== RPG System Test Suite ===");
+
             // Category 1: Skill System Tests
             RunSkillRegistrationTests();
             RunSkillDataIntegrityTests();
@@ -47,10 +43,56 @@ namespace Rpg.Common.Testing
             // Category 5: Data Integrity Tests
             RunDataIntegrityTests();
             
-            _stopwatch.Stop();
-            
-            // Summary
-            PrintSummary();
+            FinishTestRun();
+        }
+
+        public static void RunTests(string category, bool verbose = true)
+        {
+            category = string.IsNullOrWhiteSpace(category) ? "all" : category.ToLowerInvariant();
+
+            if (category == "all")
+            {
+                RunAllTests(verbose);
+                return;
+            }
+
+            switch (category)
+            {
+                case "skills":
+                    StartTestRun($"=== RPG System Test Suite ({category}) ===");
+                    RunSkillRegistrationTests();
+                    RunSkillDataIntegrityTests();
+                    RunSkillPrerequisiteTests();
+                    FinishTestRun();
+                    break;
+                case "jobs":
+                    StartTestRun($"=== RPG System Test Suite ({category}) ===");
+                    RunJobDefinitionTests();
+                    RunJobProgressionTests();
+                    FinishTestRun();
+                    break;
+                case "balance":
+                    StartTestRun($"=== RPG System Test Suite ({category}) ===");
+                    RunBalanceTests();
+                    FinishTestRun();
+                    break;
+                case "performance":
+                case "perf":
+                    StartTestRun($"=== RPG System Test Suite ({category}) ===");
+                    RunPerformanceTests();
+                    FinishTestRun();
+                    break;
+                case "integrity":
+                case "data":
+                    StartTestRun($"=== RPG System Test Suite ({category}) ===");
+                    RunDataIntegrityTests();
+                    FinishTestRun();
+                    break;
+                default:
+                    Log($"Unknown category '{category}', running all tests instead.", ConsoleColor.Yellow);
+                    RunAllTests(verbose);
+                    return;
+            }
         }
         
         #region Skill Tests
@@ -529,6 +571,20 @@ namespace Rpg.Common.Testing
             // Also log to mod logger
             Mod mod = ModContent.GetInstance<Rpg>();
             mod?.Logger.Info(message);
+        }
+
+        private static void StartTestRun(string header)
+        {
+            _results.Clear();
+            _stopwatch.Restart();
+            Log(header, ConsoleColor.Cyan);
+            Log($"Started at: {DateTime.Now:HH:mm:ss}");
+        }
+
+        private static void FinishTestRun()
+        {
+            _stopwatch.Stop();
+            PrintSummary();
         }
         
         private class TestResult

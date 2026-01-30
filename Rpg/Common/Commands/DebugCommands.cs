@@ -209,8 +209,35 @@ namespace Rpg.Common.Commands
             
             var rpgPlayer = caller.Player.GetModPlayer<RpgPlayer>();
             rpgPlayer.Initialize();
-            
-            Main.NewText("Character reset to Level 1 Novice!", Color.Green);
+
+            // Clear learned skills and refund points
+            var skillManager = caller.Player.GetModPlayer<Skills.SkillManager>();
+            skillManager?.ResetAllSkills();
+
+            // Reset pending/available points
+            rpgPlayer.StatPoints = 0;
+            rpgPlayer.SkillPoints = 0;
+            rpgPlayer.PendingStatPoints = 0;
+            rpgPlayer.PendingSkillPoints = 0;
+
+            Main.NewText("Character reset to Level 1 Novice! Stat/Skill points refunded.", Color.Green);
+        }
+    }
+
+    /// <summary>
+    /// Clear all skill hotbar assignments (skills/macros)
+    /// Usage: /rpgclearhotbar
+    /// </summary>
+    public class ClearHotbarCommand : ModCommand
+    {
+        public override string Command => "rpgclearhotbar";
+        public override string Description => "Clear all skill hotbar assignments";
+        public override CommandType Type => CommandType.Chat;
+
+        public override void Action(CommandCaller caller, string input, string[] args)
+        {
+            var skillManager = caller.Player.GetModPlayer<Skills.SkillManager>();
+            skillManager?.ClearHotbar();
         }
     }
     

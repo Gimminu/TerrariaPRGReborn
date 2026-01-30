@@ -19,6 +19,7 @@ namespace Rpg.Common.UI
     /// </summary>
     public class BiomeDebugUISystem : ModSystem
     {
+        private const bool ENABLED = false;
         public static ModKeybind ToggleKey { get; private set; }
 
         private UserInterface debugInterface;
@@ -27,6 +28,10 @@ namespace Rpg.Common.UI
 
         public override void Load()
         {
+            if (!ENABLED)
+                return;
+
+#pragma warning disable CS0162
             ToggleKey = KeybindLoader.RegisterKeybind(Mod, "Toggle RPG Test Panel", "F9");
 
             if (!Main.dedServ)
@@ -35,6 +40,7 @@ namespace Rpg.Common.UI
                 debugUI.Activate();
                 debugInterface = new UserInterface();
             }
+#pragma warning restore CS0162
         }
 
         public override void Unload()
@@ -46,14 +52,23 @@ namespace Rpg.Common.UI
 
         public override void UpdateUI(GameTime gameTime)
         {
+            if (!ENABLED)
+                return;
+
+#pragma warning disable CS0162
             if (isVisible)
             {
                 debugInterface?.Update(gameTime);
             }
+#pragma warning restore CS0162
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
+            if (!ENABLED)
+                return;
+
+#pragma warning disable CS0162
             if (!isVisible)
                 return;
 
@@ -70,14 +85,20 @@ namespace Rpg.Common.UI
                     InterfaceScaleType.UI
                 ));
             }
+#pragma warning restore CS0162
         }
 
         public void ToggleUI()
         {
+            if (!ENABLED)
+                return;
+
+#pragma warning disable CS0162
             if (isVisible)
                 HideUI();
             else
                 ShowUI();
+#pragma warning restore CS0162
         }
 
         public void ShowUI()
@@ -103,14 +124,19 @@ namespace Rpg.Common.UI
     {
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
+            if (BiomeDebugUISystem.ToggleKey == null)
+                return;
+
             if (Main.drawingPlayerChat || Main.editSign || Main.editChest ||
                 Main.gameMenu || Main.ingameOptionsWindow || Main.playerInventory || Main.inFancyUI)
                 return;
 
+#pragma warning disable CS0162
             if (BiomeDebugUISystem.ToggleKey != null && BiomeDebugUISystem.ToggleKey.JustPressed)
             {
                 ModContent.GetInstance<BiomeDebugUISystem>().ToggleUI();
             }
+#pragma warning restore CS0162
         }
     }
 

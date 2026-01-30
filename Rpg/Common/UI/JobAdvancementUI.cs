@@ -29,12 +29,20 @@ namespace Rpg.Common.UI
         
         private List<JobType> availableJobs;
         private int scrollOffset = 0;
+
+        // UI scale helpers (work in UI space so hitboxes and drawing match)
+        private Point MousePosition => GetScaledMouse();
+        private Vector2 ScreenTopLeftUi => UiInput.ScreenTopLeftUi;
+        private Vector2 ScreenBottomRightUi => UiInput.ScreenBottomRightUi;
+        private int ScreenWidthUi => UiInput.ScreenWidthUi;
+        private int ScreenHeightUi => UiInput.ScreenHeightUi;
         
         public override void OnInitialize()
         {
+            Vector2 topLeft = ScreenTopLeftUi;
             bounds = new Rectangle(
-                Main.screenWidth / 2 - PANEL_WIDTH / 2,
-                Main.screenHeight / 2 - PANEL_HEIGHT / 2,
+                (int)(topLeft.X + ScreenWidthUi / 2 - PANEL_WIDTH / 2),
+                (int)(topLeft.Y + ScreenHeightUi / 2 - PANEL_HEIGHT / 2),
                 PANEL_WIDTH,
                 PANEL_HEIGHT
             );
@@ -57,7 +65,7 @@ namespace Rpg.Common.UI
             }
             
             // Mouse scroll
-            if (bounds.Contains(Main.mouseX, Main.mouseY))
+            if (bounds.Contains(MousePosition))
             {
                 scrollOffset -= PlayerInput.ScrollWheelDelta / 60;
                 scrollOffset = System.Math.Max(0, scrollOffset);
@@ -140,6 +148,7 @@ namespace Rpg.Common.UI
             int xOffset = bounds.X + 20;
             int yOffset = startY - scrollOffset;
             int column = 0;
+            Point mouse = MousePosition;
 
             int totalCards = availableJobs.Count - 1;
             if (totalCards < 0)
@@ -176,7 +185,7 @@ namespace Rpg.Common.UI
                 }
                 
                 // Check if hovered
-                bool hovered = cardBounds.Contains(Main.mouseX, Main.mouseY) && canUnlock;
+                bool hovered = cardBounds.Contains(mouse) && canUnlock;
                 
                 // Background color
                 Color bgColor = canUnlock 
@@ -347,6 +356,11 @@ namespace Rpg.Common.UI
                 JobTier.Tier3 => "Tier 3",
                 _ => "Tier ?"
             };
+        }
+
+        private Point GetScaledMouse()
+        {
+            return UiInput.GetUiMousePoint();
         }
         
         private void DrawPanel(SpriteBatch spriteBatch, Rectangle bounds, Color bgColor, Color borderColor)

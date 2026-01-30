@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.ID;
@@ -20,21 +21,62 @@ namespace Rpg.Common.UI
         private RpgPlayer rpgPlayer;
         private bool dragging;
         private Vector2 offset;
-        private Rectangle bounds;
         
-        private const int PANEL_WIDTH = 420;
-        private const int PANEL_HEIGHT = 580;
-        private const int STAT_ROW_HEIGHT = 36;
-        private const int HEADER_HEIGHT = 60;
+        private UIPanel mainPanel;
+        private UIList statList;
+        private UIScrollbar scrollbar;
+        
+        private Dictionary<StatType, UIPanel> statButtons = new Dictionary<StatType, UIPanel>();
+
+        // UI scale helpers
+        private Point MousePosition => GetScaledMouse();
+        private Vector2 ScreenTopLeftUi => UiInput.ScreenTopLeftUi;
+        private Vector2 ScreenBottomRightUi => UiInput.ScreenBottomRightUi;
+        private int ScreenWidthUi => UiInput.ScreenWidthUi;
+        private int ScreenHeightUi => UiInput.ScreenHeightUi;
+        
+        private const float PANEL_WIDTH = 420f;
+        private const float PANEL_HEIGHT = 580f;
+        private const float STAT_ROW_HEIGHT = 36f;
+        private const float HEADER_HEIGHT = 60f;
         
         public override void OnInitialize()
         {
-            bounds = new Rectangle(
-                Main.screenWidth / 2 - PANEL_WIDTH / 2,
-                Main.screenHeight / 2 - PANEL_HEIGHT / 2,
-                PANEL_WIDTH,
-                PANEL_HEIGHT
-            );
+            // Main panel
+            mainPanel = new UIPanel();
+            mainPanel.Width.Set(PANEL_WIDTH, 0f);
+            mainPanel.Height.Set(PANEL_HEIGHT, 0f);
+            mainPanel.HAlign = 0.5f;
+            mainPanel.VAlign = 0.5f;
+            mainPanel.BackgroundColor = new Color(20, 25, 45, 240);
+            mainPanel.BorderColor = new Color(89, 116, 213);
+            Append(mainPanel);
+            
+            // Title
+            var titleText = new UIText("Stat Allocation", 1.2f);
+            titleText.HAlign = 0.5f;
+            titleText.Top.Set(15, 0f);
+            mainPanel.Append(titleText);
+            
+            // Stat list
+            statList = new UIList();
+            statList.Width.Set(-30, 1f);
+            statList.Height.Set(-80, 1f);
+            statList.Top.Set(60, 0f);
+            statList.Left.Set(10, 0f);
+            statList.ListPadding = 5f;
+            mainPanel.Append(statList);
+            
+            // Scrollbar
+            scrollbar = new UIScrollbar();
+            scrollbar.Width.Set(20, 0f);
+            scrollbar.Height.Set(-80, 1f);
+            scrollbar.Top.Set(60, 0f);
+            scrollbar.HAlign = 1f;
+            scrollbar.Left.Set(-10, 0f);
+            mainPanel.Append(scrollbar);
+            
+            statList.SetScrollbar(scrollbar);
         }
         
         public override void Update(GameTime gameTime)
@@ -43,22 +85,31 @@ namespace Rpg.Common.UI
             
             rpgPlayer = Main.LocalPlayer.GetModPlayer<RpgPlayer>();
 
-            Rectangle headerBounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, HEADER_HEIGHT);
-            if (!dragging && Main.mouseLeft && Main.mouseLeftRelease && headerBounds.Contains(Main.mouseX, Main.mouseY))
+            // Handle dragging
+            Point mouse = MousePosition;
+            Vector2 topLeft = ScreenTopLeftUi;
+            Rectangle headerBounds = new Rectangle(
+                (int)(topLeft.X + mainPanel.Left.Pixels + ScreenWidthUi * mainPanel.HAlign),
+                (int)(topLeft.Y + mainPanel.Top.Pixels + ScreenHeightUi * mainPanel.VAlign),
+                (int)mainPanel.Width.Pixels,
+                (int)HEADER_HEIGHT
+            );
+            
+            if (!dragging && Main.mouseLeft && Main.mouseLeftRelease && headerBounds.Contains(mouse))
             {
                 dragging = true;
-                offset = new Vector2(Main.mouseX - bounds.X, Main.mouseY - bounds.Y);
+                offset = new Vector2(mouse.X - headerBounds.X, mouse.Y - headerBounds.Y);
             }
             else if (dragging && !Main.mouseLeft)
             {
                 dragging = false;
             }
 
-            // Handle dragging
             if (dragging)
             {
-                bounds.X = (int)(Main.mouseX - offset.X);
-                bounds.Y = (int)(Main.mouseY - offset.Y);
+                mainPanel.Left.Set(mouse.X - offset.X - topLeft.X - ScreenWidthUi * mainPanel.HAlign, 0f);
+                mainPanel.Top.Set(mouse.Y - offset.Y - topLeft.Y - ScreenHeightUi * mainPanel.VAlign, 0f);
+                mainPanel.Recalculate();
             }
             
             // Close with ESC
@@ -67,79 +118,81 @@ namespace Rpg.Common.UI
                 var uiSystem = ModContent.GetInstance<StatUISystem>();
                 uiSystem.HideUI();
             }
+            
+            // Refresh stats periodically
+            if (Main.GameUpdateCount % 30 == 0) // Every half second
+            {
+                PopulateStatList();
+            }
+            
+            // Handle stat button clicks
+            if (Main.mouseLeftRelease)
+            {
+                foreach (var kvp in statButtons)
+                {
+                    if (kvp.Value.IsMouseHovering)
+                    {
+                        HandleStatClick(kvp.Key);
+                        break;
+                    }
+                }
+            }
         }
         
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            // UIList handles drawing, just ensure it's populated
+            if (statList.Count == 0)
+            {
+                PopulateStatList();
+            }
+        }
+        
+        private void PopulateStatList()
+        {
+            statList.Clear();
+            statButtons.Clear();
+            
             // Safety check
             if (rpgPlayer == null)
                 return;
                 
-            // Draw panel background
-            DrawPanel(spriteBatch, bounds, new Color(20, 25, 45, 240));
-            
-            // Draw header
-            Rectangle headerBounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, HEADER_HEIGHT);
-            DrawPanel(spriteBatch, headerBounds, new Color(30, 35, 60, 255));
-            
-            // Title
-            string title = "Stat Allocation";
-            Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title);
-            Vector2 titlePos = new Vector2(
-                bounds.X + bounds.Width / 2 - titleSize.X / 2,
-                bounds.Y + 12
-            );
-            DrawText(spriteBatch, title, titlePos, Color.White, 1f);
-            
             // Stat points remaining
             string pointsText = rpgPlayer.PendingStatPoints > 0
                 ? $"Points: {rpgPlayer.StatPoints} (Pending: {rpgPlayer.PendingStatPoints})"
                 : $"Points: {rpgPlayer.StatPoints}";
-            Vector2 pointsSize = FontAssets.MouseText.Value.MeasureString(pointsText);
-            Vector2 pointsPos = new Vector2(
-                bounds.X + bounds.Width / 2 - pointsSize.X / 2,
-                bounds.Y + 35
-            );
-            DrawText(spriteBatch, pointsText, pointsPos, Color.Gold, 1f);
-            
-            // Draw stats
-            int yOffset = HEADER_HEIGHT + 10;
-            DrawStatRow(spriteBatch, StatType.Strength, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Dexterity, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Rogue, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Intelligence, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Focus, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Vitality, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Stamina, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Defense, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Agility, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Wisdom, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Fortitude, ref yOffset);
-            DrawStatRow(spriteBatch, StatType.Luck, ref yOffset);
+            var pointsElement = new UIText(pointsText, 1f);
+            pointsElement.TextColor = rpgPlayer.StatPoints > 0 ? Color.Gold : Color.Gray;
+            statList.Add(pointsElement);
             
             // Instructions
-            yOffset += 10;
-            string[] instructions = {
-                "Left Click: +1",
-                "Shift + Click: +5",
-                "Ctrl + Click: +10",
-                "Ctrl + Shift + Click: All"
-            };
+            var instructions = new UIText("Left Click: +1  |  Shift: +5  |  Ctrl: +10  |  Ctrl+Shift: All", 0.8f);
+            instructions.TextColor = Color.LightGray;
+            statList.Add(instructions);
             
-            foreach (string instruction in instructions)
-            {
-                Vector2 instrSize = FontAssets.MouseText.Value.MeasureString(instruction);
-                Vector2 instrPos = new Vector2(
-                    bounds.X + bounds.Width / 2 - instrSize.X / 2,
-                    bounds.Y + yOffset
-                );
-                DrawText(spriteBatch, instruction, instrPos, Color.LightGray, 0.8f);
-                yOffset += 18;
-            }
+            // Add stat rows
+            AddStatRow(StatType.Strength);
+            AddStatRow(StatType.Dexterity);
+            AddStatRow(StatType.Rogue);
+            AddStatRow(StatType.Intelligence);
+            AddStatRow(StatType.Focus);
+            AddStatRow(StatType.Vitality);
+            AddStatRow(StatType.Stamina);
+            AddStatRow(StatType.Defense);
+            AddStatRow(StatType.Agility);
+            AddStatRow(StatType.Wisdom);
+            AddStatRow(StatType.Fortitude);
+            AddStatRow(StatType.Luck);
         }
         
-        private void DrawStatRow(SpriteBatch spriteBatch, StatType stat, ref int yOffset)
+        private void AddStatRow(StatType stat)
         {
+            var statCard = new UIPanel();
+            statCard.Width.Set(0, 1f);
+            statCard.Height.Set(STAT_ROW_HEIGHT, 0f);
+            statCard.BackgroundColor = new Color(44, 57, 105) * 0.8f;
+            statCard.BorderColor = Color.Black;
+            
             int baseValue = rpgPlayer.GetBaseStatValue(stat);
             int autoValue = rpgPlayer.GetAutoStatValue(stat);
             int bonusValue = rpgPlayer.GetBonusStatValue(stat);
@@ -147,71 +200,86 @@ namespace Rpg.Common.UI
             string statName = GetStatName(stat);
             Color statColor = GetStatColor(stat);
             
-            Rectangle rowBounds = new Rectangle(
-                bounds.X + 10,
-                bounds.Y + yOffset,
-                bounds.Width - 20,
-                STAT_ROW_HEIGHT - 4
-            );
-            
-            // Hover effect
-            bool hovered = rowBounds.Contains(Main.mouseX, Main.mouseY);
-            if (hovered)
-            {
-                DrawPanel(spriteBatch, rowBounds, new Color(40, 50, 80, 200));
-            }
-            
             // Stat name
-            Vector2 namePos = new Vector2(rowBounds.X + 10, rowBounds.Y + 8);
-            DrawText(spriteBatch, statName, namePos, statColor, 1f);
+            var nameText = new UIText(statName, 1f);
+            nameText.Top.Set(8, 0f);
+            nameText.Left.Set(15, 0f);
+            nameText.TextColor = statColor;
+            statCard.Append(nameText);
             
             // Stat value
             string valueText = totalValue.ToString();
-            Vector2 valuePos = new Vector2(rowBounds.X + 180, rowBounds.Y + 8);
-            DrawText(spriteBatch, valueText, valuePos, Color.White, 1f);
+            var valueElement = new UIText(valueText, 1f);
+            valueElement.Top.Set(8, 0f);
+            valueElement.Left.Set(180, 0f);
+            valueElement.TextColor = Color.White;
+            statCard.Append(valueElement);
 
             string detail = BuildStatDetail(baseValue, autoValue, bonusValue);
-            Vector2 detailPos = new Vector2(rowBounds.X + 230, rowBounds.Y + 10);
-            DrawText(spriteBatch, detail, detailPos, Color.Gray, 0.75f);
+            var detailElement = new UIText(detail, 0.75f);
+            detailElement.Top.Set(10, 0f);
+            detailElement.Left.Set(230, 0f);
+            detailElement.TextColor = Color.Gray;
+            statCard.Append(detailElement);
             
             // [+] Button
-            Rectangle buttonBounds = new Rectangle(
-                rowBounds.X + rowBounds.Width - 60,
-                rowBounds.Y + 4,
-                50,
-                STAT_ROW_HEIGHT - 12
-            );
-            
-            bool buttonHovered = buttonBounds.Contains(Main.mouseX, Main.mouseY);
-            Color buttonColor = rpgPlayer.StatPoints > 0 
-                ? (buttonHovered ? new Color(80, 200, 80) : new Color(60, 150, 60))
+            var buttonPanel = new UIPanel();
+            buttonPanel.Width.Set(50, 0f);
+            buttonPanel.Height.Set(STAT_ROW_HEIGHT - 12, 0f);
+            buttonPanel.Left.Set(-60, 1f);
+            buttonPanel.Top.Set(4, 0f);
+            buttonPanel.BackgroundColor = rpgPlayer.StatPoints > 0 
+                ? new Color(60, 150, 60)
                 : new Color(80, 80, 80);
+            statCard.Append(buttonPanel);
+            
+            var buttonText = new UIText("+", 1f);
+            buttonText.HAlign = 0.5f;
+            buttonText.VAlign = 0.5f;
+            buttonText.TextColor = Color.White;
+            buttonPanel.Append(buttonText);
+            
+            // Store button for click handling
+            statButtons[stat] = buttonPanel;
+            
+            // Handle clicks on the button
+            // Click handling moved to Update method
+            
+            statList.Add(statCard);
+        }
+        
+        private void HandleStatClick(StatType stat)
+        {
+            if (rpgPlayer == null || rpgPlayer.StatPoints <= 0)
+                return;
                 
-            DrawPanel(spriteBatch, buttonBounds, buttonColor);
-            
-            string buttonText = "+";
-            Vector2 buttonTextSize = FontAssets.MouseText.Value.MeasureString(buttonText);
-            Vector2 buttonTextPos = new Vector2(
-                buttonBounds.X + buttonBounds.Width / 2 - buttonTextSize.X / 2,
-                buttonBounds.Y + buttonBounds.Height / 2 - buttonTextSize.Y / 2
-            );
-            DrawText(spriteBatch, buttonText, buttonTextPos, Color.White, 1f);
-            
-            // Handle clicks
-            if (buttonHovered && Main.mouseLeft && Main.mouseLeftRelease && rpgPlayer.StatPoints > 0)
+            int amount = 1;
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) || 
+                Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
             {
-                int amount = GetClickAmount();
+                amount = 5;
+            }
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftControl) || 
+                Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightControl))
+            {
+                if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) || 
+                    Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
+                {
+                    amount = rpgPlayer.StatPoints; // All remaining
+                }
+                else
+                {
+                    amount = 10;
+                }
+            }
+            
+            amount = System.Math.Min(amount, rpgPlayer.StatPoints);
+            
+            if (amount > 0)
+            {
                 rpgPlayer.AllocateStatPoint(stat, amount);
                 SoundEngine.PlaySound(SoundID.MenuTick);
             }
-            
-            // Tooltip
-            if (hovered)
-            {
-                DrawStatTooltip(spriteBatch, stat);
-            }
-            
-            yOffset += STAT_ROW_HEIGHT;
         }
         
         private int GetClickAmount()
@@ -227,42 +295,6 @@ namespace Rpg.Common.UI
             return 1;
         }
         
-        private void DrawStatTooltip(SpriteBatch spriteBatch, StatType stat)
-        {
-            List<string> tooltipLines = GetStatTooltip(stat);
-            
-            int tooltipWidth = 300;
-            int tooltipHeight = tooltipLines.Count * 20 + 10;
-            
-            Rectangle tooltipBounds = new Rectangle(
-                Main.mouseX + 20,
-                Main.mouseY - tooltipHeight / 2,
-                tooltipWidth,
-                tooltipHeight
-            );
-            
-            // Keep on screen
-            if (tooltipBounds.Right > Main.screenWidth)
-                tooltipBounds.X = Main.mouseX - tooltipWidth - 20;
-            if (tooltipBounds.Bottom > Main.screenHeight)
-                tooltipBounds.Y = Main.screenHeight - tooltipHeight;
-            if (tooltipBounds.Y < 0)
-                tooltipBounds.Y = 0;
-            
-            DrawPanel(spriteBatch, tooltipBounds, new Color(10, 15, 30, 250));
-            
-            int yPos = tooltipBounds.Y + 5;
-            foreach (string line in tooltipLines)
-            {
-                DrawText(spriteBatch, line, new Vector2(tooltipBounds.X + 5, yPos), Color.White, 0.8f);
-                yPos += 20;
-            }
-        }
-
-        private void DrawText(SpriteBatch spriteBatch, string text, Vector2 position, Color color, float scale)
-        {
-            Utils.DrawBorderStringFourWay(spriteBatch, FontAssets.MouseText.Value, text, position.X, position.Y, color, Color.Black, Vector2.Zero, scale);
-        }
         
         private List<string> GetStatTooltip(StatType stat)
         {
@@ -299,7 +331,7 @@ namespace Rpg.Common.UI
                     break;
                 case StatType.Vitality:
                     lines.Add("Vitality - Life Force");
-                    lines.Add("+5 Max HP per point");
+                    lines.Add("+10 Max HP per point");
                     lines.Add("+0.02 HP Regen per point");
                     break;
                 case StatType.Stamina:
@@ -325,6 +357,8 @@ namespace Rpg.Common.UI
                 case StatType.Fortitude:
                     lines.Add("Fortitude - Resilience");
                     lines.Add("+0.5% Debuff Duration Reduction per point");
+                    lines.Add("+0.3% Knockback Resist per point");
+                    lines.Add("+0.2% Damage Reduction per point");
                     break;
                 case StatType.Luck:
                     lines.Add("Luck - Fortune");
@@ -383,6 +417,76 @@ namespace Rpg.Common.UI
                 StatType.Luck => new Color(255, 215, 0),
                 _ => Color.White
             };
+        }
+        
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+            
+            // Draw tooltips for stat cards
+            if (rpgPlayer != null)
+            {
+                foreach (var element in statList._items)
+                {
+                    if (element is UIPanel panel && panel.IsMouseHovering)
+                    {
+                        // Find which stat this panel represents
+                        int index = statList._items.IndexOf(panel);
+                        if (index >= 2) // Skip title and instructions
+                        {
+                            StatType stat = (StatType)(index - 2);
+                            DrawStatTooltip(spriteBatch, stat);
+                        }
+                    }
+                }
+            }
+        }
+        
+        private void DrawStatTooltip(SpriteBatch spriteBatch, StatType stat)
+        {
+            Point mouse = MousePosition;
+            List<string> tooltipLines = GetStatTooltip(stat);
+            
+            int tooltipWidth = 300;
+            int tooltipHeight = tooltipLines.Count * 20 + 10;
+            
+            Rectangle tooltipBounds = new Rectangle(
+                mouse.X + 20,
+                mouse.Y - tooltipHeight / 2,
+                tooltipWidth,
+                tooltipHeight
+            );
+            
+            // Keep on screen
+            Vector2 topLeft = ScreenTopLeftUi;
+            int screenRight = (int)(topLeft.X + ScreenWidthUi);
+            int screenBottom = (int)(topLeft.Y + ScreenHeightUi);
+
+            if (tooltipBounds.Right > screenRight)
+                tooltipBounds.X = mouse.X - tooltipWidth - 20;
+            if (tooltipBounds.Bottom > screenBottom)
+                tooltipBounds.Y = screenBottom - tooltipHeight;
+            if (tooltipBounds.Y < topLeft.Y)
+                tooltipBounds.Y = (int)topLeft.Y;
+            
+            DrawPanel(spriteBatch, tooltipBounds, new Color(10, 15, 30, 250));
+            
+            int yPos = tooltipBounds.Y + 5;
+            foreach (string line in tooltipLines)
+            {
+                DrawText(spriteBatch, line, new Vector2(tooltipBounds.X + 5, yPos), Color.White, 0.8f);
+                yPos += 20;
+            }
+        }
+
+        private Point GetScaledMouse()
+        {
+            return UiInput.GetUiMousePoint();
+        }
+        
+        private void DrawText(SpriteBatch spriteBatch, string text, Vector2 position, Color color, float scale)
+        {
+            Utils.DrawBorderStringFourWay(spriteBatch, FontAssets.MouseText.Value, text, position.X, position.Y, color, Color.Black, Vector2.Zero, scale);
         }
         
         private void DrawPanel(SpriteBatch spriteBatch, Rectangle bounds, Color color)

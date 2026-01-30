@@ -5,10 +5,10 @@ using Terraria.ID;
 using Rpg.Common.Base;
 using Rpg.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.Lichking
+namespace Rpg.Common.Skills.Tier3.LichKing
 {
     /// <summary>
-    /// Undead Legion - Lichking's ultimate summon skill.
+    /// Undead Legion - Lich King's ultimate summon skill.
     /// </summary>
     public class UndeadLegion : BaseSkill
     {
@@ -17,7 +17,7 @@ namespace Rpg.Common.Skills.Tier3.Lichking
         public override string Description => "Command a legion of undead, massively boosting summon power.";
 
         public override SkillType SkillType => SkillType.Active;
-        public override JobType RequiredJob => JobType.Lichking;
+        public override JobType RequiredJob => JobType.LichKing;
         public override int RequiredLevel => RpgConstants.THIRD_JOB_LEVEL + 10;
         public override int SkillPointCost => 2;
         public override int MaxRank => 5;

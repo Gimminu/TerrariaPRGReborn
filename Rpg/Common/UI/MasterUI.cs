@@ -7,11 +7,13 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.UI;
 using Rpg.Common.Players;
 using Rpg.Common.Skills;
 using Rpg.Common.Base;
 using Rpg.Common.Systems;
+using Rpg.Common.Config;
 
 namespace Rpg.Common.UI
 {
@@ -37,11 +39,13 @@ namespace Rpg.Common.UI
         private SkillFilter skillFilter = SkillFilter.All;
         private SkillFilter lastSkillFilter = SkillFilter.All;
         private JobType lastSkillJob = JobType.None;
+        private bool leftClick;
+        private bool wasLeftDown;
         
         // Panel dimensions
         private Rectangle bounds;
-        private const int PANEL_WIDTH = 500;
-        private const int PANEL_HEIGHT = 550;
+        private const int PANEL_WIDTH = 600;
+        private const int PANEL_HEIGHT = 650;
         private const int HEADER_HEIGHT = 50;
         private const int TAB_HEIGHT = 40;
         
@@ -63,28 +67,44 @@ namespace Rpg.Common.UI
         // Job selection
         private List<JobType> availableJobs = new();
         private int jobScrollOffset = 0;
+
+        // UI scale helpers (UI draws in scaled space; convert using UIScale)
+        private Point MousePosition => GetScaledMouse();
+        private Vector2 ScreenTopLeftUi => UiInput.ScreenTopLeftUi;
+        private Vector2 ScreenBottomRightUi => UiInput.ScreenBottomRightUi;
+        private int ScreenWidthUi => UiInput.ScreenWidthUi;
+        private int ScreenHeightUi => UiInput.ScreenHeightUi;
         
         public override void OnInitialize()
         {
             if (lastBounds.HasValue)
             {
                 bounds = lastBounds.Value;
+                return;
             }
-            else
-            {
-                bounds = new Rectangle(
-                    Main.screenWidth / 2 - PANEL_WIDTH / 2,
-                    Main.screenHeight / 2 - PANEL_HEIGHT / 2,
-                    PANEL_WIDTH,
-                    PANEL_HEIGHT
-                );
-            }
+
+            var config = ModContent.GetInstance<RpgClientConfig>();
+            float anchorX = MathHelper.Clamp(config?.RpgMenuPosX ?? 0.5f, 0f, 1f);
+            float anchorY = MathHelper.Clamp(config?.RpgMenuPosY ?? 0.5f, 0f, 1f);
+            bounds = BuildMenuBounds(anchorX, anchorY);
+        }
+
+        public override void Recalculate()
+        {
+            var config = ModContent.GetInstance<RpgClientConfig>();
+            float anchorX = MathHelper.Clamp(config?.RpgMenuPosX ?? 0.5f, 0f, 1f);
+            float anchorY = MathHelper.Clamp(config?.RpgMenuPosY ?? 0.5f, 0f, 1f);
+            bounds = BuildMenuBounds(anchorX, anchorY);
         }
         
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            
+
+            bool leftDown = Main.mouseLeft;
+            leftClick = leftDown && !wasLeftDown;
+            wasLeftDown = leftDown;
+
             if (Main.LocalPlayer == null || !Main.LocalPlayer.active)
                 return;
                 
@@ -105,7 +125,7 @@ namespace Rpg.Common.UI
             HandleDragging();
             
             // Handle scrolling
-            if (bounds.Contains(Main.mouseX, Main.mouseY))
+            if (bounds.Contains(MousePosition))
             {
                 int scroll = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
                 if (currentTab == Tab.Skills)
@@ -129,28 +149,31 @@ namespace Rpg.Common.UI
         
         private void HandleDragging()
         {
+            Point mouse = MousePosition;
             Rectangle header = new Rectangle(bounds.X, bounds.Y, bounds.Width, HEADER_HEIGHT);
             Rectangle closeBtn = new Rectangle(bounds.X + bounds.Width - 35, bounds.Y + 10, 25, 25);
             
-            if (!dragging && Main.mouseLeft && header.Contains(Main.mouseX, Main.mouseY) && !closeBtn.Contains(Main.mouseX, Main.mouseY))
+            if (!dragging && Main.mouseLeft && header.Contains(mouse) && !closeBtn.Contains(mouse))
             {
                 dragging = true;
-                dragOffset = new Vector2(Main.mouseX - bounds.X, Main.mouseY - bounds.Y);
+                dragOffset = new Vector2(mouse.X - bounds.X, mouse.Y - bounds.Y);
             }
             else if (dragging && !Main.mouseLeft)
             {
                 dragging = false;
                 lastBounds = bounds;
+                SaveMenuAnchor();
             }
             
             if (dragging)
             {
-                bounds.X = (int)(Main.mouseX - dragOffset.X);
-                bounds.Y = (int)(Main.mouseY - dragOffset.Y);
+                bounds.X = (int)(mouse.X - dragOffset.X);
+                bounds.Y = (int)(mouse.Y - dragOffset.Y);
                 
                 // Clamp to screen
-                bounds.X = Utils.Clamp(bounds.X, 0, Main.screenWidth - PANEL_WIDTH);
-                bounds.Y = Utils.Clamp(bounds.Y, 0, Main.screenHeight - PANEL_HEIGHT);
+                Vector2 topLeft = ScreenTopLeftUi;
+                bounds.X = Utils.Clamp(bounds.X, (int)topLeft.X, (int)(topLeft.X + ScreenWidthUi - PANEL_WIDTH));
+                bounds.Y = Utils.Clamp(bounds.Y, (int)topLeft.Y, (int)(topLeft.Y + ScreenHeightUi - PANEL_HEIGHT));
             }
         }
         
@@ -193,7 +216,7 @@ namespace Rpg.Common.UI
             }
             
             // Prevent clicking through
-            if (bounds.Contains(Main.mouseX, Main.mouseY))
+            if (bounds.Contains(MousePosition))
             {
                 Main.LocalPlayer.mouseInterface = true;
             }
@@ -212,6 +235,8 @@ namespace Rpg.Common.UI
                 bounds.Y + HEADER_HEIGHT / 2 - titleSize.Y / 2
             );
             Utils.DrawBorderString(spriteBatch, title, titlePos, Color.Gold, 0.6f);
+
+            DrawQuestToggle(spriteBatch);
             
             // Close button
             Rectangle closeBtn = new Rectangle(bounds.X + bounds.Width - 35, bounds.Y + 10, 25, 25);
@@ -222,33 +247,112 @@ namespace Rpg.Common.UI
             Vector2 xPos = new Vector2(closeBtn.X + closeBtn.Width / 2 - xSize.X / 2, closeBtn.Y + closeBtn.Height / 2 - xSize.Y / 2);
             Utils.DrawBorderString(spriteBatch, x, xPos, Color.White, 1f);
             
-            if (closeBtn.Contains(Main.mouseX, Main.mouseY) && Main.mouseLeft && Main.mouseLeftRelease)
+            if (closeBtn.Contains(MousePosition) && leftClick)
             {
                 ModContent.GetInstance<MasterUISystem>().HideUI();
                 SoundEngine.PlaySound(SoundID.MenuClose);
             }
         }
+
+        private void DrawQuestToggle(SpriteBatch spriteBatch)
+        {
+            var config = ModContent.GetInstance<RpgClientConfig>();
+            if (config == null)
+                return;
+
+            string label = config.ShowQuestUI ? "Quest UI: On" : "Quest UI: Off";
+            int buttonWidth = 110;
+            int buttonHeight = 22;
+            int rightEdge = bounds.X + bounds.Width - 35 - 8;
+            Rectangle toggleBtn = new Rectangle(rightEdge - buttonWidth, bounds.Y + 14, buttonWidth, buttonHeight);
+            bool hover = toggleBtn.Contains(MousePosition);
+
+            Color bg = config.ShowQuestUI ? new Color(55, 85, 120) : new Color(40, 50, 70);
+            Color border = config.ShowQuestUI ? new Color(110, 150, 210) : new Color(80, 95, 120);
+            if (hover)
+                bg = config.ShowQuestUI ? new Color(70, 110, 150) : new Color(55, 70, 95);
+
+            DrawPanel(spriteBatch, toggleBtn, bg, border);
+
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(label) * 0.7f;
+            Vector2 textPos = new Vector2(
+                toggleBtn.X + toggleBtn.Width / 2 - textSize.X / 2,
+                toggleBtn.Y + toggleBtn.Height / 2 - textSize.Y / 2
+            );
+            Utils.DrawBorderString(spriteBatch, label, textPos, Color.White, 0.7f);
+
+            if (hover)
+                Main.hoverItemName = "Toggle Quest UI (O)";
+
+            if (hover && leftClick)
+            {
+                ModContent.GetInstance<QuestUISystem>()?.ToggleQuestUI(false);
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+        }
         
         private void DrawTabs(SpriteBatch spriteBatch)
         {
-            int tabWidth = (bounds.Width - 50) / 4;
+            var clientConfig = ModContent.GetInstance<RpgClientConfig>();
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            
+            // Determine which tabs to show
+            bool showJobTab = serverConfig?.EnableJobSystem ?? true;
+            bool showSkillTab = serverConfig?.EnableSkillSystem ?? true;
+            
+            // Calculate tab layout based on enabled tabs
+            List<Tab> enabledTabs = new List<Tab> { Tab.Stats };
+            if (showJobTab) enabledTabs.Add(Tab.Job);
+            if (showSkillTab) enabledTabs.Add(Tab.Skills);
+            enabledTabs.Add(Tab.Achieve);
+            
+            int tabCount = enabledTabs.Count;
+            int tabWidth = (bounds.Width - 60) / tabCount;
             int tabY = bounds.Y + HEADER_HEIGHT + 5;
             
-            tabStatsBtn = new Rectangle(bounds.X + 10, tabY, tabWidth, TAB_HEIGHT - 10);
-            tabJobBtn = new Rectangle(bounds.X + 20 + tabWidth, tabY, tabWidth, TAB_HEIGHT - 10);
-            tabSkillsBtn = new Rectangle(bounds.X + 30 + tabWidth * 2, tabY, tabWidth, TAB_HEIGHT - 10);
-            tabAchieveBtn = new Rectangle(bounds.X + 40 + tabWidth * 3, tabY, tabWidth, TAB_HEIGHT - 10);
+            // Reset tab buttons
+            tabStatsBtn = Rectangle.Empty;
+            tabJobBtn = Rectangle.Empty;
+            tabSkillsBtn = Rectangle.Empty;
+            tabAchieveBtn = Rectangle.Empty;
             
-            DrawTabButton(spriteBatch, tabStatsBtn, "Stats", Tab.Stats);
-            DrawTabButton(spriteBatch, tabJobBtn, "Job", Tab.Job);
-            DrawTabButton(spriteBatch, tabSkillsBtn, "Skills", Tab.Skills);
-            DrawTabButton(spriteBatch, tabAchieveBtn, "Achieve", Tab.Achieve);
+            for (int i = 0; i < enabledTabs.Count; i++)
+            {
+                Tab tab = enabledTabs[i];
+                Rectangle tabRect = new Rectangle(bounds.X + 10 + i * (tabWidth + 5), tabY, tabWidth, TAB_HEIGHT - 10);
+                
+                string label = tab switch
+                {
+                    Tab.Stats => "Stats",
+                    Tab.Job => "Job",
+                    Tab.Skills => "Skills",
+                    Tab.Achieve => "Achieve",
+                    _ => "Unknown"
+                };
+                
+                DrawTabButton(spriteBatch, tabRect, label, tab);
+                
+                // Assign to appropriate button rect
+                switch (tab)
+                {
+                    case Tab.Stats: tabStatsBtn = tabRect; break;
+                    case Tab.Job: tabJobBtn = tabRect; break;
+                    case Tab.Skills: tabSkillsBtn = tabRect; break;
+                    case Tab.Achieve: tabAchieveBtn = tabRect; break;
+                }
+            }
+            
+            // If current tab is disabled, switch to Stats
+            if ((currentTab == Tab.Job && !showJobTab) || (currentTab == Tab.Skills && !showSkillTab))
+            {
+                currentTab = Tab.Stats;
+            }
         }
         
         private void DrawTabButton(SpriteBatch spriteBatch, Rectangle rect, string label, Tab tab)
         {
             bool active = currentTab == tab;
-            bool hover = rect.Contains(Main.mouseX, Main.mouseY);
+            bool hover = rect.Contains(MousePosition);
             
             Color bg = active ? new Color(60, 80, 120) : (hover ? new Color(50, 60, 90) : new Color(35, 45, 70));
             Color border = active ? new Color(100, 150, 220) : new Color(70, 80, 100);
@@ -257,9 +361,9 @@ namespace Rpg.Common.UI
             
             Vector2 textSize = FontAssets.MouseText.Value.MeasureString(label);
             Vector2 textPos = new Vector2(rect.X + rect.Width / 2 - textSize.X / 2, rect.Y + rect.Height / 2 - textSize.Y / 2);
-            Utils.DrawBorderString(spriteBatch, label, textPos, active ? Color.White : Color.LightGray, 1f);
+            Utils.DrawBorderString(spriteBatch, label, textPos, active ? Color.White : Color.LightGray, 1.1f);
             
-            if (hover && Main.mouseLeft && Main.mouseLeftRelease)
+            if (hover && leftClick)
             {
                 currentTab = tab;
                 SoundEngine.PlaySound(SoundID.MenuTick);
@@ -276,16 +380,16 @@ namespace Rpg.Common.UI
             string pointsText = rpgPlayer.PendingStatPoints > 0
                 ? $"Stat Points: {rpgPlayer.StatPoints} (Pending: {rpgPlayer.PendingStatPoints})"
                 : $"Stat Points: {rpgPlayer.StatPoints}";
-            Utils.DrawBorderString(spriteBatch, pointsText, new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString(pointsText).X / 2, y), Color.Gold);
+            Utils.DrawBorderString(spriteBatch, pointsText, new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString(pointsText).X / 2, y), Color.Gold, 1.1f);
             y += 30;
             
             // Instructions
             string instr = "Click: +1 | Shift: +5 | Ctrl: +10 | Ctrl+Shift: All";
-            Utils.DrawBorderString(spriteBatch, instr, new Vector2(area.X + 10, y), Color.Gray, 0.7f);
+            Utils.DrawBorderString(spriteBatch, instr, new Vector2(area.X + 10, y), Color.Gray, 0.8f);
             y += 18;
 
             string autoHint = "Auto growth shown as A (Base/Auto/Bonus).";
-            Utils.DrawBorderString(spriteBatch, autoHint, new Vector2(area.X + 10, y), Color.Gray, 0.65f);
+            Utils.DrawBorderString(spriteBatch, autoHint, new Vector2(area.X + 10, y), Color.Gray, 0.7f);
             y += 22;
             
             // Stats
@@ -307,23 +411,24 @@ namespace Rpg.Common.UI
         
         private void DrawStatRow(SpriteBatch spriteBatch, Rectangle area, ref int y, StatType stat, int baseVal, int autoVal, int bonus, string abbr, Color color)
         {
-            int rowHeight = 32;
+            Point mouse = MousePosition;
+            int rowHeight = 36;
             Rectangle rowRect = new Rectangle(area.X, y, area.Width, rowHeight);
             
             // Stat name
-            Utils.DrawBorderString(spriteBatch, abbr, new Vector2(area.X, y + 5), color);
+            Utils.DrawBorderString(spriteBatch, abbr, new Vector2(area.X, y + 5), color, 1.1f);
             
             // Values
             int totalValue = baseVal + autoVal + bonus;
             string total = $"{totalValue}";
             string detail = BuildStatDetail(baseVal, autoVal, bonus);
             
-            Utils.DrawBorderString(spriteBatch, total, new Vector2(area.X + 60, y + 5), Color.White);
-            Utils.DrawBorderString(spriteBatch, detail, new Vector2(area.X + 110, y + 5), Color.Gray, 0.8f);
+            Utils.DrawBorderString(spriteBatch, total, new Vector2(area.X + 60, y + 5), Color.White, 1.1f);
+            Utils.DrawBorderString(spriteBatch, detail, new Vector2(area.X + 110, y + 5), Color.Gray, 0.9f);
             
             // + Button
             Rectangle plusBtn = new Rectangle(area.X + area.Width - 40, y, 35, rowHeight - 4);
-            bool hover = plusBtn.Contains(Main.mouseX, Main.mouseY);
+            bool hover = plusBtn.Contains(mouse);
             bool canAllocate = rpgPlayer.StatPoints > 0;
             
             Color btnColor = canAllocate ? (hover ? new Color(80, 150, 80) : new Color(50, 120, 50)) : new Color(60, 60, 60);
@@ -337,13 +442,13 @@ namespace Rpg.Common.UI
 
             statRowBounds[stat] = rowRect;
 
-            if (rowRect.Contains(Main.mouseX, Main.mouseY))
+            if (rowRect.Contains(mouse))
             {
                 DrawStatTooltip(spriteBatch, stat, baseVal, autoVal, bonus);
             }
             
             // Handle click
-            if (hover && Main.mouseLeft && Main.mouseLeftRelease && canAllocate)
+            if (hover && leftClick && canAllocate)
             {
                 int amount = 1;
                 if (Main.keyState.IsKeyDown(Keys.LeftControl) && Main.keyState.IsKeyDown(Keys.LeftShift))
@@ -366,6 +471,16 @@ namespace Rpg.Common.UI
         
         private void DrawJobTab(SpriteBatch spriteBatch, Rectangle area)
         {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null && !serverConfig.EnableJobSystem)
+            {
+                string disabledText = "Job system is disabled on this server.";
+                Vector2 textSize = FontAssets.MouseText.Value.MeasureString(disabledText);
+                Vector2 textPos = new Vector2(area.X + area.Width / 2f - textSize.X / 2f, area.Y + area.Height / 2f - textSize.Y / 2f);
+                Utils.DrawBorderString(spriteBatch, disabledText, textPos, Color.Red, 1.1f);
+                return;
+            }
+            
             int y = area.Y;
             
             // Current job
@@ -374,11 +489,11 @@ namespace Rpg.Common.UI
             {
                 string currentText = $"Current: {currentJobData.DisplayName}";
                 Color tierColor = GetJobTierColor(currentJobData.Tier);
-                Utils.DrawBorderString(spriteBatch, currentText, new Vector2(area.X, y), tierColor);
+                Utils.DrawBorderString(spriteBatch, currentText, new Vector2(area.X, y), tierColor, 1.1f);
                 y += 25;
                 
                 // Description
-                Utils.DrawBorderString(spriteBatch, currentJobData.Description, new Vector2(area.X, y), Color.LightGray, 0.75f);
+                Utils.DrawBorderString(spriteBatch, currentJobData.Description, new Vector2(area.X, y), Color.LightGray, 0.85f);
                 y += 40;
             }
             
@@ -390,7 +505,7 @@ namespace Rpg.Common.UI
             DrawJobFilterRow(spriteBatch, area, ref y);
             
             // Job list (name-only)
-            int rowHeight = 32;
+            int rowHeight = 36;
             int rowSpacing = 4;
             List<JobType> filteredJobs = GetFilteredJobs();
             int visibleCards = (area.Y + area.Height - y) / (rowHeight + rowSpacing);
@@ -416,7 +531,7 @@ namespace Rpg.Common.UI
         
         private void DrawJobRow(SpriteBatch spriteBatch, Rectangle rect, Jobs.JobData jobData, JobType jobType)
         {
-            bool hover = rect.Contains(Main.mouseX, Main.mouseY);
+            bool hover = rect.Contains(MousePosition);
             bool canChange = Jobs.JobDatabase.CanUnlockJob(rpgPlayer, jobType);
             
             Color bg = canChange
@@ -431,13 +546,13 @@ namespace Rpg.Common.UI
             Vector2 tierPos = new Vector2(rect.Right - tierSize.X - 10, rect.Y + 6);
             Color nameColor = canChange ? Color.White : Color.Gray;
             
-            Utils.DrawBorderString(spriteBatch, jobData.DisplayName, new Vector2(rect.X + 10, rect.Y + 6), nameColor, 0.85f);
-            Utils.DrawBorderString(spriteBatch, tierText, tierPos, Color.Gray, 0.7f);
+            Utils.DrawBorderString(spriteBatch, jobData.DisplayName, new Vector2(rect.X + 10, rect.Y + 6), nameColor, 1.0f);
+            Utils.DrawBorderString(spriteBatch, tierText, tierPos, Color.Gray, 0.8f);
             
             if (hover)
             {
                 Main.hoverItemName = BuildJobTooltip(jobData, canChange);
-                if (Main.mouseLeft && Main.mouseLeftRelease && canChange)
+                if (leftClick && canChange)
                 {
                     var levelSystem = Main.LocalPlayer.GetModPlayer<Players.PlayerLevel>();
                     if (levelSystem == null || !levelSystem.AdvanceJob(jobType))
@@ -450,6 +565,7 @@ namespace Rpg.Common.UI
 
         private void DrawJobFilterRow(SpriteBatch spriteBatch, Rectangle area, ref int y)
         {
+            Point mouse = MousePosition;
             string label = "Filter:";
             Utils.DrawBorderString(spriteBatch, label, new Vector2(area.X, y), Color.White, 0.8f);
             float labelWidth = FontAssets.MouseText.Value.MeasureString(label).X * 0.8f;
@@ -466,7 +582,7 @@ namespace Rpg.Common.UI
             for (int i = 0; i < filters.Length; i++)
             {
                 Rectangle btn = new Rectangle(startX + i * (buttonWidth + spacing), top, buttonWidth, buttonHeight);
-                bool hovered = btn.Contains(Main.mouseX, Main.mouseY);
+                bool hovered = btn.Contains(mouse);
                 bool selected = jobFilter == filters[i];
                 Color bg = selected ? new Color(90, 120, 170) : (hovered ? new Color(70, 90, 130) : new Color(50, 70, 100));
                 Color border = selected ? new Color(140, 170, 220) : new Color(90, 110, 150);
@@ -474,7 +590,7 @@ namespace Rpg.Common.UI
 
                 Utils.DrawBorderString(spriteBatch, names[i], new Vector2(btn.X + 8, btn.Y + 3), Color.White, 0.7f);
 
-                if (hovered && Main.mouseLeft && Main.mouseLeftRelease && jobFilter != filters[i])
+                if (hovered && leftClick && jobFilter != filters[i])
                 {
                     jobFilter = filters[i];
                     jobScrollOffset = 0;
@@ -684,35 +800,79 @@ namespace Rpg.Common.UI
         
         private void DrawSkillsTab(SpriteBatch spriteBatch, Rectangle area)
         {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null && !serverConfig.EnableSkillSystem)
+            {
+                string disabledText = "Skill system is disabled on this server.";
+                Vector2 textSize = FontAssets.MouseText.Value.MeasureString(disabledText);
+                Vector2 textPos = new Vector2(area.X + area.Width / 2f - textSize.X / 2f, area.Y + area.Height / 2f - textSize.Y / 2f);
+                Utils.DrawBorderString(spriteBatch, disabledText, textPos, Color.Red, 1.1f);
+                return;
+            }
+            
             int y = area.Y;
+            Point mouse = MousePosition;
             
             // Skill points
             string pointsText = rpgPlayer.PendingSkillPoints > 0
                 ? $"Skill Points: {rpgPlayer.SkillPoints} (Pending: {rpgPlayer.PendingSkillPoints})"
                 : $"Skill Points: {rpgPlayer.SkillPoints}";
-            Utils.DrawBorderString(spriteBatch, pointsText, new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString(pointsText).X / 2, y), Color.Gold);
-            y += 28;
+            float pointsScale = 1f;
+            Vector2 pointsSize = FontAssets.MouseText.Value.MeasureString(pointsText) * pointsScale;
+            Utils.DrawBorderString(
+                spriteBatch,
+                pointsText,
+                new Vector2(area.X + area.Width / 2f - pointsSize.X / 2f, y),
+                Color.Gold,
+                pointsScale
+            );
+            y += (int)pointsSize.Y + 6;
 
-            Rectangle macroBtn = new Rectangle(area.X + area.Width - 130, y - 26, 120, 20);
-            bool macroHover = macroBtn.Contains(Main.mouseX, Main.mouseY);
+            // Macro editor / hotbar buttons
+            const int buttonWidth = 120;
+            const int buttonHeight = 20;
+            const int buttonSpacing = 6;
+            int buttonsTotalWidth = buttonWidth * 2 + buttonSpacing;
+            int buttonsX = area.Right - buttonsTotalWidth;
+            int buttonsY = y;
+
+            Rectangle macroBtn = new Rectangle(buttonsX, buttonsY, buttonWidth, buttonHeight);
+            bool macroHover = macroBtn.Contains(mouse);
             DrawPanel(spriteBatch, macroBtn, macroHover ? new Color(70, 90, 130) : new Color(50, 70, 100), new Color(90, 120, 170));
-            Utils.DrawBorderString(spriteBatch, "Open Macro Editor", new Vector2(macroBtn.X + 6, macroBtn.Y + 2), Color.White, 0.7f);
-            if (macroHover && Main.mouseLeft && Main.mouseLeftRelease)
+            string macroLabel = "Macro Editor";
+            Vector2 macroSize = FontAssets.MouseText.Value.MeasureString(macroLabel) * 0.8f;
+            Vector2 macroPos = new Vector2(macroBtn.X + macroBtn.Width / 2f - macroSize.X / 2f, macroBtn.Y + macroBtn.Height / 2f - macroSize.Y / 2f);
+            Utils.DrawBorderString(spriteBatch, macroLabel, macroPos, Color.White, 0.8f);
+            if (macroHover && leftClick)
             {
                 ModContent.GetInstance<MacroUISystem>()?.ToggleUI();
                 SoundEngine.PlaySound(SoundID.MenuTick);
             }
 
-            y += 8;
+            // Clear hotbar button
+            Rectangle clearBtn = new Rectangle(buttonsX + buttonWidth + buttonSpacing, buttonsY, buttonWidth, buttonHeight);
+            bool clearHover = clearBtn.Contains(mouse);
+            DrawPanel(spriteBatch, clearBtn, clearHover ? new Color(70, 90, 130) : new Color(50, 70, 100), new Color(90, 120, 170));
+            string clearLabel = "Clear Hotbar";
+            Vector2 clearSize = FontAssets.MouseText.Value.MeasureString(clearLabel) * 0.8f;
+            Vector2 clearPos = new Vector2(clearBtn.X + clearBtn.Width / 2f - clearSize.X / 2f, clearBtn.Y + clearBtn.Height / 2f - clearSize.Y / 2f);
+            Utils.DrawBorderString(spriteBatch, clearLabel, clearPos, Color.White, 0.8f);
+            if (clearHover && leftClick)
+            {
+                skillManager.ClearHotbar();
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+
+            y += buttonHeight + 8;
 
             string instr = "Drag skill icon to slots or macro. Use the M button to add to a macro.";
-            Utils.DrawBorderString(spriteBatch, instr, new Vector2(area.X + 10, y), Color.Gray, 0.7f);
+            Utils.DrawBorderString(spriteBatch, instr, new Vector2(area.X + 10, y), Color.Gray, 0.8f);
             y += 22;
 
             y = DrawSkillFilters(spriteBatch, area, y);
             
             // Skill cards
-            int cardHeight = 78;
+            int cardHeight = 90;
             int visibleCards = (area.Y + area.Height - y) / (cardHeight + 5);
 
             if (visibleCards < 1)
@@ -739,6 +899,7 @@ namespace Rpg.Common.UI
 
         private int DrawSkillFilters(SpriteBatch spriteBatch, Rectangle area, int y)
         {
+            Point mouse = MousePosition;
             string label = "Filter:";
             Utils.DrawBorderString(spriteBatch, label, new Vector2(area.X, y), Color.White, 0.8f);
             float labelWidth = FontAssets.MouseText.Value.MeasureString(label).X * 0.8f;
@@ -755,7 +916,7 @@ namespace Rpg.Common.UI
             for (int i = 0; i < filters.Length; i++)
             {
                 Rectangle btn = new Rectangle(startX + i * (buttonWidth + spacing), top, buttonWidth, buttonHeight);
-                bool hovered = btn.Contains(Main.mouseX, Main.mouseY);
+                bool hovered = btn.Contains(mouse);
                 bool selected = skillFilter == filters[i];
                 Color bg = selected ? new Color(90, 120, 170) : (hovered ? new Color(70, 90, 130) : new Color(50, 70, 100));
                 Color border = selected ? new Color(140, 170, 220) : new Color(90, 110, 150);
@@ -763,7 +924,7 @@ namespace Rpg.Common.UI
 
                 Utils.DrawBorderString(spriteBatch, names[i], new Vector2(btn.X + 8, btn.Y + 3), Color.White, 0.7f);
 
-                if (hovered && Main.mouseLeft && Main.mouseLeftRelease && skillFilter != filters[i])
+                if (hovered && leftClick && skillFilter != filters[i])
                 {
                     skillFilter = filters[i];
                     skillScrollOffset = 0;
@@ -798,8 +959,9 @@ namespace Rpg.Common.UI
         
         private void DrawSkillCard(SpriteBatch spriteBatch, Rectangle rect, BaseSkill skill)
         {
+            Point mouse = MousePosition;
             bool isLearned = skillManager.LearnedSkills.ContainsKey(skill.InternalName);
-            bool hover = rect.Contains(Main.mouseX, Main.mouseY);
+            bool hover = rect.Contains(mouse);
             bool canLearn = isLearned
                 ? skillManager.LearnedSkills[skill.InternalName].CanLearn(Main.LocalPlayer)
                 : skill.CanLearn(Main.LocalPlayer);
@@ -814,10 +976,10 @@ namespace Rpg.Common.UI
             var icon = AssetLoader.GetSkillIcon(skill.InternalName);
             spriteBatch.Draw(icon, iconRect, isLearned ? Color.White : Color.Gray);
 
-            if (isLearned && iconRect.Contains(Main.mouseX, Main.mouseY))
+            if (isLearned && iconRect.Contains(mouse))
             {
                 Main.hoverItemName = "Drag to slot or macro";
-                if (Main.mouseLeft && Main.mouseLeftRelease)
+                if (leftClick)
                 {
                     SkillDragDropSystem.StartDrag(skill.InternalName);
                 }
@@ -855,7 +1017,7 @@ namespace Rpg.Common.UI
                 string btnText = isLearned ? "Upgrade" : "Learn";
                 Utils.DrawBorderString(spriteBatch, btnText, new Vector2(learnBtn.X + 5, learnBtn.Y + 2), Color.White, 0.7f);
                 
-                if (hover && learnBtn.Contains(Main.mouseX, Main.mouseY) && Main.mouseLeft && Main.mouseLeftRelease)
+                if (hover && learnBtn.Contains(mouse) && leftClick)
                 {
                     skillManager.LearnSkill(skill);
                     SoundEngine.PlaySound(SoundID.Item4);
@@ -877,6 +1039,7 @@ namespace Rpg.Common.UI
 
         private void DrawSkillSlotsRow(SpriteBatch spriteBatch, Rectangle rect, BaseSkill skill, bool showLearnButton, int contentX)
         {
+            Point mouse = MousePosition;
             string slotLabel = "Slots:";
             float labelScale = 0.6f;
             Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(slotLabel) * labelScale;
@@ -913,10 +1076,10 @@ namespace Rpg.Common.UI
                 );
                 Utils.DrawBorderString(spriteBatch, label, numPos, Color.White, 0.55f);
 
-                if (slotRect.Contains(Main.mouseX, Main.mouseY))
+                if (slotRect.Contains(mouse))
                 {
                     Main.hoverItemName = $"Assign to slot {i + 1}";
-                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    if (leftClick)
                     {
                         skillManager.AssignSkillToSlot(skill.InternalName, i);
                         SoundEngine.PlaySound(SoundID.MenuTick);
@@ -929,14 +1092,14 @@ namespace Rpg.Common.UI
             if (macroX + macroSize <= maxRight)
             {
                 Rectangle macroRect = new Rectangle(macroX, (int)rowY - 2, macroSize, macroSize);
-                bool macroHover = macroRect.Contains(Main.mouseX, Main.mouseY);
+                bool macroHover = macroRect.Contains(mouse);
                 DrawPanel(spriteBatch, macroRect, macroHover ? new Color(80, 60, 120) : new Color(60, 50, 90), new Color(110, 90, 160));
                 Utils.DrawBorderString(spriteBatch, "M", new Vector2(macroRect.X + 4, macroRect.Y + 1), Color.Cyan, 0.6f);
 
                 if (macroHover)
                 {
                     Main.hoverItemName = "Add to macro";
-                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    if (leftClick)
                     {
                         MacroEditorUI.PendingSkillToAdd = skill.InternalName;
                         var macroUISystem = ModContent.GetInstance<MacroUISystem>();
@@ -979,14 +1142,14 @@ namespace Rpg.Common.UI
             y += 30;
             
             // Achievement list
-            int cardHeight = 50;
+            int cardHeight = 60;
             int visibleCards = (area.Y + area.Height - y) / (cardHeight + 5);
             
             // Convert to list for indexed access
             var achievementList = new List<KeyValuePair<string, AchievementData>>(achievements);
             
             // Handle scroll
-            if (area.Contains(Main.mouseX, Main.mouseY))
+            if (area.Contains(MousePosition))
             {
                 int scroll = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
                 achievementScrollOffset -= scroll / 30;
@@ -1033,6 +1196,7 @@ namespace Rpg.Common.UI
 
         private void DrawStatTooltip(SpriteBatch spriteBatch, StatType stat, int baseVal, int autoVal, int bonusVal)
         {
+            Point mouse = MousePosition;
             List<string> lines = GetStatTooltipLines(stat, baseVal, autoVal, bonusVal);
             if (lines.Count == 0)
                 return;
@@ -1041,18 +1205,22 @@ namespace Rpg.Common.UI
             int height = lines.Count * 18 + 10;
 
             Rectangle tooltipBounds = new Rectangle(
-                Main.mouseX + 20,
-                Main.mouseY - height / 2,
+                mouse.X + 20,
+                mouse.Y - height / 2,
                 width,
                 height
             );
 
-            if (tooltipBounds.Right > Main.screenWidth)
-                tooltipBounds.X = Main.mouseX - width - 20;
-            if (tooltipBounds.Bottom > Main.screenHeight)
-                tooltipBounds.Y = Main.screenHeight - height;
-            if (tooltipBounds.Y < 0)
-                tooltipBounds.Y = 0;
+            Vector2 topLeft = ScreenTopLeftUi;
+            int screenRight = (int)(topLeft.X + ScreenWidthUi);
+            int screenBottom = (int)(topLeft.Y + ScreenHeightUi);
+
+            if (tooltipBounds.Right > screenRight)
+                tooltipBounds.X = mouse.X - width - 20;
+            if (tooltipBounds.Bottom > screenBottom)
+                tooltipBounds.Y = screenBottom - height;
+            if (tooltipBounds.Y < topLeft.Y)
+                tooltipBounds.Y = (int)topLeft.Y;
 
             DrawPanel(spriteBatch, tooltipBounds, new Color(10, 15, 30, 240), new Color(60, 80, 120));
 
@@ -1106,7 +1274,7 @@ namespace Rpg.Common.UI
                     lines.Add("+1 Minion Slot at 10/30/60/100 FOC");
                     break;
                 case StatType.Vitality:
-                    lines.Add("+5 Max HP per point");
+                    lines.Add("+10 Max HP per point");
                     lines.Add("+0.02 HP Regen per point");
                     break;
                 case StatType.Stamina:
@@ -1127,6 +1295,8 @@ namespace Rpg.Common.UI
                     break;
                 case StatType.Fortitude:
                     lines.Add("+0.5% Debuff Duration Reduction per point");
+                    lines.Add("+0.3% Knockback Resist per point");
+                    lines.Add("+0.2% Damage Reduction per point");
                     break;
                 case StatType.Luck:
                     lines.Add("+0.5% Critical Chance per point");
@@ -1153,6 +1323,35 @@ namespace Rpg.Common.UI
                 return $"(B{baseVal})";
 
             return $"(B{baseVal} A{autoVal} +{bonus})";
+        }
+
+        private Point GetScaledMouse()
+        {
+            return UiInput.GetUiMousePoint();
+        }
+
+        private Rectangle BuildMenuBounds(float anchorX, float anchorY)
+        {
+            Vector2 topLeft = ScreenTopLeftUi;
+            int x = (int)(topLeft.X + ScreenWidthUi * anchorX - PANEL_WIDTH / 2);
+            int y = (int)(topLeft.Y + ScreenHeightUi * anchorY - PANEL_HEIGHT / 2);
+
+            x = Utils.Clamp(x, (int)topLeft.X, (int)(topLeft.X + ScreenWidthUi - PANEL_WIDTH));
+            y = Utils.Clamp(y, (int)topLeft.Y, (int)(topLeft.Y + ScreenHeightUi - PANEL_HEIGHT));
+
+            return new Rectangle(x, y, PANEL_WIDTH, PANEL_HEIGHT);
+        }
+
+        private void SaveMenuAnchor()
+        {
+            var config = ModContent.GetInstance<RpgClientConfig>();
+            if (config == null || ScreenWidthUi <= 0 || ScreenHeightUi <= 0)
+                return;
+
+            Vector2 topLeft = ScreenTopLeftUi;
+            config.RpgMenuPosX = MathHelper.Clamp((bounds.Center.X - topLeft.X) / ScreenWidthUi, 0f, 1f);
+            config.RpgMenuPosY = MathHelper.Clamp((bounds.Center.Y - topLeft.Y) / ScreenHeightUi, 0f, 1f);
+            config.SaveChanges(config, null, true, true);
         }
         
         private void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, Color bg, Color border)

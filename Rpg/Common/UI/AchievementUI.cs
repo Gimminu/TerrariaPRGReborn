@@ -135,10 +135,15 @@ namespace Rpg.Common.UI
             base.Update(gameTime);
             
             // Prevent clicks going through
-            if (mainPanel.ContainsPoint(Main.MouseScreen))
+            if (mainPanel.ContainsPoint(GetScaledMouse()))
             {
                 Main.LocalPlayer.mouseInterface = true;
             }
+        }
+
+        private static Vector2 GetScaledMouse()
+        {
+            return Main.MouseScreen;
         }
     }
     

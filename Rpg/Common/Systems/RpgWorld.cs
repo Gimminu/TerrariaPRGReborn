@@ -156,13 +156,15 @@ namespace Rpg.Common.Systems
 
         public override void LoadWorldData(TagCompound tag)
         {
-            WorldLevel = tag.GetInt("worldLevel");
+            int loadedLevel = tag.ContainsKey("worldLevel") ? tag.GetInt("worldLevel") : 1;
+            WorldLevel = Math.Clamp(loadedLevel, 1, RpgConstants.MAX_WORLD_LEVEL);
             
-            // Validate loaded value
-            if (WorldLevel < 1)
-                WorldLevel = 1;
-            if (WorldLevel > RpgConstants.MAX_WORLD_LEVEL)
-                WorldLevel = RpgConstants.MAX_WORLD_LEVEL;
+            if (WorldLevel <= 1)
+            {
+                int progressLevel = WorldProgression.CalculateWorldLevelFromProgress();
+                if (progressLevel > WorldLevel)
+                    WorldLevel = Math.Min(progressLevel, RpgConstants.MAX_WORLD_LEVEL);
+            }
         }
 
         #endregion

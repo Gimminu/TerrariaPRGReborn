@@ -89,7 +89,7 @@ namespace Rpg.Common
         public const float INTELLIGENCE_SPELL_POWER_PER_POINT = 0.005f;    // 0.5% spell power
         public const float INTELLIGENCE_MANA_COST_REDUCTION_PER_POINT = 0.002f; // 0.2% mana cost reduction
         public const float INTELLIGENCE_MAX_MANA_COST_REDUCTION = 0.5f;    // 50% max
-        public const int VITALITY_HP_PER_POINT = 5;                        // +5 HP
+        public const int VITALITY_HP_PER_POINT = 10;                       // +10 HP
         public const float VITALITY_HP_REGEN_PER_POINT = 0.02f;            // +0.02 HP/sec
         public const int STAMINA_MAX_PER_POINT = 2;                        // +2 max stamina
         public const float STAMINA_REGEN_PER_POINT = 0.05f;                // +0.05 stamina/sec
@@ -248,9 +248,9 @@ namespace Rpg.Common
         public const int MIN_NPC_XP = 5;
 
         // World level XP multiplier
-        public const float XP_WORLD_LEVEL_MULTIPLIER = 0.1f; // +10% per world level
-        public const float XP_MONSTER_LEVEL_MULTIPLIER = 0.01f; // +1% per monster level
-        public const float XP_MONSTER_LEVEL_MAX_MULTIPLIER = 2.5f; // Cap to avoid runaway scaling
+        public const float XP_WORLD_LEVEL_MULTIPLIER = 0.12f; // +12% per world level
+        public const float XP_MONSTER_LEVEL_MULTIPLIER = 0.02f; // +2% per monster level
+        public const float XP_MONSTER_LEVEL_MAX_MULTIPLIER = 3f; // Cap to avoid runaway scaling
 
         // Special case multipliers
         public const float EVENT_XP_MULTIPLIER = 0.5f;       // 50% for event monsters
@@ -261,24 +261,36 @@ namespace Rpg.Common
         // Multiplayer
         public const float MULTIPLAYER_XP_SHARE_RADIUS = 5000f; // Tiles
 
+        public const float MONSTER_PROJECTILE_SCALE_PER_LEVEL = 0.025f; // +2.5% per WL
+        public const float MONSTER_PROJECTILE_MAX_MULTIPLIER = 3f; // Cap for projectile buffs
+
+        // Biome scaling multipliers (global overlay on table)
+        public const float BIOME_BASE_LEVEL_MULT = 1.0f;     // Base level across biomes
+        public const float BIOME_GROWTH_MULT = 1.15f;        // Faster growth per world level
+        public const float BIOME_CAP_MULT = 1.0f;            // Base biome caps
+        public const float BIOME_RANGE_WIDTH_MULT = 0.25f;   // Fraction of cap range used for random spread
+
         #endregion
 
         #region World Level System
 
         // Monster scaling per world level
-        public const float MONSTER_HP_SCALE_PER_LEVEL = 0.03f;      // +3% HP per WL
+        public const float MONSTER_HP_SCALE_PER_LEVEL = 0.15f;      // +15% HP per level
 
         // Damage scaling by difficulty
-        public const float CLASSIC_DAMAGE_SCALE = 0.008f;           // +0.8% per WL
-        public const float EXPERT_DAMAGE_SCALE = 0.006f;            // +0.6% per WL
-        public const float MASTER_DAMAGE_SCALE = 0.004f;            // +0.4% per WL
-        public const float LEGENDARY_DAMAGE_SCALE = 0.002f;         // +0.2% per WL
+        public const float CLASSIC_DAMAGE_SCALE = 0.015f;            // +1.5% per level
+        public const float EXPERT_DAMAGE_SCALE = 0.008f;            // +0.8% per WL
+        public const float MASTER_DAMAGE_SCALE = 0.006f;            // +0.6% per WL
+        public const float LEGENDARY_DAMAGE_SCALE = 0.004f;         // +0.4% per WL
 
         // World level increase per boss
         public const int WL_INCREASE_SMALL = 1;
         public const int WL_INCREASE_MEDIUM = 2;
         public const int WL_INCREASE_LARGE = 3;
         public const int MAX_WORLD_LEVEL = int.MaxValue;
+        public const int WORLD_LEVEL_CAP_STEP = 10;
+        public const float BOSS_PROGRESSION_WORLD_LEVEL_MULT = 2.0f;
+        public const float BOSS_PROGRESSION_WORLD_LEVEL_BASE = 2.0f;
 
         #endregion
 

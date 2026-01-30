@@ -5,8 +5,11 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Rpg.Common;
 using Rpg.Common.Players;
 using Rpg.Common.Systems;
+using Rpg.Common.NPCs;
+using Rpg.Common.Config;
 
 namespace Rpg.Common.UI
 {
@@ -28,14 +31,14 @@ namespace Rpg.Common.UI
                 return;
             
             // Get client config
-            var config = ModContent.GetInstance<Config.RpgClientConfig>();
+            var config = ModContent.GetInstance<RpgClientConfig>();
             if (config != null && !config.ShowMonsterLevel)
                 return;
             
-            DrawMonsterLevels(spriteBatch);
+            DrawMonsterLevels(spriteBatch, config);
         }
         
-        private void DrawMonsterLevels(SpriteBatch spriteBatch)
+        private void DrawMonsterLevels(SpriteBatch spriteBatch, Config.RpgClientConfig config)
         {
             Player player = Main.LocalPlayer;
             var rpgPlayer = player.GetModPlayer<RpgPlayer>();
@@ -53,13 +56,25 @@ namespace Rpg.Common.UI
             {
                 if (!npc.active || npc.friendly || npc.townNPC || npc.lifeMax <= 5)
                     continue;
+
+                if (IsDuplicateSegment(npc))
+                    continue;
                 
                 // Check if on screen
                 if (!IsOnScreen(npc))
                     continue;
                 
                 float distance = Vector2.Distance(playerCenter, npc.Center);
-                int monsterLevel = BiomeLevelSystem.CalculateMonsterLevel(npc);
+                int monsterLevel = npc.GetGlobalNPC<RpgGlobalNPC>().MonsterLevel;
+                if (monsterLevel <= 0)
+                {
+                    // Fallback for edge cases: calculate once if not set
+                    if (npc.boss || RpgFormulas.IsBossHead(npc.type))
+                        monsterLevel = RpgFormulas.GetBossLevel(npc.type);
+                    else
+                        monsterLevel = BiomeLevelSystem.CalculateMonsterLevel(npc);
+                    npc.GetGlobalNPC<RpgGlobalNPC>().MonsterLevel = monsterLevel;
+                }
                 
                 monstersToDisplay.Add((npc, distance, monsterLevel));
             }
@@ -86,7 +101,9 @@ namespace Rpg.Common.UI
                 if (inEvent && !npc.boss && distance > PRIORITY_RANGE * 2)
                     continue;
                 
-                Color levelColor = BiomeLevelSystem.GetLevelColor(monsterLevel, playerLevel);
+                Color levelColor = (config != null && !config.ColorCodeMonsterLevel)
+                    ? Color.White
+                    : BiomeLevelSystem.GetLevelColor(monsterLevel, playerLevel);
                 
                 // Fade out distant monsters during events
                 if (inEvent && distance > PRIORITY_RANGE)
@@ -121,6 +138,14 @@ namespace Rpg.Common.UI
             
             return screenRect.Contains(npc.Center.ToPoint());
         }
+
+        private static bool IsDuplicateSegment(NPC npc)
+        {
+            if (npc.realLife >= 0 && npc.realLife != npc.whoAmI)
+                return true;
+
+            return RpgFormulas.IsBodySegment(npc.type);
+        }
         
         private void DrawLevelText(SpriteBatch spriteBatch, NPC npc, int level, Color color)
         {
@@ -131,7 +156,16 @@ namespace Rpg.Common.UI
             
             // Position above NPC
             Vector2 screenPos = npc.Top - Main.screenPosition;
-            screenPos.Y -= 20; // Offset above NPC
+            screenPos.Y -= 24; // Offset above NPC
+            
+            // Draw Name (if not boss, as bosses usually have big health bars)
+            if (!npc.boss)
+            {
+                string nameText = npc.FullName;
+                Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(nameText) * 0.7f;
+                Vector2 namePos = new Vector2(screenPos.X - nameSize.X / 2, screenPos.Y - 18);
+                DrawTextWithOutline(spriteBatch, nameText, namePos, Color.LightGray, 0.7f);
+            }
             
             // Format text with difficulty indicator (난이도 표시)
             string levelText = $"Lv.{level}";
@@ -144,11 +178,11 @@ namespace Rpg.Common.UI
             }
             
             // Get text size for centering
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(levelText) * 0.7f;
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(levelText) * 0.8f;
             screenPos.X -= textSize.X / 2;
             
             // Draw with outline for visibility
-            DrawTextWithOutline(spriteBatch, levelText, screenPos, color, 0.7f);
+            DrawTextWithOutline(spriteBatch, levelText, screenPos, color, 0.8f);
             
             // Draw XP efficiency indicator below level (경험치 효율 표시)
             if (!npc.boss)

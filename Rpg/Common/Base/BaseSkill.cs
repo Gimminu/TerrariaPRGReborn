@@ -1,6 +1,9 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
 using Terraria.ModLoader;
+using Rpg.Common;
 using Rpg.Common.Effects;
 using Rpg.Common.Jobs;
 
@@ -174,11 +177,12 @@ namespace Rpg.Common.Base
         /// </summary>
         protected virtual bool HasEnoughResource(Player player)
         {
+            int cost = GetEffectiveResourceCost(player);
             return ResourceType switch
             {
-                ResourceType.Mana => player.statMana >= ResourceCost,
-                ResourceType.Life => player.statLife >= ResourceCost,
-                ResourceType.Stamina => player.GetModPlayer<Players.RpgPlayer>().Stamina >= ResourceCost,
+                ResourceType.Mana => player.statMana >= cost,
+                ResourceType.Life => player.statLife >= cost,
+                ResourceType.Stamina => player.GetModPlayer<Players.RpgPlayer>().Stamina >= cost,
                 _ => true
             };
         }
@@ -188,17 +192,52 @@ namespace Rpg.Common.Base
         /// </summary>
         protected virtual void ConsumeResource(Player player)
         {
+            int cost = GetEffectiveResourceCost(player);
             switch (ResourceType)
             {
                 case ResourceType.Mana:
-                    player.statMana -= ResourceCost;
+                    player.statMana -= cost;
                     break;
                 case ResourceType.Life:
-                    player.statLife -= ResourceCost;
+                    player.statLife -= cost;
                     break;
                 case ResourceType.Stamina:
-                    player.GetModPlayer<Players.RpgPlayer>().ConsumeStamina(ResourceCost);
+                    player.GetModPlayer<Players.RpgPlayer>().ConsumeStamina(cost);
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Get resource cost after stat-based reductions (e.g., Intelligence mana cost reduction)
+        /// </summary>
+        public virtual int GetEffectiveResourceCost(Player player)
+        {
+            int baseCost = ResourceCost;
+            if (baseCost <= 0)
+                return 0;
+
+            switch (ResourceType)
+            {
+                case ResourceType.Mana:
+                    {
+                        float costMultiplier = System.Math.Max(0f, player.manaCost);
+                        var rpgPlayer = player.GetModPlayer<Players.RpgPlayer>();
+                        float intReduction = 0f;
+                        if (rpgPlayer != null)
+                        {
+                            intReduction = System.Math.Min(
+                                rpgPlayer.TotalIntelligence * RpgConstants.INTELLIGENCE_MANA_COST_REDUCTION_PER_POINT,
+                                RpgConstants.INTELLIGENCE_MAX_MANA_COST_REDUCTION);
+                        }
+
+                        float finalCost = baseCost * costMultiplier * (1f - intReduction);
+                        if (finalCost <= 0f)
+                            return 0;
+
+                        return System.Math.Max(1, (int)System.Math.Ceiling(finalCost));
+                    }
+                default:
+                    return baseCost;
             }
         }
 
@@ -230,12 +269,69 @@ namespace Rpg.Common.Base
             ConsumeResource(player);
             CurrentCooldown = GetActualCooldown(player);
 
+            // Enhanced activation effects for RPG feel
+            PlayActivationEffects(player);
+
             // Play activation sound/visual
             OnActivate(player);
 
             if (SkillEffect != null)
             {
                 SpawnEffect(player, 1);
+            }
+        }
+
+        /// <summary>
+        /// Play enhanced activation effects for skills
+        /// </summary>
+        private void PlayActivationEffects(Player player)
+        {
+            if (Main.netMode == NetmodeID.Server)
+                return;
+
+            // Different sound effects based on skill type
+            switch (SkillType)
+            {
+                case SkillType.Active:
+                    SoundEngine.PlaySound(SoundID.Item43, player.position); // Magic activation sound
+                    break;
+                case SkillType.Passive:
+                    // Passives don't play activation sounds
+                    break;
+            }
+
+            // Visual effects based on skill type
+            Color effectColor = GetSkillEffectColor();
+            
+            // Create skill activation particles
+            for (int i = 0; i < 15; i++)
+            {
+                Vector2 velocity = Main.rand.NextVector2Circular(4f, 4f);
+                Dust dust = Dust.NewDustPerfect(
+                    player.Center,
+                    DustID.MagicMirror,
+                    velocity,
+                    Scale: Main.rand.NextFloat(0.8f, 1.2f)
+                );
+                dust.noGravity = true;
+                dust.color = effectColor;
+                dust.fadeIn = 0.3f;
+            }
+        }
+
+        /// <summary>
+        /// Get color for skill activation effects based on skill type
+        /// </summary>
+        private Color GetSkillEffectColor()
+        {
+            switch (SkillType)
+            {
+                case SkillType.Active:
+                    return new Color(100, 200, 255); // Blue for active skills
+                case SkillType.Passive:
+                    return new Color(255, 255, 100); // Yellow for passive skills
+                default:
+                    return Color.White;
             }
         }
 
@@ -281,7 +377,7 @@ namespace Rpg.Common.Base
         /// </summary>
         protected float GetScaledPower(float basePower)
         {
-            return basePower * (1f + (CurrentRank - 1) * 0.2f); // 20% increase per rank
+            return basePower * (1f + (CurrentRank - 1) * 0.25f); // 25% per rank for sharper scaling
         }
 
         /// <summary>

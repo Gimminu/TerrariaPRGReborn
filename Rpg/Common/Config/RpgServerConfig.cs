@@ -38,23 +38,33 @@ namespace Rpg.Common.Config
         
         [Header("ScalingSettings")]
         
-        [DefaultValue(0.03f)]
-        [Range(0.01f, 0.10f)]
+        [DefaultValue(0.15f)]
+        [Range(0.01f, 0.50f)]
         [Slider]
-        public float MonsterHPScalePerLevel { get; set; } = 0.03f;
+        public float MonsterHPScalePerLevel { get; set; } = 0.15f;
         
-        [DefaultValue(0.008f)]
-        [Range(0.001f, 0.02f)]
+        [DefaultValue(0.015f)]
+        [Range(0.001f, 0.05f)]
         [Slider]
-        public float MonsterDamageScalePerLevel { get; set; } = 0.008f;
+        public float MonsterDamageScalePerLevel { get; set; } = 0.015f;
+        
+        [DefaultValue(0.15f)]
+        [Range(0.01f, 0.50f)]
+        [Slider]
+        public float BossHPScalePerLevel { get; set; } = 0.15f;
+        
+        [DefaultValue(0.015f)]
+        [Range(0.001f, 0.05f)]
+        [Slider]
+        public float BossDamageScalePerLevel { get; set; } = 0.015f;
         
         [DefaultValue(false)]
         public bool ScaleMonsterDefense { get; set; } = false;
         
-        [DefaultValue(0.001f)]
-        [Range(0.0f, 0.01f)]
+        [DefaultValue(0.01f)]
+        [Range(0.0f, 0.05f)]
         [Slider]
-        public float MonsterDefenseScalePerLevel { get; set; } = 0.001f;
+        public float MonsterDefenseScalePerLevel { get; set; } = 0.01f;
         
         #endregion
         
@@ -117,6 +127,18 @@ namespace Rpg.Common.Config
         [Range(0.3f, 1.0f)]
         [Slider]
         public float MasterModeScaleReduction { get; set; } = 0.6f;
+        
+        #endregion
+        
+        #region Feature Toggles
+        
+        [Header("FeatureToggles")]
+        
+        [DefaultValue(true)]
+        public bool EnableJobSystem { get; set; } = true;
+        
+        [DefaultValue(true)]
+        public bool EnableSkillSystem { get; set; } = true;
         
         #endregion
         

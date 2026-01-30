@@ -200,6 +200,15 @@ namespace Rpg.Common.Skills
             return $"{MacroHotbarPrefix}{macroIndex}";
         }
 
+        /// <summary>
+        /// Clear all hotbar assignments (skills/macros).
+        /// </summary>
+        public void ClearHotbar()
+        {
+            SkillHotbar = new string[9];
+            ShowMessage("Skill hotbar cleared.", Color.LightGray);
+        }
+
         public static bool TryParseMacroEntry(string entry, out int macroIndex)
         {
             macroIndex = -1;
@@ -249,25 +258,26 @@ namespace Rpg.Common.Skills
         private bool HasEnoughResource(BaseSkill skill)
         {
             var rpgPlayer = Player.GetModPlayer<Players.RpgPlayer>();
+            int cost = skill.GetEffectiveResourceCost(Player);
 
             switch (skill.ResourceType)
             {
                 case ResourceType.Stamina:
-                    if (rpgPlayer.Stamina < skill.ResourceCost)
+                    if (rpgPlayer.Stamina < cost)
                     {
                         ShowMessage("Not enough stamina!", Color.OrangeRed);
                         return false;
                     }
                     break;
                 case ResourceType.Mana:
-                    if (Player.statMana < skill.ResourceCost)
+                    if (Player.statMana < cost)
                     {
                         ShowMessage("Not enough mana!", Color.OrangeRed);
                         return false;
                     }
                     break;
                 case ResourceType.Life:
-                    if (Player.statLife < skill.ResourceCost)
+                    if (Player.statLife < cost)
                     {
                         ShowMessage("Not enough life!", Color.OrangeRed);
                         return false;

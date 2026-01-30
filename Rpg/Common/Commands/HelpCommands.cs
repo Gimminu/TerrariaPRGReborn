@@ -27,6 +27,7 @@ namespace Rpg.Common.Commands
             Main.NewText("/rpgworldlevel [level] - Set world level (debug)", Color.Gray);
             Main.NewText("/rpgreset confirm - Reset character (debug)", Color.Gray);
             Main.NewText("/rpgunlockbosses - Unlock all bosses (debug)", Color.Gray);
+            Main.NewText("/rpgclearhotbar - Clear all skill hotbar assignments", Color.White);
         }
     }
     
@@ -42,13 +43,12 @@ namespace Rpg.Common.Commands
         public override void Action(CommandCaller caller, string input, string[] args)
         {
             Main.NewText("=== RPG Mod Keybinds ===", Color.Cyan);
-            Main.NewText("C - Open Stats Window", Color.White);
-            Main.NewText("K - Open Skills Window", Color.White);
-            Main.NewText("J - Open Achievements", Color.White);
-            Main.NewText("M - Open Macro Editor", Color.White);
+            Main.NewText("C - Open RPG Menu", Color.White);
+            Main.NewText("O - Toggle Quest UI", Color.White);
             Main.NewText("1-9 - Use Skill in Hotbar Slot", Color.White);
             Main.NewText("NumPad 1-5 - Execute Macro", Color.White);
-            Main.NewText("", Color.White);
+            Main.NewText("F - Dash", Color.White);
+            Main.NewText("/rpgclearhotbar - Clear skill slot assignments", Color.Gray);
             Main.NewText("Customize in Settings > Controls > Mod Controls", Color.Yellow);
         }
     }

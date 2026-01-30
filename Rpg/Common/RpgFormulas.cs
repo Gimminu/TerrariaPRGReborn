@@ -1,6 +1,10 @@
 using System;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
+using Rpg.Common.Compatibility;
+using Rpg.Common.Config;
+using Rpg.Common.Systems;
 
 namespace Rpg.Common
 {
@@ -71,7 +75,11 @@ namespace Rpg.Common
         /// </summary>
         public static int GetMaxLevel()
         {
-            int maxLevel = RpgConstants.BASE_LEVEL_CAP;
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null && !serverConfig.EnableBossLevelCaps)
+                return int.MaxValue;
+
+            int maxLevel = RpgConstants.BASE_LEVEL_CAP + ModCompatibilitySystem.GetTotalModLevelCapBonus();
 
             foreach (var step in LevelCapSteps)
             {
@@ -89,7 +97,7 @@ namespace Rpg.Common
 
         public static bool TryGetNextCapInfo(out int nextCap, out string requirement)
         {
-            int maxLevel = RpgConstants.BASE_LEVEL_CAP;
+            int maxLevel = RpgConstants.BASE_LEVEL_CAP + ModCompatibilitySystem.GetTotalModLevelCapBonus();
 
             foreach (var step in LevelCapSteps)
             {
@@ -201,7 +209,9 @@ namespace Rpg.Common
         /// </summary>
         public static float GetWorldLevelXPMultiplier(int worldLevel)
         {
-            return 1f + (worldLevel * RpgConstants.XP_WORLD_LEVEL_MULTIPLIER);
+            float baseMultiplier = 1f + (worldLevel * RpgConstants.XP_WORLD_LEVEL_MULTIPLIER);
+            float logBonus = (float)(Math.Log(1.0 + worldLevel) * 0.05f);
+            return baseMultiplier + logBonus;
         }
 
         /// <summary>
@@ -213,7 +223,8 @@ namespace Rpg.Common
                 Main.pumpkinMoon || Main.snowMoon ||
                 Main.invasionType > 0)
             {
-                return RpgConstants.EVENT_XP_MULTIPLIER; // 0.5
+                var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+                return serverConfig?.EventXPMultiplier ?? RpgConstants.EVENT_XP_MULTIPLIER;
             }
             return 1f;
         }
@@ -259,44 +270,59 @@ namespace Rpg.Common
         /// </summary>
         public static long GetRequiredXP(int currentLevel)
         {
-            // Novice (1-10): Fast growth
-            if (currentLevel < 10)
+            // Inspired by AnotherRPG: a smooth exponential/log composite curve
+            double baseGrowth = Math.Pow(1.12 + Math.Log(1.0 + currentLevel) * 0.01, currentLevel);
+            double tierBonus = currentLevel switch
             {
-                return (long)(100 * Math.Pow(1.5, currentLevel - 1));
-            }
+                < 10 => 0.7,
+                < 60 => 1.0,
+                < 120 => 1.35,
+                _ => 1.75
+            };
 
-            // 1st Job (10-60): Moderate growth
-            if (currentLevel < 60)
-            {
-                int baseXP = 2000;
-                double growth = Math.Pow(1.3, currentLevel - 10);
-                return baseXP + (long)(500 * growth);
-            }
-
-            // 2nd Job (60-120): Slow growth
-            if (currentLevel < 120)
-            {
-                int baseXP = 50000;
-                double growth = Math.Pow(1.25, currentLevel - 60);
-                return baseXP + (long)(5000 * growth);
-            }
-
-            // 3rd Job (120+): Very slow growth
-            int endgameBase = 500000;
-            double endgameGrowth = Math.Pow(1.2, currentLevel - 120);
-            return endgameBase + (long)(50000 * endgameGrowth);
+            long target = (long)(baseGrowth * 90 * tierBonus);
+            return Math.Max(100, Math.Min(target, long.MaxValue / 2));
         }
 
         #endregion
 
         #region Monster Scaling
 
+        private static float GetHealthScalingPower()
+        {
+            if (NPC.downedPlantBoss || NPC.downedGolemBoss)
+                return 1.2f;
+            if (Main.hardMode)
+                return 1.1f;
+            return 1.0f;
+        }
+
         /// <summary>
         /// Get monster HP multiplier based on world level
         /// </summary>
         public static float GetMonsterHPMultiplier(int worldLevel)
         {
-            return 1f + (worldLevel * RpgConstants.MONSTER_HP_SCALE_PER_LEVEL);
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float scalePerLevel = serverConfig?.MonsterHPScalePerLevel ?? RpgConstants.MONSTER_HP_SCALE_PER_LEVEL;
+            float baseMultiplier = 1f + (worldLevel * scalePerLevel);
+            return (float)Math.Pow(baseMultiplier, GetHealthScalingPower());
+        }
+
+        /// <summary>
+        /// Get monster HP multiplier based on monster level (for biome-scaled monsters)
+        /// </summary>
+        public static float GetMonsterHPMultiplierForLevel(int monsterLevel)
+        {
+            if (monsterLevel <= 1)
+                return 1f;
+
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float scalePerLevel = serverConfig?.MonsterHPScalePerLevel ?? RpgConstants.MONSTER_HP_SCALE_PER_LEVEL;
+            
+            // Use monster level directly for scaling
+            float linear = 1f + (monsterLevel * scalePerLevel);
+            float exponential = (float)Math.Pow(1.01f, monsterLevel);
+            return Math.Max(linear, exponential);
         }
 
         /// <summary>
@@ -304,16 +330,192 @@ namespace Rpg.Common
         /// </summary>
         public static float GetMonsterDamageMultiplier(int worldLevel)
         {
-            float scaleRate = RpgConstants.CLASSIC_DAMAGE_SCALE;
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float baseScaleRate = serverConfig?.MonsterDamageScalePerLevel ?? RpgConstants.CLASSIC_DAMAGE_SCALE;
+
+            float scaleRate = baseScaleRate;
 
             if (Main.masterMode)
-                scaleRate = RpgConstants.MASTER_DAMAGE_SCALE;      // 0.002 (slowest)
-            else if (Main.getGoodWorld) // For the Worthy
-                scaleRate = RpgConstants.EXPERT_DAMAGE_SCALE;      // 0.006
+                scaleRate = baseScaleRate * (serverConfig?.MasterModeScaleReduction ?? RpgConstants.MASTER_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.getGoodWorld)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
             else if (Main.expertMode)
-                scaleRate = RpgConstants.EXPERT_DAMAGE_SCALE;      // 0.004
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
 
-            return 1f + (worldLevel * scaleRate);
+            float linear = 1f + (worldLevel * scaleRate);
+            float exponential = (float)Math.Pow(1.01f, worldLevel);
+            float bonus = (exponential - 1f) * 0.4f;
+            float combined = linear + bonus;
+            float taperedMax = 1f + (worldLevel * scaleRate * 2f);
+            return Math.Min(combined, taperedMax);
+        }
+
+        /// <summary>
+        /// Get monster damage multiplier based on monster level
+        /// </summary>
+        public static float GetMonsterDamageMultiplierForLevel(int monsterLevel)
+        {
+            if (monsterLevel <= 1)
+                return 1f;
+
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float baseScaleRate = serverConfig?.MonsterDamageScalePerLevel ?? RpgConstants.CLASSIC_DAMAGE_SCALE;
+
+            float scaleRate = baseScaleRate;
+
+            if (Main.masterMode)
+                scaleRate = baseScaleRate * (serverConfig?.MasterModeScaleReduction ?? RpgConstants.MASTER_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.getGoodWorld)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.expertMode)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+
+            float linear = 1f + (monsterLevel * scaleRate);
+            float exponential = (float)Math.Pow(1.01f, monsterLevel);
+            float bonus = (exponential - 1f) * 0.4f;
+            float combined = linear + bonus;
+            float taperedMax = 1f + (monsterLevel * scaleRate * 2f);
+            return Math.Min(combined, taperedMax);
+        }
+
+        /// <summary>
+        /// Get boss HP multiplier based on world level
+        /// </summary>
+        public static float GetBossHPMultiplier(int worldLevel)
+        {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float scalePerLevel = serverConfig?.BossHPScalePerLevel ?? 0.05f;
+            float baseMultiplier = 1f + (worldLevel * scalePerLevel);
+            return (float)Math.Pow(baseMultiplier, GetHealthScalingPower());
+        }
+
+        /// <summary>
+        /// Get boss HP multiplier based on boss level
+        /// </summary>
+        public static float GetBossHPMultiplierForLevel(int bossLevel)
+        {
+            if (bossLevel <= 1)
+                return 1f;
+
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float scalePerLevel = serverConfig?.BossHPScalePerLevel ?? 0.15f;
+            
+            float linear = 1f + (bossLevel * scalePerLevel);
+            float exponential = (float)Math.Pow(1.01f, bossLevel);
+            return Math.Max(linear, exponential);
+        }
+
+        /// <summary>
+        /// Get boss damage multiplier based on world level and difficulty
+        /// </summary>
+        public static float GetBossDamageMultiplier(int worldLevel)
+        {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float baseScaleRate = serverConfig?.BossDamageScalePerLevel ?? 0.012f;
+
+            float scaleRate = baseScaleRate;
+
+            if (Main.masterMode)
+                scaleRate = baseScaleRate * (serverConfig?.MasterModeScaleReduction ?? RpgConstants.MASTER_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.getGoodWorld)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.expertMode)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+
+            float linear = 1f + (worldLevel * scaleRate);
+            float exponential = (float)Math.Pow(1.01f, worldLevel);
+            float bonus = (exponential - 1f) * 0.4f;
+            float combined = linear + bonus;
+            float taperedMax = 1f + (worldLevel * scaleRate * 2f);
+            return Math.Min(combined, taperedMax);
+        }
+
+        /// <summary>
+        /// Get boss damage multiplier based on boss level
+        /// </summary>
+        public static float GetBossDamageMultiplierForLevel(int bossLevel)
+        {
+            if (bossLevel <= 1)
+                return 1f;
+
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float baseScaleRate = serverConfig?.BossDamageScalePerLevel ?? 0.015f;
+
+            float scaleRate = baseScaleRate;
+
+            if (Main.masterMode)
+                scaleRate = baseScaleRate * (serverConfig?.MasterModeScaleReduction ?? RpgConstants.MASTER_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.getGoodWorld)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+            else if (Main.expertMode)
+                scaleRate = baseScaleRate * (serverConfig?.ExpertModeScaleReduction ?? RpgConstants.EXPERT_DAMAGE_SCALE / RpgConstants.CLASSIC_DAMAGE_SCALE);
+
+            float linear = 1f + (bossLevel * scaleRate);
+            float exponential = (float)Math.Pow(1.01f, bossLevel);
+            float bonus = (exponential - 1f) * 0.4f;
+            float combined = linear + bonus;
+            float taperedMax = 1f + (bossLevel * scaleRate * 2f);
+            return Math.Min(combined, taperedMax);
+        }
+
+        /// <summary>
+        /// Get monster defense multiplier based on world level
+        /// </summary>
+        public static float GetMonsterDefenseMultiplier(int worldLevel)
+        {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig == null || !serverConfig.ScaleMonsterDefense)
+                return 1f;
+                
+            float scalePerLevel = serverConfig.MonsterDefenseScalePerLevel;
+            return 1f + (worldLevel * scalePerLevel);
+        }
+
+        /// <summary>
+        /// Get monster defense multiplier based on monster level
+        /// </summary>
+        public static float GetMonsterDefenseMultiplierForLevel(int monsterLevel)
+        {
+            if (monsterLevel <= 1)
+                return 1f;
+
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig == null || !serverConfig.ScaleMonsterDefense)
+                return 1f;
+                
+            float scalePerLevel = serverConfig.MonsterDefenseScalePerLevel;
+            return 1f + (monsterLevel * scalePerLevel);
+        }
+
+        /// <summary>
+        /// Get boss defense multiplier based on world level
+        /// </summary>
+        public static float GetBossDefenseMultiplier(int worldLevel)
+        {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig == null || !serverConfig.ScaleMonsterDefense)
+                return 1f;
+                
+            // Bosses use the same defense scaling as monsters for now
+            float scalePerLevel = serverConfig.MonsterDefenseScalePerLevel;
+            return 1f + (worldLevel * scalePerLevel);
+        }
+
+        /// <summary>
+        /// Get boss defense multiplier based on boss level
+        /// </summary>
+        public static float GetBossDefenseMultiplierForLevel(int bossLevel)
+        {
+            if (bossLevel <= 1)
+                return 1f;
+
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig == null || !serverConfig.ScaleMonsterDefense)
+                return 1f;
+                
+            // Bosses use the same defense scaling as monsters for now
+            float scalePerLevel = serverConfig.MonsterDefenseScalePerLevel;
+            return 1f + (bossLevel * scalePerLevel);
         }
 
         /// <summary>
@@ -329,9 +531,66 @@ namespace Rpg.Common
         #region Boss Levels
 
         /// <summary>
-        /// Get predefined boss level
+        /// Get boss level based on base tier and progression
         /// </summary>
         public static int GetBossLevel(int npcType)
+        {
+            int baseLevel = GetBossBaseLevel(npcType);
+            int progressionLevel = GetBossProgressionLevel();
+            return Math.Max(baseLevel, progressionLevel);
+        }
+
+        private static int GetBossProgressionLevel()
+        {
+            int progressionLevel = 1;
+
+            if (NPC.downedSlimeKing)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.KingSlime));
+            if (NPC.downedBoss1)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.EyeofCthulhu));
+            if (NPC.downedBoss2)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.EaterofWorldsHead));
+            if (NPC.downedQueenBee)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.QueenBee));
+            if (NPC.downedBoss3)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.SkeletronHead));
+            if (NPC.downedDeerclops)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.Deerclops));
+            if (Main.hardMode)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.WallofFlesh));
+            if (NPC.downedQueenSlime)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.QueenSlimeBoss));
+            if (NPC.downedMechBoss1)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.TheDestroyer));
+            if (NPC.downedMechBoss2)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.Retinazer));
+            if (NPC.downedMechBoss3)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.SkeletronPrime));
+            if (NPC.downedPlantBoss)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.Plantera));
+            if (NPC.downedGolemBoss)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.Golem));
+            if (NPC.downedFishron)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.DukeFishron));
+            if (NPC.downedEmpressOfLight)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.HallowBoss));
+            if (NPC.downedAncientCultist)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.CultistBoss));
+            if (NPC.downedMoonlord)
+                progressionLevel = Math.Max(progressionLevel, GetBossBaseLevel(NPCID.MoonLordCore));
+
+            int worldLevelProgression = GetBossProgressionLevelFromWorldLevel(RpgWorld.GetWorldLevel());
+            return Math.Max(progressionLevel, worldLevelProgression);
+        }
+
+        private static int GetBossProgressionLevelFromWorldLevel(int worldLevel)
+        {
+            int safeWorldLevel = Math.Max(1, worldLevel);
+            float scaled = (safeWorldLevel * RpgConstants.BOSS_PROGRESSION_WORLD_LEVEL_MULT) + RpgConstants.BOSS_PROGRESSION_WORLD_LEVEL_BASE;
+            return Math.Max(1, (int)MathF.Round(scaled));
+        }
+
+        private static int GetBossBaseLevel(int npcType)
         {
             return npcType switch
             {
@@ -443,7 +702,7 @@ namespace Rpg.Common
 
             if (job == JobType.Summoner || job == JobType.Beastmaster ||
                 job == JobType.Necromancer || job == JobType.Overlord ||
-                job == JobType.Lichking || job == JobType.Druid)
+                job == JobType.LichKing || job == JobType.Druid)
             {
                 baseBonus *= RpgConstants.PRIMARY_STAT_EFFICIENCY;
             }

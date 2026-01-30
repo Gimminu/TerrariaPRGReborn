@@ -2,7 +2,6 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using System.Collections.Generic;
-using System.Reflection;
 using Rpg.Common.Compatibility;
 
 namespace Rpg.Common.Systems
@@ -178,6 +177,11 @@ namespace Rpg.Common.Systems
                 if (modBossData.HasValue)
                 {
                     worldLevelIncrease = modBossData.Value.worldLevel;
+                    bool firstKill = ModCompatibilitySystem.RegisterModBossKill(bossType);
+                    if (firstKill && modBossData.Value.levelCap > 0)
+                    {
+                        AnnounceModBossCapIncrease(modBossData.Value.levelCap);
+                    }
                 }
             }
 
@@ -193,13 +197,20 @@ namespace Rpg.Common.Systems
 
         #region Utility
 
-        /// <summary>
-        /// Manually recalculate world level from current boss flags
-        /// (useful for existing worlds)
-        /// </summary>
-        public static void RecalculateWorldLevel()
+        private static void AnnounceModBossCapIncrease(int capIncrease)
         {
-            processedBosses.Clear();
+            if (Main.netMode == NetmodeID.Server)
+                return;
+
+            string message = $"Mod Boss defeated! Level Cap increased by {capIncrease}.";
+            Main.NewText(message, Microsoft.Xna.Framework.Color.LightSkyBlue);
+        }
+
+        /// <summary>
+        /// Calculate world level from current boss flags (no side effects).
+        /// </summary>
+        public static int CalculateWorldLevelFromProgress()
+        {
             int totalIncrease = 0;
 
             // Check all boss flags and sum up increases
@@ -210,7 +221,7 @@ namespace Rpg.Common.Systems
             if (NPC.downedBoss3) totalIncrease += RpgConstants.WL_INCREASE_MEDIUM; // Skeletron
             if (NPC.downedDeerclops) totalIncrease += RpgConstants.WL_INCREASE_SMALL;
             if (Main.hardMode) totalIncrease += RpgConstants.WL_INCREASE_LARGE; // Wall of Flesh
-            
+
             if (NPC.downedQueenSlime) totalIncrease += RpgConstants.WL_INCREASE_MEDIUM;
             if (NPC.downedMechBoss1) totalIncrease += RpgConstants.WL_INCREASE_MEDIUM; // Destroyer
             if (NPC.downedMechBoss2) totalIncrease += RpgConstants.WL_INCREASE_MEDIUM; // Twins
@@ -223,17 +234,42 @@ namespace Rpg.Common.Systems
             if (NPC.downedMoonlord) totalIncrease += RpgConstants.WL_INCREASE_LARGE;
 
             // Set world level (start at 1, add all increases)
-            int newWorldLevel = 1 + totalIncrease;
-            
-            // This bypasses the normal increase method
-            // (WorldProgression can access RpgWorld's internal state)
-            PropertyInfo worldLevelProperty = typeof(RpgWorld).GetProperty(
-                "WorldLevel",
-                BindingFlags.Public | BindingFlags.Static
-            );
-            worldLevelProperty?.SetValue(null, newWorldLevel);
+            return 1 + totalIncrease;
+        }
 
-            Main.NewText($"World Level recalculated: {newWorldLevel}", Microsoft.Xna.Framework.Color.Orange);
+        /// <summary>
+        /// Manually recalculate world level from current boss flags
+        /// (useful for existing worlds)
+        /// </summary>
+        public static void RecalculateWorldLevel(bool showMessage = true)
+        {
+            processedBosses.Clear();
+            int newWorldLevel = CalculateWorldLevelFromProgress();
+
+            RpgWorld.SetWorldLevel(newWorldLevel);
+            SeedProcessedBossesFromProgress();
+
+            if (showMessage && Main.netMode != NetmodeID.Server)
+                Main.NewText($"World Level recalculated: {newWorldLevel}", Microsoft.Xna.Framework.Color.Orange);
+        }
+
+        /// <summary>
+        /// Get current progression stage based on processed bosses
+        /// </summary>
+        public static string GetCurrentProgressionStage()
+        {
+            if (processedBosses.Contains(NPCID.MoonLordCore))
+                return "Post-Moon Lord";
+            if (processedBosses.Contains(NPCID.Golem))
+                return "Post-Golem";
+            if (processedBosses.Contains(NPCID.Plantera))
+                return "Post-Plantera";
+            if (processedBosses.Contains(NPCID.TheDestroyer) || processedBosses.Contains(NPCID.Retinazer) || 
+                processedBosses.Contains(NPCID.Spazmatism) || processedBosses.Contains(NPCID.SkeletronPrime))
+                return "Mid Hardmode";
+            if (processedBosses.Contains(NPCID.WallofFlesh))
+                return "Early Hardmode";
+            return "Pre-Hardmode";
         }
 
         #endregion

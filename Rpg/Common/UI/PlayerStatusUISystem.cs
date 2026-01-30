@@ -44,20 +44,6 @@ namespace Rpg.Common.UI
         
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
-            var config = ModContent.GetInstance<RpgClientConfig>();
-            bool hideVanillaBars = config?.HideVanillaResourceBars ?? true;
-            
-            // Hide vanilla HP and Mana bars when our custom UI is active
-            if (hideVanillaBars && !Main.gameMenu && !Main.ingameOptionsWindow && !Main.playerInventory && !Main.inFancyUI)
-            {
-                // Find and hide vanilla resource bars
-                int resourceBarIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Resource Bars"));
-                if (resourceBarIndex != -1)
-                {
-                    layers.RemoveAt(resourceBarIndex);
-                }
-            }
-            
             int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
             if (mouseTextIndex != -1)
             {
@@ -65,8 +51,7 @@ namespace Rpg.Common.UI
                     "Rpg: Player Status",
                     delegate
                     {
-                        // Don't draw when menus are open
-                        if (Main.gameMenu || Main.ingameOptionsWindow || Main.playerInventory || Main.inFancyUI)
+                        if (Main.gameMenu)
                             return true;
                             
                         if (statusInterface?.CurrentState != null)

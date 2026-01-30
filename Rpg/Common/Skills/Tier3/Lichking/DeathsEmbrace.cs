@@ -5,7 +5,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Rpg.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Lichking
+namespace Rpg.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Death's Embrace - 죽음의 포옹.
@@ -19,7 +19,7 @@ namespace Rpg.Common.Skills.Tier3.Lichking
         public override string Description => "Embrace enemies with death, dealing massive damage and raising undead.";
 
         public override SkillType SkillType => SkillType.Active;
-        public override JobType RequiredJob => JobType.Lichking;
+        public override JobType RequiredJob => JobType.LichKing;
         public override int RequiredLevel => 120;
         public override int SkillPointCost => 1;
         public override int MaxRank => 10;

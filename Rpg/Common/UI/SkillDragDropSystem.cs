@@ -46,7 +46,7 @@ namespace Rpg.Common.UI
                 return;
 
             DraggedSkillId = skillId;
-            DragStartPosition = Main.MouseScreen;
+            DragStartPosition = GetMouseUiPosition();
             DropPending = false;
             _dragMouseDown = true;
             _dropPendingFrames = 0;
@@ -55,7 +55,7 @@ namespace Rpg.Common.UI
         public static void StartMacroDrag(int macroIndex)
         {
             DraggedSkillId = Skills.SkillManager.BuildMacroEntry(macroIndex);
-            DragStartPosition = Main.MouseScreen;
+            DragStartPosition = GetMouseUiPosition();
             DropPending = false;
             _dragMouseDown = true;
             _dropPendingFrames = 0;
@@ -136,7 +136,7 @@ namespace Rpg.Common.UI
             if (!IsDragging)
                 return;
 
-            Vector2 pos = Main.MouseScreen + new Vector2(15, 15);
+            Vector2 pos = GetMouseUiPosition() + new Vector2(15, 15);
             string displayName;
             Texture2D icon = null;
 
@@ -201,6 +201,11 @@ namespace Rpg.Common.UI
                 spriteBatch.Draw(icon, iconRect, Color.White);
             }
 
+        }
+
+        private static Vector2 GetMouseUiPosition()
+        {
+            return UiInput.GetUiMouse();
         }
 
         private static bool _dragMouseDown;

@@ -26,7 +26,7 @@ namespace Rpg.Common.Testing
             
             try
             {
-                RpgTestSystem.RunAllTests(verbose: true);
+                RpgTestSystem.RunTests(category, verbose: true);
             }
             catch (System.Exception ex)
             {

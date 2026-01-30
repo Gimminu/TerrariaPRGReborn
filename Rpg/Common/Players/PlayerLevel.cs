@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using System;
 using Rpg.Common.Config;
 using Rpg.Common.UI;
 using Rpg.Common.Systems;
@@ -36,8 +37,11 @@ namespace Rpg.Common.Players
         /// Award XP to the player with all multipliers applied
         /// Per design doc: XP is throttled near level cap
         /// </summary>
-        public void GainExperience(long baseXP, XPSource source = XPSource.Monster, int monsterLevel = 0)
+        public void GainExperience(long baseXP, XPSource source = XPSource.Monster, int monsterLevel = 0, bool fromNetwork = false)
         {
+            if (Main.netMode == NetmodeID.MultiplayerClient && !fromNetwork)
+                return;
+
             // Check if at level cap
             int maxLevel = RpgFormulas.GetMaxLevel();
             if (rpgPlayer.Level >= maxLevel)
@@ -52,6 +56,14 @@ namespace Rpg.Common.Players
                 // Monster too far above player level (anti-boosting)
                 ShowXPGainEffect(0, "Too High Level!", Color.Red);
                 return;
+            }
+
+            // Fix for low level monsters giving 0 XP due to low HP scaling
+            if (source == XPSource.Monster && monsterLevel > 0)
+            {
+                long minXP = BiomeLevelSystem.GetMinimumXP(monsterLevel);
+                if (baseXP < minXP)
+                    baseXP = minXP;
             }
 
             // Apply player's XP multiplier (from buffs/items)
@@ -69,6 +81,13 @@ namespace Rpg.Common.Players
                 case XPSource.Quest:
                     // Quest XP already balanced, no multiplier
                     break;
+            }
+
+            // Apply global XP multiplier from config
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (serverConfig != null)
+            {
+                finalXP = (long)(finalXP * serverConfig.GlobalXPMultiplier);
             }
             
             // Apply level difference XP modifier (anti-farming for both high and low level monsters)
@@ -105,6 +124,9 @@ namespace Rpg.Common.Players
             // Apply level cap proximity modifiers (레벨 캡 근접 보정)
             finalXP = ApplyLevelCapModifiers(finalXP, maxLevel);
 
+            long minFinalXP = BiomeLevelSystem.GetMinimumXP(Math.Max(monsterLevel, 1));
+            finalXP = Math.Max(finalXP, minFinalXP);
+
             // Add to current XP
             rpgPlayer.CurrentXP += finalXP;
 
@@ -113,6 +135,11 @@ namespace Rpg.Common.Players
 
             // Check for level-up
             CheckLevelUp();
+
+            if (Main.netMode == NetmodeID.Server)
+            {
+                SendXPGainPacket(baseXP, source, monsterLevel);
+            }
         }
         
         #region Sweet Spot Combo System
@@ -237,8 +264,12 @@ namespace Rpg.Common.Players
 
             // Award skill points
             float skillMultiplier = serverConfig?.SkillPointMultiplier ?? 1f;
-            int skillPoints = (int)System.Math.Round(RpgFormulas.GetSkillPointsPerLevel(rpgPlayer.CurrentTier) * skillMultiplier);
-            skillPoints = System.Math.Max(0, skillPoints);
+            int skillPoints = 0;
+            if (serverConfig == null || serverConfig.EnableSkillSystem)
+            {
+                skillPoints = (int)System.Math.Round(RpgFormulas.GetSkillPointsPerLevel(rpgPlayer.CurrentTier) * skillMultiplier);
+                skillPoints = System.Math.Max(0, skillPoints);
+            }
 
             bool storePending = rpgPlayer.Level > RpgFormulas.GetTierMaxLevel(rpgPlayer.CurrentTier);
             if (storePending)
@@ -263,6 +294,9 @@ namespace Rpg.Common.Players
             var achievements = Player.GetModPlayer<AchievementSystem>();
             achievements?.CheckLevelAchievements(rpgPlayer.Level);
 
+            // Add level-based quests
+            AddLevelQuests();
+
             // Play level-up effects
             PlayLevelUpEffects();
 
@@ -271,6 +305,50 @@ namespace Rpg.Common.Players
 
             // Check for job advancement availability
             CheckJobAdvancement();
+        }
+
+        private void AddLevelQuests()
+        {
+            // Add quests based on level milestones
+            if (rpgPlayer.Level == 5)
+            {
+                var quest = new KillQuest(
+                    "First Steps",
+                    "Defeat 10 slimes to prove your worth",
+                    "Slime",
+                    10,
+                    500,
+                    1,
+                    0
+                );
+                QuestSystem.AddQuest(quest, Player.whoAmI);
+            }
+            else if (rpgPlayer.Level == 10)
+            {
+                var quest = new KillQuest(
+                    "Monster Hunter",
+                    "Slay 5 zombies",
+                    "Zombie",
+                    5,
+                    800,
+                    1,
+                    1
+                );
+                QuestSystem.AddQuest(quest, Player.whoAmI);
+            }
+            else if (rpgPlayer.Level == 15)
+            {
+                var quest = new KillQuest(
+                    "Eye See You",
+                    "Defeat the Eye of Cthulhu",
+                    "Eye of Cthulhu",
+                    1,
+                    2000,
+                    2,
+                    1
+                );
+                QuestSystem.AddQuest(quest, Player.whoAmI);
+            }
         }
 
         private void EnsureTierSkillPointMinimum()
@@ -334,6 +412,8 @@ namespace Rpg.Common.Players
             {
                 rpgPlayer.ReleasePendingPoints();
             }
+
+            rpgPlayer.RequestJobSync();
 
             // Play job change effects
             PlayJobChangeEffects();
@@ -449,24 +529,41 @@ namespace Rpg.Common.Players
             if (Main.netMode == NetmodeID.Server)
                 return;
 
-            // Sound effect
+            // Enhanced sound effect - multiple sounds for epic feel
             SoundEngine.PlaySound(SoundID.Item4, Player.position);
+            SoundEngine.PlaySound(SoundID.MenuOpen, Player.position); // Add fanfare sound
 
-            // Dust effect
-            for (int i = 0; i < 50; i++)
+            // More spectacular dust effect - golden sparkles
+            for (int i = 0; i < 80; i++)
             {
-                Vector2 velocity = Main.rand.NextVector2Circular(8f, 8f);
+                Vector2 velocity = Main.rand.NextVector2Circular(12f, 12f);
+                int dustType = Main.rand.NextBool() ? DustID.GoldCoin : DustID.Firework_Green;
                 Dust dust = Dust.NewDustPerfect(
                     Player.Center,
-                    DustID.GoldCoin,
+                    dustType,
                     velocity,
-                    Scale: 1.5f
+                    Scale: Main.rand.NextFloat(1.2f, 2.0f)
                 );
                 dust.noGravity = true;
+                dust.fadeIn = 0.5f;
             }
 
-            // Screen shake (optional)
-            // Player.GetModPlayer<ScreenShakePlayer>()?.AddShake(10, 0.5f);
+            // Add star particles for RPG feel
+            for (int i = 0; i < 20; i++)
+            {
+                Vector2 velocity = Main.rand.NextVector2Circular(6f, 6f);
+                Dust dust = Dust.NewDustPerfect(
+                    Player.Center,
+                    DustID.MagicMirror,
+                    velocity,
+                    Scale: Main.rand.NextFloat(0.8f, 1.5f)
+                );
+                dust.noGravity = true;
+                dust.color = Color.Yellow;
+            }
+
+            // Screen flash effect for dramatic level up
+            // Main.flashAlpha = 1f; // Brief white flash (removed for compatibility)
         }
 
         /// <summary>
@@ -474,12 +571,22 @@ namespace Rpg.Common.Players
         /// </summary>
         private void ShowLevelUpMessage()
         {
-            string message = $"Level Up! Now level {rpgPlayer.Level}";
-            Color levelColor = new Color(255, 255, 100); // Bright yellow
+            string message = $"★ LEVEL UP! ★ Now level {rpgPlayer.Level}";
+            Color levelColor = new Color(255, 255, 150); // Bright golden yellow
             
             if (Main.netMode != NetmodeID.Server)
             {
                 Main.NewText(message, levelColor);
+                
+                // Additional celebratory messages based on level milestones
+                if (rpgPlayer.Level % 10 == 0)
+                {
+                    Main.NewText("🎉 Major Level Milestone! 🎉", new Color(255, 100, 255));
+                }
+                else if (rpgPlayer.Level % 5 == 0)
+                {
+                    Main.NewText("✨ Significant Level Up! ✨", new Color(100, 255, 255));
+                }
             }
         }
 
@@ -573,6 +680,9 @@ namespace Rpg.Common.Players
         /// </summary>
         public static void DistributeXPToNearbyPlayers(Vector2 position, long baseXP, XPSource source, int monsterLevel = 0)
         {
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            float shareRadius = serverConfig?.MultiplayerXPShareRange ?? RpgConstants.MULTIPLAYER_XP_SHARE_RADIUS;
+
             // Find all players within radius
             int playersInRange = 0;
             foreach (Player player in Main.player)
@@ -581,7 +691,7 @@ namespace Rpg.Common.Players
                     continue;
 
                 float distance = Vector2.Distance(player.Center, position);
-                if (distance <= RpgConstants.MULTIPLAYER_XP_SHARE_RADIUS)
+                if (distance <= shareRadius)
                 {
                     playersInRange++;
                 }
@@ -597,7 +707,7 @@ namespace Rpg.Common.Players
                     continue;
 
                 float distance = Vector2.Distance(player.Center, position);
-                if (distance <= RpgConstants.MULTIPLAYER_XP_SHARE_RADIUS)
+                if (distance <= shareRadius)
                 {
                     PlayerLevel levelSystem = player.GetModPlayer<PlayerLevel>();
                     levelSystem.GainExperience(baseXP, source, monsterLevel);
@@ -627,6 +737,20 @@ namespace Rpg.Common.Players
                 PlayerLevel levelSystem = player.GetModPlayer<PlayerLevel>();
                 levelSystem.GainExperience(baseXP, source, monsterLevel);
             }
+        }
+
+        private void SendXPGainPacket(long baseXP, XPSource source, int monsterLevel)
+        {
+            if (Player == null || !Player.active)
+                return;
+
+            ModPacket packet = Mod.GetPacket();
+            packet.Write((byte)global::Rpg.RpgMessageType.AwardXP);
+            packet.Write((byte)Player.whoAmI);
+            packet.Write(baseXP);
+            packet.Write((byte)source);
+            packet.Write(monsterLevel);
+            packet.Send(Player.whoAmI);
         }
 
         #endregion

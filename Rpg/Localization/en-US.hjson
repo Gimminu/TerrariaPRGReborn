@@ -43,6 +43,7 @@ Mods: {
 			"Open Stat UI.DisplayName": Open  Stat  U I
 			"Open RPG Menu.DisplayName": Open  R P G  Menu
 			"Toggle RPG Test Panel.DisplayName": Toggle  R P G  Test  Panel
+			"Toggle Quest UI.DisplayName": Toggle  Quest  U I
 		}
 
 		# Config
@@ -55,6 +56,11 @@ Mods: {
 					WorldLevel: World Level Settings
 					MonsterInfo: Monster Info Settings
 					UI: U I Header
+					QuestUI: Quest U I Header
+					LayoutMode: Layout Mode Header
+					RpgMenu: Rpg Menu Header
+					SkillBar: Skill Bar Header
+					UIVisibility: U I Visibility Header
 				}
 
 				ShowXPGainText: {
@@ -86,6 +92,61 @@ Mods: {
 					Label: Hide Vanilla Resource Bars
 					Tooltip: ""
 				}
+
+				ShowQuestUI: {
+					Label: Show Quest U I
+					Tooltip: ""
+				}
+
+				HideQuestUIWhenEmpty: {
+					Label: Hide Quest U I When Empty
+					Tooltip: ""
+				}
+
+				QuestUIScale: {
+					Label: Quest U I Scale
+					Tooltip: ""
+				}
+
+				QuestUIPosX: {
+					Label: Quest U I Pos X
+					Tooltip: ""
+				}
+
+				QuestUIPosY: {
+					Label: Quest U I Pos Y
+					Tooltip: ""
+				}
+
+				EnableUILayoutMode: {
+					Label: Enable U I Layout Mode
+					Tooltip: ""
+				}
+
+				RpgMenuPosX: {
+					Label: Rpg Menu Pos X
+					Tooltip: ""
+				}
+
+				RpgMenuPosY: {
+					Label: Rpg Menu Pos Y
+					Tooltip: ""
+				}
+
+				ShowSkillBar: {
+					Label: Show Skill Bar
+					Tooltip: ""
+				}
+
+				ShowJobUI: {
+					Label: Show Job U I
+					Tooltip: ""
+				}
+
+				ShowSkillUI: {
+					Label: Show Skill U I
+					Tooltip: ""
+				}
 			}
 
 			RpgServerConfig: {
@@ -98,6 +159,7 @@ Mods: {
 					StatSettings: Stat & Skill Settings
 					DifficultyAdjustments: Difficulty Adjustments
 					ModCompatibility: Mod Compatibility
+					FeatureToggles: Feature Toggles Header
 				}
 
 				GlobalXPMultiplier: {
@@ -209,6 +271,26 @@ Mods: {
 					Label: Auto Detect Mod Bosses
 					Tooltip: Automatically detect and integrate mod bosses
 				}
+
+				BossHPScalePerLevel: {
+					Label: Boss H P Scale Per Level
+					Tooltip: ""
+				}
+
+				BossDamageScalePerLevel: {
+					Label: Boss Damage Scale Per Level
+					Tooltip: ""
+				}
+
+				EnableJobSystem: {
+					Label: Enable Job System
+					Tooltip: ""
+				}
+
+				EnableSkillSystem: {
+					Label: Enable Skill System
+					Tooltip: ""
+				}
 			}
 		}
 
@@ -305,6 +387,11 @@ Mods: {
 					[c/FF0000:WARNING: This cannot be undone!]
 					'''
 			}
+
+			MonsterMagnet: {
+				DisplayName: Monster Magnet
+				Tooltip: ""
+			}
 		}
 
 		# Jobs
@@ -338,7 +425,7 @@ Mods: {
 			Gunmaster: Gunmaster
 			Archbishop: Archbishop
 			Overlord: Overlord
-			Lichking: Lich King
+			LichKing: Lich King
 		}
 
 		# Stats
@@ -633,6 +720,13 @@ Mods: {
 				Buff: "[Buff]"
 				Debuff: "[Debuff]"
 				Ultimate: "[Ultimate]"
+			}
+		}
+
+		Buffs: {
+			MonsterMagnetBuff: {
+				DisplayName: Monster Magnet Buff
+				Description: Mods.Rpg.Buffs.MonsterMagnetBuff.Description
 			}
 		}
 	}

@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Rpg.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Lichking
+namespace Rpg.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Necrotic Mastery - 사령 숙련.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier3.Lichking
         public override string Description => "Master the arts of necromancy, greatly increasing summon and magic damage.";
 
         public override SkillType SkillType => SkillType.Passive;
-        public override JobType RequiredJob => JobType.Lichking;
+        public override JobType RequiredJob => JobType.LichKing;
         public override int RequiredLevel => 120;
         public override int SkillPointCost => 1;
         public override int MaxRank => 10;

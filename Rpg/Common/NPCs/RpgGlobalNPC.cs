@@ -1,10 +1,12 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Rpg.Common.Players;
 using Rpg.Common.Systems;
 using Rpg.Common.Compatibility;
+using Rpg.Common.Config;
 using System.Collections.Generic;
 
 namespace Rpg.Common.NPCs
@@ -29,7 +31,8 @@ namespace Rpg.Common.NPCs
         private const int DAMAGE_TIMEOUT = 600; // 10 seconds
         
         // Monster level (calculated on spawn)
-        public int MonsterLevel { get; private set; } = 1;
+        public int MonsterLevel { get; internal set; } = 0;
+        private bool scalingApplied = false;
 
         #region Damage Tracking
         
@@ -132,99 +135,88 @@ namespace Rpg.Common.NPCs
             // Don't scale critters
             if (npc.lifeMax <= 5)
                 return;
+        }
 
-            // Apply world level scaling with progression-aware system
+        public override void OnSpawn(NPC npc, IEntitySource source)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient || scalingApplied)
+                return;
+
+            if (npc.townNPC || npc.friendly || npc.lifeMax <= 5)
+                return;
+
             ApplyProgressionAwareScaling(npc);
+            scalingApplied = true;
+            EnsureNpcLifeBytes(npc);
+            npc.netUpdate = true;
+        }
+
+        public override void ApplyDifficultyAndPlayerScaling(NPC npc, int numPlayers, float balance, float bossAdjustment)
+        {
+            if (scalingApplied)
+                return;
+
+            if (npc.townNPC || npc.friendly || npc.lifeMax <= 5)
+                return;
+
+            ApplyProgressionAwareScaling(npc);
+            scalingApplied = true;
+            EnsureNpcLifeBytes(npc);
+            npc.netUpdate = true;
+        }
+
+        public override void PostAI(NPC npc)
+        {
+            if (Main.netMode == NetmodeID.MultiplayerClient || scalingApplied)
+                return;
+
+            if (npc.townNPC || npc.friendly || npc.lifeMax <= 5)
+                return;
+
+            ApplyProgressionAwareScaling(npc);
+            scalingApplied = true;
+            EnsureNpcLifeBytes(npc);
+            npc.netUpdate = true;
         }
 
         /// <summary>
-        /// Apply HP and damage scaling based on world level with progression separation
-        /// Per design doc: Pre-hardmode monsters cap their scaling when hardmode begins
+        /// Apply HP and damage scaling based on monster level
         /// </summary>
         private void ApplyProgressionAwareScaling(NPC npc)
         {
-            int worldLevel = RpgWorld.GetWorldLevel();
-
-            // Skip scaling if world level is 1 (no bosses killed yet)
-            if (worldLevel <= 1)
-                return;
-
-            // Determine if this is a pre-hardmode or hardmode monster
-            bool isHardmodeMonster = IsHardmodeMonster(npc);
-            bool worldInHardmode = Main.hardMode;
-            
-            // Get effective world level for this monster
-            int effectiveWorldLevel = GetEffectiveWorldLevel(npc, worldLevel, isHardmodeMonster, worldInHardmode);
-            
-            // Apply biome-based scaling
-            ApplyBiomeAwareScaling(npc, effectiveWorldLevel);
-        }
-        
-        /// <summary>
-        /// Check if NPC is a hardmode monster
-        /// </summary>
-        private bool IsHardmodeMonster(NPC npc)
-        {
-            // Check known hardmode NPCs
-            return npc.type >= Terraria.ID.NPCID.Pixie && npc.type <= Terraria.ID.NPCID.DungeonSpirit ||
-                   npc.type >= Terraria.ID.NPCID.Wraith && npc.type <= Terraria.ID.NPCID.Clown ||
-                   npc.type >= Terraria.ID.NPCID.Mummy && npc.type <= Terraria.ID.NPCID.DarkMummy ||
-                   npc.type >= Terraria.ID.NPCID.Corruptor && npc.type <= Terraria.ID.NPCID.CorruptSlime ||
-                   npc.type >= Terraria.ID.NPCID.Gastropod && npc.type <= Terraria.ID.NPCID.IlluminantSlime ||
-                   npc.type >= Terraria.ID.NPCID.GiantBat && npc.type <= Terraria.ID.NPCID.IceGolem ||
-                   // Mechanical bosses and beyond
-                   npc.type == Terraria.ID.NPCID.TheDestroyer ||
-                   npc.type == Terraria.ID.NPCID.Retinazer ||
-                   npc.type == Terraria.ID.NPCID.Spazmatism ||
-                   npc.type == Terraria.ID.NPCID.SkeletronPrime ||
-                   npc.type == Terraria.ID.NPCID.Plantera ||
-                   npc.type == Terraria.ID.NPCID.Golem ||
-                   npc.type == Terraria.ID.NPCID.DukeFishron ||
-                   npc.type == Terraria.ID.NPCID.CultistBoss ||
-                   npc.type == Terraria.ID.NPCID.MoonLordCore ||
-                   // Use the hardmode flag as fallback for modded NPCs
-                   (npc.HitSound == Terraria.ID.SoundID.NPCHit1 && npc.lifeMax > 100 && Main.hardMode);
-        }
-        
-        /// <summary>
-        /// Get effective world level for scaling, considering progression
-        /// </summary>
-        private int GetEffectiveWorldLevel(NPC npc, int worldLevel, bool isHardmodeMonster, bool worldInHardmode)
-        {
-            // Pre-hardmode monsters cap at world level when WoF was killed
-            if (!isHardmodeMonster && worldInHardmode)
-            {
-                // Cap pre-hardmode monsters at a reasonable level
-                // This is approximately world level 5-6 (after major pre-hm bosses)
-                int preHardmodeCap = RpgConstants.PREHARDMODE_MONSTER_LEVEL_CAP;
-                return System.Math.Min(worldLevel, preHardmodeCap);
-            }
-            
-            // Hardmode monsters use full world level, but start from a baseline
-            if (isHardmodeMonster)
-            {
-                // Hardmode monsters start scaling from hardmode world level
-                return worldLevel;
-            }
-            
-            // Pre-hardmode in pre-hardmode world: normal scaling
-            return worldLevel;
+            ApplyBiomeAwareScaling(npc);
         }
         
         /// <summary>
         /// Apply scaling using biome-aware system
         /// </summary>
-        private void ApplyBiomeAwareScaling(NPC npc, int effectiveWorldLevel)
+        private void ApplyBiomeAwareScaling(NPC npc)
         {
-            // Calculate monster level from biome system
-            MonsterLevel = BiomeLevelSystem.CalculateMonsterLevel(npc);
-            
-            if (effectiveWorldLevel <= 1)
+            bool treatAsBoss = IsBossScaled(npc);
+            int monsterLevel = MonsterLevel;
+            if (monsterLevel <= 0)
+            {
+                monsterLevel = CalculateMonsterLevel(npc, out _);
+                MonsterLevel = monsterLevel;
+            }
+
+            if (monsterLevel <= 1)
                 return;
             
             // Get multipliers from formulas using effective world level
-            float hpMultiplier = RpgFormulas.GetMonsterHPMultiplier(effectiveWorldLevel);
-            float damageMultiplier = RpgFormulas.GetMonsterDamageMultiplier(effectiveWorldLevel);
+            float hpMultiplier, damageMultiplier, defenseMultiplier;
+            if (treatAsBoss)
+            {
+                hpMultiplier = RpgFormulas.GetBossHPMultiplierForLevel(monsterLevel);
+                damageMultiplier = RpgFormulas.GetBossDamageMultiplierForLevel(monsterLevel);
+                defenseMultiplier = RpgFormulas.GetBossDefenseMultiplierForLevel(monsterLevel);
+            }
+            else
+            {
+                hpMultiplier = RpgFormulas.GetMonsterHPMultiplierForLevel(monsterLevel);
+                damageMultiplier = RpgFormulas.GetMonsterDamageMultiplierForLevel(monsterLevel);
+                defenseMultiplier = RpgFormulas.GetMonsterDefenseMultiplierForLevel(monsterLevel);
+            }
 
             // Apply HP scaling
             npc.lifeMax = (int)(npc.lifeMax * hpMultiplier);
@@ -232,6 +224,33 @@ namespace Rpg.Common.NPCs
 
             // Apply damage scaling
             npc.damage = (int)(npc.damage * damageMultiplier);
+
+            // Apply defense scaling
+            npc.defense = (int)(npc.defense * defenseMultiplier);
+        }
+
+        private static bool IsBossScaled(NPC npc)
+        {
+            return npc.boss || RpgFormulas.IsBossHead(npc.type);
+        }
+
+        private static void EnsureNpcLifeBytes(NPC npc)
+        {
+            if (npc.lifeMax <= byte.MaxValue)
+                return;
+
+            if (!Main.npcLifeBytes.TryGetValue(npc.type, out var lifeBytes) || lifeBytes < 4)
+                Main.npcLifeBytes[npc.type] = 4;
+        }
+
+        private int CalculateMonsterLevel(NPC npc, out bool treatAsBoss)
+        {
+            treatAsBoss = IsBossScaled(npc);
+            int level = BiomeLevelSystem.CalculateMonsterLevel(npc);
+            if (treatAsBoss)
+                level = RpgFormulas.GetBossLevel(npc.type);
+
+            return level;
         }
 
         #endregion
@@ -251,6 +270,9 @@ namespace Rpg.Common.NPCs
             
             // Track kill achievements for nearby players
             TrackKillAchievements(npc);
+
+            // Update quests for nearby players
+            UpdatePlayerQuests(npc);
         }
         
         /// <summary>
@@ -287,12 +309,36 @@ namespace Rpg.Common.NPCs
                 }
             }
         }
+        
+        /// <summary>
+        /// Update quest progress for players who damaged this NPC
+        /// </summary>
+        private void UpdatePlayerQuests(NPC npc)
+        {
+            var damagingPlayers = GetPlayersWhoDamaged();
+            var questEntries = new List<QuestSystem.QuestEntry>(QuestSystem.ActiveQuests);
+
+            foreach (var questEntry in questEntries)
+            {
+                if (questEntry.Quest is not KillQuest killQuest)
+                    continue;
+
+                // If quest has an owner, only progress when that owner dealt damage
+                if (questEntry.OwnerIndex >= 0 && !damagingPlayers.Contains(questEntry.OwnerIndex))
+                    continue;
+
+                killQuest.OnNPCKilled(npc);
+            }
+        }
 
         /// <summary>
         /// Calculate XP and distribute to nearby players
         /// </summary>
         private void CalculateAndAwardXP(NPC npc)
         {
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+                return;
+
             // Skip if no XP should be awarded
             if (!ShouldAwardXP(npc))
                 return;
@@ -305,9 +351,11 @@ namespace Rpg.Common.NPCs
             if (npc.boss)
             {
                 int bossLevel = RpgFormulas.GetBossLevel(npc.type);
+                var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+                float shareRadius = serverConfig?.MultiplayerXPShareRange ?? RpgConstants.MULTIPLAYER_XP_SHARE_RADIUS;
                 int averageLevel = PlayerLevel.GetAveragePlayerLevel(
                     npc.Center,
-                    RpgConstants.MULTIPLAYER_XP_SHARE_RADIUS
+                    shareRadius
                 );
                 baseXP = RpgFormulas.CalculateBossXP(bossLevel, averageLevel);
                 source = XPSource.Boss;
@@ -319,6 +367,9 @@ namespace Rpg.Common.NPCs
                 baseXP = RpgFormulas.CalculateBaseXP(npc);
                 source = XPSource.Monster;
             }
+
+            // Brighten base XP for higher-level monsters so they feel meaningful even before other bonuses
+            baseXP = (long)(baseXP * (1f + monsterLevel * 0.05f));
 
             // Apply world level multiplier (progression-capped)
             float worldLevelMultiplier = RpgFormulas.GetWorldLevelXPMultiplier(RpgWorld.GetEffectiveWorldLevel());
@@ -383,8 +434,9 @@ namespace Rpg.Common.NPCs
             if (npc.friendly || npc.townNPC)
                 return false;
 
-            // No XP from statue-spawned enemies
-            if (npc.SpawnedFromStatue)
+            // No XP from statue-spawned enemies (unless config allows it)
+            var serverConfig = ModContent.GetInstance<RpgServerConfig>();
+            if (npc.SpawnedFromStatue && (serverConfig == null || !serverConfig.StatueSpawnsGiveXP))
                 return false;
 
             // No XP from critters

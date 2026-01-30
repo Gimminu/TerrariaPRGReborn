@@ -48,7 +48,7 @@ namespace Rpg.Common.UI
             
             // Skill list
             skillList = new UIList();
-            skillList.Width.Set(-25, 1f);
+            skillList.Width.Set(-30, 1f);
             skillList.Height.Set(-80, 1f);
             skillList.Top.Set(60, 0f);
             skillList.Left.Set(10, 0f);
@@ -57,10 +57,11 @@ namespace Rpg.Common.UI
             
             // Scrollbar
             scrollbar = new UIScrollbar();
+            scrollbar.Width.Set(20, 0f);
             scrollbar.Height.Set(-80, 1f);
             scrollbar.Top.Set(60, 0f);
             scrollbar.HAlign = 1f;
-            scrollbar.Left.Set(-6, 0f);
+            scrollbar.Left.Set(-10, 0f);
             mainPanel.Append(scrollbar);
             
             skillList.SetScrollbar(scrollbar);

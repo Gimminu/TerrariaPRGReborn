@@ -159,7 +159,9 @@ namespace Rpg.Common.Systems
             if (level >= 50) TryUnlock("level_50");
             if (level >= 75) TryUnlock("level_75");
             if (level >= 100) TryUnlock("level_100");
-            if (level >= 200) TryUnlock("level_max"); // Assuming 200 is max
+            int maxLevel = RpgFormulas.GetMaxLevel();
+            int targetLevel = maxLevel == int.MaxValue ? 200 : maxLevel;
+            if (level >= targetLevel) TryUnlock("level_max");
         }
         
         /// <summary>
