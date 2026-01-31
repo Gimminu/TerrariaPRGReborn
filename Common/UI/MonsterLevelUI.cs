@@ -5,13 +5,13 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common;
-using Rpg.Common.Players;
-using Rpg.Common.Systems;
-using Rpg.Common.NPCs;
-using Rpg.Common.Config;
+using RpgMod.Common;
+using RpgMod.Common.Players;
+using RpgMod.Common.Systems;
+using RpgMod.Common.NPCs;
+using RpgMod.Common.Config;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Displays monster level above their heads

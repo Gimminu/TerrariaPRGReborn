@@ -4,9 +4,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Players;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Party System for multiplayer XP sharing

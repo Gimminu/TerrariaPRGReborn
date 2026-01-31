@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Deadeye
+namespace RpgMod.Common.Skills.Tier3.Deadeye
 {
     /// <summary>
     /// Marked for Death - 죽음의 표식.

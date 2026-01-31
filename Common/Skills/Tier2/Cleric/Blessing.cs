@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Cleric
+namespace RpgMod.Common.Skills.Tier2.Cleric
 {
     /// <summary>
     /// Blessing - 축복.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Cleric
     {
         public override string InternalName => "Blessing";
         public override string DisplayName => "Blessing";
-        public override string Description => "Bestow a divine blessing, increasing all stats.";
+        public override string Description => "Bestow a divine blessing, granting Ironskin, Regeneration, Swiftness, and Mana Regeneration.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Cleric;

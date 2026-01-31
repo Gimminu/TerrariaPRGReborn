@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.DeathKnight
+namespace RpgMod.Common.Skills.Tier2.DeathKnight
 {
     /// <summary>
     /// Dark Aura - 어둠의 오라.

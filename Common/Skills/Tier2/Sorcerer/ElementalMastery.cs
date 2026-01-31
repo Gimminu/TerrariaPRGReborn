@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sorcerer
+namespace RpgMod.Common.Skills.Tier2.Sorcerer
 {
     /// <summary>
     /// Elemental Mastery - Sorcerer's passive for elemental power.

@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.LichKing
+namespace RpgMod.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Eternal Darkness - 영원한 어둠.

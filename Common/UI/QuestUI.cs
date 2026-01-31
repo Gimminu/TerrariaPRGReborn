@@ -6,12 +6,12 @@ using Terraria.ModLoader;
 using Terraria.GameInput;
 using Terraria.UI;
 using System.Collections.Generic;
-using Rpg.Common.Systems;
-using Rpg.Common.Config;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Config;
 using System;
 using Terraria.ModLoader.Config;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// UI for displaying active quests
@@ -327,6 +327,7 @@ namespace Rpg.Common.UI
                 return;
 
             config.ShowQuestUI = visible;
+            config.SaveChanges(config, null, true, true);
             if (showMessage)
             {
                 string message = config.ShowQuestUI ? "Quest UI: On" : "Quest UI: Off";

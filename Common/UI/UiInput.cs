@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     internal static class UiInput
     {

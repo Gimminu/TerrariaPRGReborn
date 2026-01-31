@@ -1,9 +1,9 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Poison Mastery - Assassin's passive for poison damage.

@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Toxic Blade - 맹독 칼날.
@@ -48,8 +48,10 @@ namespace Rpg.Common.Skills.Tier2.Assassin
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int finalDamage = Main.DamageVar(damage, player.luck);
-                    npc.SimpleStrikeNPC(finalDamage, player.direction, true, 2f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, damage);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 2f, DamageClass.Melee);
                     
                     // 독 부여
                     npc.AddBuff(BuffID.Poisoned, POISON_DURATION[rank - 1]);

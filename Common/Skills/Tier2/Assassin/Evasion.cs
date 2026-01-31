@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Evasion - 회피.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Assassin
     {
         public override string InternalName => "Evasion";
         public override string DisplayName => "Evasion";
-        public override string Description => "Chance to completely dodge attacks.";
+        public override string Description => "Chance to completely dodge attacks and gain movement speed.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Assassin;
@@ -24,7 +24,7 @@ namespace Rpg.Common.Skills.Tier2.Assassin
         public override int ResourceCost => 0;
         public override ResourceType ResourceType => ResourceType.None;
 
-        // 회피 확률 (RpgPlayer.ModifyHurt에서 처리)
+        // 회피 확률 (RpgPlayer.ModifyHitByNPC/ModifyHitByProjectile에서 처리)
         private static readonly float[] DODGE_CHANCE = { 0.02f, 0.04f, 0.06f, 0.08f, 0.10f, 0.12f, 0.14f, 0.16f, 0.18f, 0.22f };
 
         public static float GetDodgeChance(int rank)

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Terraria;
-using Rpg.Common;
-using Rpg.Common.Players;
-using Rpg.Common.Skills;
+using RpgMod.Common;
+using RpgMod.Common.Players;
+using RpgMod.Common.Skills;
 
-namespace Rpg.Common.Jobs
+namespace RpgMod.Common.Jobs
 {
     /// <summary>
     /// Complete database of all jobs in the RPG system

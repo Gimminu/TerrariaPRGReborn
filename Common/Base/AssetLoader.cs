@@ -6,7 +6,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Base
+namespace RpgMod.Common.Base
 {
     /// <summary>
     /// Centralized asset loading system - ensures textures are loaded once and reused

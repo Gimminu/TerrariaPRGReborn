@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellthief
+namespace RpgMod.Common.Skills.Tier2.Spellthief
 {
     /// <summary>
     /// Mana Siphon - 마나 흡수.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Spellthief
     {
         public override string InternalName => "ManaSiphon";
         public override string DisplayName => "Mana Siphon";
-        public override string Description => "Chance to restore mana when attacking.";
+        public override string Description => "Chance to restore mana on hit and increase mana regeneration.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Spellthief;

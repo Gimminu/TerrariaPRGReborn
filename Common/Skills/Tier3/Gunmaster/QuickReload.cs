@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.Gunmaster
+namespace RpgMod.Common.Skills.Tier3.Gunmaster
 {
     /// <summary>
     /// Quick Reload - Gunmaster's attack speed buff.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier3.Gunmaster
     {
         public override string InternalName => "QuickReload";
         public override string DisplayName => "Quick Reload";
-        public override string Description => "Drastically increase attack speed for a short duration.";
+        public override string Description => "Drastically increase attack speed and movement speed for a short duration.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Gunmaster;

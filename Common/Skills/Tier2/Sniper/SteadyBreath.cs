@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Sniper
+namespace RpgMod.Common.Skills.Tier2.Sniper
 {
     /// <summary>
     /// Steady Breath - Sniper's aim enhancement skill.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier2.Sniper
     {
         public override string InternalName => "SteadyBreath";
         public override string DisplayName => "Steady Breath";
-        public override string Description => "Steady your aim for increased crit chance and damage.";
+        public override string Description => "Steady your aim for increased ranged damage and critical chance.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Sniper;
@@ -28,15 +28,18 @@ namespace Rpg.Common.Skills.Tier2.Sniper
 
         private static readonly int[] DURATION_SECONDS = { 8, 10, 12, 14, 18 };
         private static readonly float[] DAMAGE_BONUS = { 0.12f, 0.16f, 0.20f, 0.25f, 0.35f };
+        private static readonly float[] CRIT_BONUS = { 4f, 6f, 8f, 10f, 12f };
 
         protected override void OnActivate(Player player)
         {
             int rank = System.Math.Max(1, CurrentRank);
             int duration = DURATION_SECONDS[rank - 1] * 60;
             float bonus = DAMAGE_BONUS[rank - 1];
+            float critBonus = CRIT_BONUS[rank - 1];
 
             var rpgPlayer = player.GetModPlayer<RpgPlayer>();
-            rpgPlayer.AddTemporaryDamage(bonus, duration);
+            rpgPlayer.AddTemporaryRangedDamage(bonus, duration);
+            rpgPlayer.AddTemporaryRangedCrit(critBonus, duration);
 
             player.AddBuff(BuffID.Archery, duration);
 

@@ -4,16 +4,17 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Rpg.Content.Items;
+using RpgMod.Content.Items;
 
-namespace Rpg.Common.NPCs
+namespace RpgMod.Common.NPCs
 {
     /// <summary>
     /// RPG Shop NPC - Sells job advancement items, reset items, and skill books
     /// </summary>
-    [AutoloadHead]
     public class RpgMerchant : ModNPC
     {
+        public override string Texture => "Rpg/Common/NPCs/RpgMerchant";
+
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 25;

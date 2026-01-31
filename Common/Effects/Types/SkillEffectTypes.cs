@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 
-namespace Rpg.Common.Effects.Types
+namespace RpgMod.Common.Effects.Types
 {
     #region Healing Effects
     

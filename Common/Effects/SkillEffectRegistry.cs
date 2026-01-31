@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Effects.Types;
-using Rpg.Common;
+using RpgMod.Common.Effects.Types;
+using RpgMod.Common;
 
-namespace Rpg.Common.Effects
+namespace RpgMod.Common.Effects
 {
     /// <summary>
     /// Central registry for all skill effects

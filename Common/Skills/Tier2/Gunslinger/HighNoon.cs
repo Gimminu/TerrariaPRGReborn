@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Gunslinger
+namespace RpgMod.Common.Skills.Tier2.Gunslinger
 {
     /// <summary>
     /// High Noon - 정오의 결투.
@@ -39,8 +39,12 @@ namespace Rpg.Common.Skills.Tier2.Gunslinger
             Vector2 direction = (Main.MouseWorld - player.Center).SafeNormalize(Vector2.UnitX);
             
             // 고속 관통 총알
-            Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, direction * 25f,
+            int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, direction * 25f,
                 ProjectileID.BulletHighVelocity, damage, 6f, player.whoAmI);
+            if (projId >= 0 && projId < Main.maxProjectiles)
+            {
+                Main.projectile[projId].DamageType = DamageClass.Ranged;
+            }
             
             PlayEffects(player, direction);
         }

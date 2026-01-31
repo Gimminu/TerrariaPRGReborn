@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Beastmaster
+namespace RpgMod.Common.Skills.Tier2.Beastmaster
 {
     /// <summary>
     /// Beast Call - Beastmaster's minion enhancement skill.
@@ -34,6 +34,7 @@ namespace Rpg.Common.Skills.Tier2.Beastmaster
 
             player.AddBuff(BuffID.Wrath, duration);
             player.AddBuff(BuffID.Endurance, duration);
+            player.AddBuff(BuffID.Summoning, duration);
 
             PlayEffects(player);
             ShowMessage(player, "Beasts Empowered!", Color.Orange);

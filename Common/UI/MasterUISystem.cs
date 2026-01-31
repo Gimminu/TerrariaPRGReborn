@@ -7,7 +7,7 @@ using Terraria.GameInput;
 using Terraria.Audio;
 using Terraria.ID;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// System for the unified Master UI (Stats + Job + Skills in one window)
@@ -45,8 +45,8 @@ namespace Rpg.Common.UI
         
         public override void UpdateUI(GameTime gameTime)
         {
-            // Auto-close when inventory or other menus open
-            if (isVisible && (Main.playerInventory || Main.ingameOptionsWindow || Main.inFancyUI || Main.gameMenu))
+            // Auto-close when other menus open (keep inventory open)
+            if (isVisible && (Main.ingameOptionsWindow || Main.inFancyUI || Main.gameMenu))
             {
                 HideUI();
                 return;
@@ -116,7 +116,7 @@ namespace Rpg.Common.UI
         {
             // Don't process keybinds while in chat/menus
             if (Main.drawingPlayerChat || Main.editSign || Main.editChest ||
-                Main.gameMenu || Main.ingameOptionsWindow || Main.playerInventory || Main.inFancyUI)
+                Main.gameMenu || Main.ingameOptionsWindow || Main.inFancyUI)
                 return;
                 
             if (MasterUISystem.MasterUIKey.JustPressed)

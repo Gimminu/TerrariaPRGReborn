@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Druid
+namespace RpgMod.Common.Skills.Tier2.Druid
 {
     /// <summary>
     /// Nature's Blessing - 자연의 축복.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Druid
     {
         public override string InternalName => "NaturesBlessing";
         public override string DisplayName => "Nature's Blessing";
-        public override string Description => "Call upon nature to heal and regenerate.";
+        public override string Description => "Call upon nature to heal and grant regeneration, mana regen, and thorns.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Druid;

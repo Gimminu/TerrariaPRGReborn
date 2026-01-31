@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Ranger
+namespace RpgMod.Common.Skills.Tier1.Ranger
 {
     /// <summary>
     /// Precision - 정밀 조준.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier1.Ranger
     {
         public override string InternalName => "Precision";
         public override string DisplayName => "Precision";
-        public override string Description => "Focus your aim, increasing critical chance and critical damage.";
+        public override string Description => "Focus your aim, increasing critical chance.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Ranger;

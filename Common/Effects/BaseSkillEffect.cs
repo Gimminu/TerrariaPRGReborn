@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 
-namespace Rpg.Common.Effects
+namespace RpgMod.Common.Effects
 {
     /// <summary>
     /// Abstract base class for all skill effects

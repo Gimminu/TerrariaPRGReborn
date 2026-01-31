@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.GameInput;
 
-namespace Rpg.Common.Input
+namespace RpgMod.Common.Input
 {
     /// <summary>
     /// DEPRECATED: UI keybinds are now unified in MasterUISystem.

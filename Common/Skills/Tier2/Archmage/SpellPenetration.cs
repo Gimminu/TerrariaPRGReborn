@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Archmage
+namespace RpgMod.Common.Skills.Tier2.Archmage
 {
     /// <summary>
     /// Spell Penetration - 주문 관통.

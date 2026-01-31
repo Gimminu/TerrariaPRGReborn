@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Last Stand - 최후의 저항.
@@ -24,7 +24,7 @@ namespace Rpg.Common.Skills.Tier2.Knight
         public override int ResourceCost => 0;
         public override ResourceType ResourceType => ResourceType.None;
 
-        // 쿨다운은 랭크에 따라 감소 (이 패시브는 RpgPlayer.ModifyHurt에서 처리)
+        // 쿨다운은 랭크에 따라 감소 (이 패시브는 RpgPlayer.PreKill에서 처리)
         public static int GetCooldownSeconds(int rank)
         {
             int[] cooldowns = { 180, 165, 150, 135, 120, 105, 90, 75, 60, 45 };
@@ -33,7 +33,7 @@ namespace Rpg.Common.Skills.Tier2.Knight
 
         public override void ApplyPassive(Player player)
         {
-            // 실제 효과는 RpgPlayer.ModifyHurt에서 처리
+            // 실제 효과는 RpgPlayer.PreKill에서 처리
             // 여기서는 아무것도 하지 않음
         }
     }

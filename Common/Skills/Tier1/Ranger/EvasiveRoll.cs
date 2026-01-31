@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Ranger
+namespace RpgMod.Common.Skills.Tier1.Ranger
 {
     /// <summary>
     /// Evasive Roll - Ranger's mobility skill.

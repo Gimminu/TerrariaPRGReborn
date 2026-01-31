@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Overlord
+namespace RpgMod.Common.Skills.Tier3.Overlord
 {
     /// <summary>
     /// Army of Darkness - 어둠의 군대.
@@ -43,8 +43,14 @@ namespace Rpg.Common.Skills.Tier3.Overlord
                 Vector2 offset = new Vector2(Main.rand.NextFloat(-80, 80), -20 - Main.rand.NextFloat(20));
                 int projType = Main.rand.NextBool() ? ProjectileID.Raven : ProjectileID.BabySlime;
                 
-                Projectile.NewProjectile(player.GetSource_FromThis(), player.Center + offset, Vector2.Zero,
+                int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center + offset, Vector2.Zero,
                     projType, damage, 2f, player.whoAmI);
+                if (projId >= 0 && projId < Main.maxProjectiles)
+                {
+                    Projectile proj = Main.projectile[projId];
+                    proj.DamageType = DamageClass.Summon;
+                    proj.ContinuouslyUpdateDamageStats = true;
+                }
             }
             
             PlayEffects(player);

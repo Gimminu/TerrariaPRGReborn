@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Paladin
+namespace RpgMod.Common.Skills.Tier2.Paladin
 {
     /// <summary>
     /// Holy Strike - 성스러운 일격.
@@ -45,7 +45,8 @@ namespace Rpg.Common.Skills.Tier2.Paladin
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int damage = Main.DamageVar(DAMAGE[rank - 1], player.luck);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, DAMAGE[rank - 1]);
+                    int damage = ApplyDamageVariance(player, scaledDamage);
                     
                     // 언데드에게 추가 피해
                     if (NPCID.Sets.Zombies[npc.type] || npc.type == NPCID.Skeleton || 
@@ -54,7 +55,8 @@ namespace Rpg.Common.Skills.Tier2.Paladin
                         damage = (int)(damage * 1.5f);
                     }
                     
-                    npc.SimpleStrikeNPC(damage, player.direction, true, 6f, DamageClass.Melee, true);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(damage, player.direction, crit, 6f, DamageClass.Melee);
                 }
             }
             

@@ -8,12 +8,12 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Players;
-using Rpg.Common.Skills;
-using Rpg.Common.Systems;
-using Rpg.Common.Base;
+using RpgMod.Common.Players;
+using RpgMod.Common.Skills;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// UI System for managing macro editor visibility
@@ -616,12 +616,21 @@ namespace Rpg.Common.UI
             if (skillManager?.LearnedSkills != null && skillManager.LearnedSkills.TryGetValue(skillId, out var skill))
             {
                 _skillDisplayName = skill?.DisplayName ?? skillId;
-                _skillIcon = AssetLoader.GetSkillIcon(skill.InternalName);
+                _skillIcon = AssetLoader.GetTexture(skill.IconTexture);
             }
             else
             {
                 _skillDisplayName = skillId;
-                _skillIcon = AssetLoader.GetSkillIcon(skillId);
+                var skillDef = SkillDatabase.GetSkill(skillId);
+                if (skillDef != null)
+                {
+                    _skillDisplayName = skillDef.DisplayName;
+                    _skillIcon = AssetLoader.GetTexture(skillDef.IconTexture);
+                }
+                else
+                {
+                    _skillIcon = AssetLoader.GetSkillIcon(skillId);
+                }
             }
 
             _skillText?.SetText("");

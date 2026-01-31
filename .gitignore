@@ -12,3 +12,5 @@ Docs/
 *.tmp
 Thumbs.db
 .DS_Store
+STEAM_WORKSHOP_DESCRIPTION.txt
+description.txt

@@ -3,10 +3,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Effects;
+using RpgMod.Common.Base;
+using RpgMod.Common.Effects;
 
-namespace Rpg.Common.Skills.Tier2.Cleric
+namespace RpgMod.Common.Skills.Tier2.Cleric
 {
     /// <summary>
     /// Heal - 치유.

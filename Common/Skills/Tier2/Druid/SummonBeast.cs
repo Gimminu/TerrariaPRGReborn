@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Druid
+namespace RpgMod.Common.Skills.Tier2.Druid
 {
     /// <summary>
     /// Summon Beast - Druid's summon enhancement skill.
@@ -13,7 +13,7 @@ namespace Rpg.Common.Skills.Tier2.Druid
     {
         public override string InternalName => "SummonBeast";
         public override string DisplayName => "Summon Beast";
-        public override string Description => "Channel nature's power to enhance your summons.";
+        public override string Description => "Channel nature's power, granting Summoning, Wrath, and Regeneration.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Druid;
@@ -34,6 +34,7 @@ namespace Rpg.Common.Skills.Tier2.Druid
 
             player.AddBuff(BuffID.Wrath, duration);
             player.AddBuff(BuffID.Regeneration, duration);
+            player.AddBuff(BuffID.Summoning, duration);
 
             PlayEffects(player);
             ShowMessage(player, "Nature's Fury!", Color.Green);

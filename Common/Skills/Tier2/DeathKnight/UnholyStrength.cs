@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.DeathKnight
+namespace RpgMod.Common.Skills.Tier2.DeathKnight
 {
     /// <summary>
     /// Unholy Strength - 부정한 힘.

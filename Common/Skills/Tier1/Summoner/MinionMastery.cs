@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Summoner
+namespace RpgMod.Common.Skills.Tier1.Summoner
 {
     /// <summary>
     /// Minion Mastery - 소환수 숙련.

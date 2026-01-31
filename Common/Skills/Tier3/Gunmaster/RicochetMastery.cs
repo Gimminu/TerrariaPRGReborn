@@ -1,9 +1,9 @@
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Gunmaster
+namespace RpgMod.Common.Skills.Tier3.Gunmaster
 {
     /// <summary>
     /// Ricochet Mastery - Gunmaster's passive for bouncing shots.

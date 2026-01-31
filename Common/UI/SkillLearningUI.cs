@@ -8,11 +8,11 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Base;
-using Rpg.Common.Jobs;
-using Rpg.Common.Systems;
+using RpgMod.Common.Base;
+using RpgMod.Common.Jobs;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// UI for learning and upgrading skills

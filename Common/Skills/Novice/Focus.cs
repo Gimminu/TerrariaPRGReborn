@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Novice
+namespace RpgMod.Common.Skills.Novice
 {
     /// <summary>
     /// Focus - 집중하여 다음 공격의 크리티컬 확률을 높이는 버프.

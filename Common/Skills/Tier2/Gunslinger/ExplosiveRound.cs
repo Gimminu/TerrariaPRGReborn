@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Gunslinger
+namespace RpgMod.Common.Skills.Tier2.Gunslinger
 {
     /// <summary>
     /// Explosive Round - Gunslinger's AoE damage skill.
@@ -45,8 +45,10 @@ namespace Rpg.Common.Skills.Tier2.Gunslinger
                 if (Vector2.Distance(npc.Center, explosionCenter) > radius) continue;
 
                 int dir = npc.Center.X >= player.Center.X ? 1 : -1;
-                bool crit = Main.rand.NextFloat(100f) < player.GetCritChance(DamageClass.Ranged);
-                player.ApplyDamageToNPC(npc, damage, 6f, dir, crit, DamageClass.Ranged, false);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                bool crit = RollCrit(player, DamageClass.Ranged);
+                player.ApplyDamageToNPC(npc, finalDamage, 6f, dir, crit, DamageClass.Ranged, false);
             }
 
             PlayExplosionEffects(explosionCenter, radius);

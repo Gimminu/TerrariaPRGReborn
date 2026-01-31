@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellblade
+namespace RpgMod.Common.Skills.Tier2.Spellblade
 {
     /// <summary>
     /// Hybrid Mastery - 하이브리드 숙련.

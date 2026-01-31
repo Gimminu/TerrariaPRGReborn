@@ -1,6 +1,6 @@
 displayName = Terraria RPG Reborn
 author = Gimminwoo 
-version = 0.1.8
+version = 0.1.9
 homepage = https://github.com/Gimminu/TerrariaPRGReborn
 hideCode = false
 hideResources = false

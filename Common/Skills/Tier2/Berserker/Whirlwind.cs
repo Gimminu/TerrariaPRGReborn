@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Berserker
+namespace RpgMod.Common.Skills.Tier2.Berserker
 {
     /// <summary>
     /// Whirlwind - 회전 공격.
@@ -44,8 +44,10 @@ namespace Rpg.Common.Skills.Tier2.Berserker
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= radius)
                     {
-                        int damage = Main.DamageVar(DAMAGE[rank - 1], player.luck);
-                        npc.SimpleStrikeNPC(damage, player.direction, true, 5f, DamageClass.Melee, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Melee, DAMAGE[rank - 1]);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Melee);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 5f, DamageClass.Melee);
                     }
                 }
             }

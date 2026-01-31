@@ -2,9 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.Guardian
+namespace RpgMod.Common.Skills.Tier3.Guardian
 {
     /// <summary>
     /// Guardian Spirit - Guardian's ultimate protection skill.
@@ -13,7 +14,7 @@ namespace Rpg.Common.Skills.Tier3.Guardian
     {
         public override string InternalName => "GuardianSpiritTier3";
         public override string DisplayName => "Guardian Spirit";
-        public override string Description => "Summon a guardian spirit that provides immunity to knockback and damage reduction.";
+        public override string Description => "Summon a guardian spirit that grants knockback immunity, defense, regeneration, and damage reduction.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Guardian;
@@ -35,6 +36,7 @@ namespace Rpg.Common.Skills.Tier3.Guardian
             player.AddBuff(BuffID.Endurance, duration);
             player.AddBuff(BuffID.Ironskin, duration);
             player.AddBuff(BuffID.Regeneration, duration);
+            player.GetModPlayer<RpgPlayer>().AddTemporaryNoKnockback(duration);
 
             PlayEffects(player);
             ShowMessage(player, "Guardian Spirit!", Color.Gold);

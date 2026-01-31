@@ -3,13 +3,13 @@ using Terraria;
 using Terraria.ID;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
-using Rpg.Common.Players;
-using Rpg.Common.Systems;
-using Rpg.Common.Compatibility;
-using Rpg.Common.Config;
+using RpgMod.Common.Players;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Compatibility;
+using RpgMod.Common.Config;
 using System.Collections.Generic;
 
-namespace Rpg.Common.NPCs
+namespace RpgMod.Common.NPCs
 {
     /// <summary>
     /// Global NPC handler - applies monster scaling and XP drops
@@ -273,6 +273,28 @@ namespace Rpg.Common.NPCs
 
             // Update quests for nearby players
             UpdatePlayerQuests(npc);
+
+            // Apply Carnage stacks for the killing player
+            ApplyCarnageKill(npc);
+        }
+
+        private void ApplyCarnageKill(NPC npc)
+        {
+            if (npc.friendly || npc.townNPC || npc.lifeMax <= 5)
+                return;
+
+            if (RpgFormulas.IsBodySegment(npc.type))
+                return;
+
+            int killerIndex = npc.lastInteraction;
+            if (killerIndex < 0 || killerIndex >= Main.maxPlayers)
+                return;
+
+            Player player = Main.player[killerIndex];
+            if (player == null || !player.active)
+                return;
+
+            player.GetModPlayer<RpgPlayer>().RegisterCarnageKill();
         }
         
         /// <summary>

@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Berserker
+namespace RpgMod.Common.Skills.Tier2.Berserker
 {
     /// <summary>
     /// Savage Strikes - 야만의 일격.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Berserker
     {
         public override string InternalName => "SavageStrikes";
         public override string DisplayName => "Savage Strikes";
-        public override string Description => "Your strikes are more vicious, increasing critical damage.";
+        public override string Description => "Your strikes are more vicious, increasing critical chance.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Berserker;

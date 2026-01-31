@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// War Cry - 전투함성으로 자신과 주변 아군의 공격력을 높인다.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier1.Warrior
     {
         public override string InternalName => "WarCry";
         public override string DisplayName => "War Cry";
-        public override string Description => "Let out a mighty war cry, increasing damage for you and nearby allies.";
+        public override string Description => "Let out a mighty war cry, increasing your damage.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Warrior;

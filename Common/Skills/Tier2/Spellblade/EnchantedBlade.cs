@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellblade
+namespace RpgMod.Common.Skills.Tier2.Spellblade
 {
     /// <summary>
     /// Enchanted Blade - 마법 부여 검.

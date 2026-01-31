@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Archmage
+namespace RpgMod.Common.Skills.Tier2.Archmage
 {
     /// <summary>
     /// Time Warp - Archmage's buff that speeds up actions.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier2.Archmage
     {
         public override string InternalName => "TimeWarp";
         public override string DisplayName => "Time Warp";
-        public override string Description => "Bend time to increase your casting speed.";
+        public override string Description => "Bend time to increase attack speed and movement speed.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Archmage;

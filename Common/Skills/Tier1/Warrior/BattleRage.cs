@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Battle Rage - Warrior's offensive passive.

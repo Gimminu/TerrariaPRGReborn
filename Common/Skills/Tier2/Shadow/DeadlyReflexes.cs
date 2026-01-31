@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Shadow
+namespace RpgMod.Common.Skills.Tier2.Shadow
 {
     /// <summary>
     /// Deadly Reflexes - 치명적 반사신경.

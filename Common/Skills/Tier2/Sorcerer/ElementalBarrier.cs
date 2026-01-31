@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Sorcerer
+namespace RpgMod.Common.Skills.Tier2.Sorcerer
 {
     /// <summary>
     /// Elemental Barrier - Sorcerer's defensive skill.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier2.Sorcerer
     {
         public override string InternalName => "ElementalBarrier";
         public override string DisplayName => "Elemental Barrier";
-        public override string Description => "Surround yourself with an elemental barrier for protection.";
+        public override string Description => "Surround yourself with an elemental barrier, reducing damage and boosting magic power.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Sorcerer;

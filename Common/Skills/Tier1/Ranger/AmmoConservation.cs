@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Ranger
+namespace RpgMod.Common.Skills.Tier1.Ranger
 {
     /// <summary>
     /// Ammo Conservation - 탄약 절약.

@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.BloodKnight
+namespace RpgMod.Common.Skills.Tier3.BloodKnight
 {
     /// <summary>
     /// Crimson Vitality - 진홍의 활력.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier3.BloodKnight
     {
         public override string InternalName => "CrimsonVitality";
         public override string DisplayName => "Crimson Vitality";
-        public override string Description => "Deal more damage when at low health.";
+        public override string Description => "Deal more damage at low health and gain bonus life regen.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.BloodKnight;

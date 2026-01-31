@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Shadow Walk - 그림자 걸음.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier2.Assassin
     {
         public override string InternalName => "ShadowWalk";
         public override string DisplayName => "Shadow Walk";
-        public override string Description => "Move like a shadow, increasing movement speed and evasion.";
+        public override string Description => "Move like a shadow, increasing speed and granting a dash at high rank.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Assassin;

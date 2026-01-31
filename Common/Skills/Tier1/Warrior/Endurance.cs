@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Endurance - 지구력.
@@ -17,7 +17,7 @@ namespace Rpg.Common.Skills.Tier1.Warrior
     {
         public override string InternalName => "Endurance";
         public override string DisplayName => "Endurance";
-        public override string Description => "Embrace the pain, converting a portion of damage taken into healing.";
+        public override string Description => "Reduce damage taken and gain lifesteal on hits for a short time.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Warrior;

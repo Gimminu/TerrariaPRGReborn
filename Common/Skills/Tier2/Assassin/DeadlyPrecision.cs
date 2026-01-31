@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Deadly Precision - 치명적 정확도.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Assassin
     {
         public override string InternalName => "DeadlyPrecision";
         public override string DisplayName => "Deadly Precision";
-        public override string Description => "Strike with deadly precision, increasing critical damage.";
+        public override string Description => "Strike with deadly precision, increasing critical chance.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Assassin;

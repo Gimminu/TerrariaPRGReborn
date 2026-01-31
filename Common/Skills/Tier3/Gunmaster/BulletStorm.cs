@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Gunmaster
+namespace RpgMod.Common.Skills.Tier3.Gunmaster
 {
     /// <summary>
     /// Bullet Storm - Gunmaster's ultimate multi-shot skill.
@@ -46,8 +46,10 @@ namespace Rpg.Common.Skills.Tier3.Gunmaster
                 for (int h = 0; h < hits / 2; h++)
                 {
                     int dir = npc.Center.X >= player.Center.X ? 1 : -1;
-                    bool crit = Main.rand.NextFloat(100f) < player.GetCritChance(DamageClass.Ranged);
-                    player.ApplyDamageToNPC(npc, damage, 3f, dir, crit, DamageClass.Ranged, false);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, damage);
+                    bool crit = RollCrit(player, DamageClass.Ranged);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    player.ApplyDamageToNPC(npc, finalDamage, 3f, dir, crit, DamageClass.Ranged, false);
                 }
                 CreateBulletEffect(player, npc);
             }

@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Cleric
+namespace RpgMod.Common.Skills.Tier2.Cleric
 {
     /// <summary>
     /// Mana Font - 마나 샘.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier2.Cleric
     {
         public override string InternalName => "ManaFont";
         public override string DisplayName => "Mana Font";
-        public override string Description => "A font of divine energy, increasing mana regeneration.";
+        public override string Description => "A font of divine energy, increasing max mana and regeneration.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Cleric;

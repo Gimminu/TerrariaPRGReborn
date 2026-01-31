@@ -3,10 +3,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.BloodKnight
+namespace RpgMod.Common.Skills.Tier3.BloodKnight
 {
     /// <summary>
     /// Blood Storm - 피의 폭풍.
@@ -49,8 +49,10 @@ namespace Rpg.Common.Skills.Tier3.BloodKnight
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= radius)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 4f, DamageClass.Melee, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Melee, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Melee);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 4f, DamageClass.Melee);
                         npc.AddBuff(BuffID.Bleeding, 300);
                         
                         totalHealed += (int)(finalDamage * lifesteal);

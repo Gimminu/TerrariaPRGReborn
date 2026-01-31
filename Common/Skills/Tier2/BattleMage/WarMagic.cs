@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.BattleMage
+namespace RpgMod.Common.Skills.Tier2.BattleMage
 {
     /// <summary>
     /// War Magic - 전쟁 마법.
@@ -46,8 +46,10 @@ namespace Rpg.Common.Skills.Tier2.BattleMage
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= radius)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 5f, DamageClass.Magic, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Magic);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 5f, DamageClass.Magic);
                         npc.AddBuff(BuffID.OnFire, 180 + rank * 20);
                     }
                 }

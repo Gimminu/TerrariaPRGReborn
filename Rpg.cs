@@ -2,8 +2,8 @@ using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common;
-using Rpg.Common.Players;
+using RpgMod.Common;
+using RpgMod.Common.Players;
 
 namespace Rpg
 {
@@ -13,6 +13,8 @@ namespace Rpg
     /// </summary>
     public class Rpg : Mod
     {
+        public override string Name => "Rpg";
+
         public override void Load()
         {
             // 모드 로드 시 초기화

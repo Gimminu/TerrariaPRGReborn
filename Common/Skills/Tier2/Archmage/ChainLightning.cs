@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Archmage
+namespace RpgMod.Common.Skills.Tier2.Archmage
 {
     /// <summary>
     /// Chain Lightning - 연쇄 번개.
@@ -42,8 +42,10 @@ namespace Rpg.Common.Skills.Tier2.Archmage
             
             for (int chain = 0; chain < maxChains && current != null; chain++)
             {
-                int finalDamage = Main.DamageVar(damage, player.luck);
-                current.SimpleStrikeNPC(finalDamage, player.direction, true, 4f, DamageClass.Magic, true);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                bool crit = RollCrit(player, DamageClass.Magic);
+                current.SimpleStrikeNPC(finalDamage, player.direction, crit, 4f, DamageClass.Magic);
                 
                 hitNPCs.Add(current);
                 CreateLightningEffect(chain == 0 ? player.Center : hitNPCs[chain - 1].Center, current.Center);

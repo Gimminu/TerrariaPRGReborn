@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Archbishop
+namespace RpgMod.Common.Skills.Tier3.Archbishop
 {
     /// <summary>
     /// Sanctified Body - 성화된 육체.

@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Ranger
+namespace RpgMod.Common.Skills.Tier1.Ranger
 {
     /// <summary>
     /// Agility - 민첩.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier1.Ranger
     {
         public override string InternalName => "Agility";
         public override string DisplayName => "Agility";
-        public override string Description => "Your nimble movements make you harder to hit, increasing dodge chance.";
+        public override string Description => "Your nimble movements increase dodge chance and grant a basic dash at higher ranks.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Ranger;
@@ -28,7 +28,7 @@ namespace Rpg.Common.Skills.Tier1.Ranger
         {
             if (CurrentRank <= 0) return;
             
-            // 회피율은 RpgPlayer에서 별도 처리 필요
+            // 회피율은 RpgPlayer에서 처리
             // 여기서는 블랙벨트 효과처럼 대시 가능 여부
             if (CurrentRank >= 5)
             {

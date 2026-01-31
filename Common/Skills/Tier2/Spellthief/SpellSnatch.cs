@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellthief
+namespace RpgMod.Common.Skills.Tier2.Spellthief
 {
     /// <summary>
     /// Spell Snatch - 마법 탈취.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Spellthief
     {
         public override string InternalName => "SpellSnatch";
         public override string DisplayName => "Spell Snatch";
-        public override string Description => "Temporarily boost magic damage and reduce mana cost.";
+        public override string Description => "Temporarily boost magic damage and movement speed, granting Magic Power and Clairvoyance.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Spellthief;

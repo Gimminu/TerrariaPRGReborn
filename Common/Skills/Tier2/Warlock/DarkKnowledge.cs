@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Warlock
+namespace RpgMod.Common.Skills.Tier2.Warlock
 {
     /// <summary>
     /// Dark Knowledge - 어둠의 지식.

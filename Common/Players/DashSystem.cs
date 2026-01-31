@@ -5,7 +5,7 @@ using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Players
+namespace RpgMod.Common.Players
 {
     /// <summary>
     /// Dash system - available to ALL players

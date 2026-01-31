@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Necromancer
+namespace RpgMod.Common.Skills.Tier2.Necromancer
 {
     /// <summary>
     /// Undead Army - 언데드 군단.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Necromancer
     {
         public override string InternalName => "UndeadArmy";
         public override string DisplayName => "Undead Army";
-        public override string Description => "Command a larger army of undead, gaining additional minion slots.";
+        public override string Description => "Command a larger army of undead, gaining minion slots and summon damage.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Necromancer;

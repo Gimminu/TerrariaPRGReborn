@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Archbishop
+namespace RpgMod.Common.Skills.Tier3.Archbishop
 {
     /// <summary>
     /// Mass Heal - Archbishop's ultimate healing skill.

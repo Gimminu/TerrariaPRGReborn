@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Cleric
+namespace RpgMod.Common.Skills.Tier2.Cleric
 {
     /// <summary>
     /// Divine Protection - 신성 보호.

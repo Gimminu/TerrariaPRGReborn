@@ -9,13 +9,14 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
-using Rpg.Common.Players;
-using Rpg.Common.Skills;
-using Rpg.Common.Base;
-using Rpg.Common.Systems;
-using Rpg.Common.Config;
+using RpgMod.Common.Players;
+using RpgMod.Common.Skills;
+using RpgMod.Common.Base;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Config;
+using RpgMod.Common.Stats;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Master UI - Unified window for Stats, Job, Skills, and Achievements
@@ -23,7 +24,7 @@ namespace Rpg.Common.UI
     /// </summary>
     public class MasterUI : UIState
     {
-        public enum Tab { Stats, Job, Skills, Achieve }
+        public enum Tab { Stats, Job, Skills, Achieve, Damage }
         private enum JobFilter { All, Next, Available, Tier1, Tier2, Tier3 }
         private enum SkillFilter { All, Novice, Tier1, Tier2, Tier3 }
         
@@ -54,9 +55,11 @@ namespace Rpg.Common.UI
         private Rectangle tabJobBtn;
         private Rectangle tabSkillsBtn;
         private Rectangle tabAchieveBtn;
+        private Rectangle tabDamageBtn;
         
         // Stat allocation buttons
         private Dictionary<StatType, Rectangle> statPlusBtns = new();
+        private Dictionary<StatType, Rectangle> statMinusBtns = new();
         private Dictionary<StatType, Rectangle> statRowBounds = new();
         
         // Skill list scroll
@@ -213,6 +216,9 @@ namespace Rpg.Common.UI
                 case Tab.Achieve:
                     DrawAchievementsTab(spriteBatch, contentArea);
                     break;
+                case Tab.Damage:
+                    DrawDamageTab(spriteBatch, contentArea);
+                    break;
             }
             
             // Prevent clicking through
@@ -305,6 +311,7 @@ namespace Rpg.Common.UI
             if (showJobTab) enabledTabs.Add(Tab.Job);
             if (showSkillTab) enabledTabs.Add(Tab.Skills);
             enabledTabs.Add(Tab.Achieve);
+            enabledTabs.Add(Tab.Damage);
             
             int tabCount = enabledTabs.Count;
             int tabWidth = (bounds.Width - 60) / tabCount;
@@ -315,6 +322,7 @@ namespace Rpg.Common.UI
             tabJobBtn = Rectangle.Empty;
             tabSkillsBtn = Rectangle.Empty;
             tabAchieveBtn = Rectangle.Empty;
+            tabDamageBtn = Rectangle.Empty;
             
             for (int i = 0; i < enabledTabs.Count; i++)
             {
@@ -327,6 +335,7 @@ namespace Rpg.Common.UI
                     Tab.Job => "Job",
                     Tab.Skills => "Skills",
                     Tab.Achieve => "Achieve",
+                    Tab.Damage => "Damage",
                     _ => "Unknown"
                 };
                 
@@ -339,6 +348,7 @@ namespace Rpg.Common.UI
                     case Tab.Job: tabJobBtn = tabRect; break;
                     case Tab.Skills: tabSkillsBtn = tabRect; break;
                     case Tab.Achieve: tabAchieveBtn = tabRect; break;
+                    case Tab.Damage: tabDamageBtn = tabRect; break;
                 }
             }
             
@@ -394,23 +404,27 @@ namespace Rpg.Common.UI
             
             // Stats
             statPlusBtns.Clear();
+            statMinusBtns.Clear();
             statRowBounds.Clear();
-            DrawStatRow(spriteBatch, area, ref y, StatType.Strength, rpgPlayer.Strength, rpgPlayer.AutoStrength, rpgPlayer.BonusStrength, "STR", Color.OrangeRed);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Dexterity, rpgPlayer.Dexterity, rpgPlayer.AutoDexterity, rpgPlayer.BonusDexterity, "DEX", Color.LightGreen);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Rogue, rpgPlayer.Rogue, rpgPlayer.AutoRogue, rpgPlayer.BonusRogue, "ROG", Color.Purple);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Intelligence, rpgPlayer.Intelligence, rpgPlayer.AutoIntelligence, rpgPlayer.BonusIntelligence, "INT", Color.Cyan);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Focus, rpgPlayer.Focus, rpgPlayer.AutoFocus, rpgPlayer.BonusFocus, "FOC", Color.MediumPurple);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Vitality, rpgPlayer.Vitality, rpgPlayer.AutoVitality, rpgPlayer.BonusVitality, "VIT", Color.Red);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Stamina, rpgPlayer.StaminaStat, rpgPlayer.AutoStamina, rpgPlayer.BonusStamina, "STA", Color.Yellow);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Defense, rpgPlayer.Defense, rpgPlayer.AutoDefense, rpgPlayer.BonusDefense, "DEF", Color.Gray);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Agility, rpgPlayer.Agility, rpgPlayer.AutoAgility, rpgPlayer.BonusAgility, "AGI", Color.LightBlue);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Wisdom, rpgPlayer.Wisdom, rpgPlayer.AutoWisdom, rpgPlayer.BonusWisdom, "WIS", Color.Blue);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Fortitude, rpgPlayer.Fortitude, rpgPlayer.AutoFortitude, rpgPlayer.BonusFortitude, "FOR", Color.Brown);
-            DrawStatRow(spriteBatch, area, ref y, StatType.Luck, rpgPlayer.Luck, rpgPlayer.AutoLuck, rpgPlayer.BonusLuck, "LUK", Color.Gold);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Strength, rpgPlayer.Strength, rpgPlayer.AutoStrength, rpgPlayer.BonusStrength);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Dexterity, rpgPlayer.Dexterity, rpgPlayer.AutoDexterity, rpgPlayer.BonusDexterity);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Rogue, rpgPlayer.Rogue, rpgPlayer.AutoRogue, rpgPlayer.BonusRogue);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Intelligence, rpgPlayer.Intelligence, rpgPlayer.AutoIntelligence, rpgPlayer.BonusIntelligence);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Focus, rpgPlayer.Focus, rpgPlayer.AutoFocus, rpgPlayer.BonusFocus);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Vitality, rpgPlayer.Vitality, rpgPlayer.AutoVitality, rpgPlayer.BonusVitality);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Stamina, rpgPlayer.StaminaStat, rpgPlayer.AutoStamina, rpgPlayer.BonusStamina);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Defense, rpgPlayer.Defense, rpgPlayer.AutoDefense, rpgPlayer.BonusDefense);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Agility, rpgPlayer.Agility, rpgPlayer.AutoAgility, rpgPlayer.BonusAgility);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Wisdom, rpgPlayer.Wisdom, rpgPlayer.AutoWisdom, rpgPlayer.BonusWisdom);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Fortitude, rpgPlayer.Fortitude, rpgPlayer.AutoFortitude, rpgPlayer.BonusFortitude);
+            DrawStatRow(spriteBatch, area, ref y, StatType.Luck, rpgPlayer.Luck, rpgPlayer.AutoLuck, rpgPlayer.BonusLuck);
         }
         
-        private void DrawStatRow(SpriteBatch spriteBatch, Rectangle area, ref int y, StatType stat, int baseVal, int autoVal, int bonus, string abbr, Color color)
+        private void DrawStatRow(SpriteBatch spriteBatch, Rectangle area, ref int y, StatType stat, int baseVal, int autoVal, int bonus)
         {
+            var def = StatDefinitions.GetDefinition(stat);
+            string abbr = def.Abbrev;
+            Color color = def.Color;
             Point mouse = MousePosition;
             int rowHeight = 36;
             Rectangle rowRect = new Rectangle(area.X, y, area.Width, rowHeight);
@@ -428,10 +442,10 @@ namespace Rpg.Common.UI
             
             // + Button
             Rectangle plusBtn = new Rectangle(area.X + area.Width - 40, y, 35, rowHeight - 4);
-            bool hover = plusBtn.Contains(mouse);
+            bool hoverPlus = plusBtn.Contains(mouse);
             bool canAllocate = rpgPlayer.StatPoints > 0;
             
-            Color btnColor = canAllocate ? (hover ? new Color(80, 150, 80) : new Color(50, 120, 50)) : new Color(60, 60, 60);
+            Color btnColor = canAllocate ? (hoverPlus ? new Color(80, 150, 80) : new Color(50, 120, 50)) : new Color(60, 60, 60);
             DrawPanel(spriteBatch, plusBtn, btnColor, canAllocate ? new Color(100, 180, 100) : new Color(80, 80, 80));
             
             string plus = "+";
@@ -439,6 +453,20 @@ namespace Rpg.Common.UI
             Utils.DrawBorderString(spriteBatch, plus, new Vector2(plusBtn.X + plusBtn.Width / 2 - plusSize.X / 2, plusBtn.Y + plusBtn.Height / 2 - plusSize.Y / 2), canAllocate ? Color.White : Color.Gray);
             
             statPlusBtns[stat] = plusBtn;
+            
+            // - Button
+            Rectangle minusBtn = new Rectangle(area.X + area.Width - 80, y, 35, rowHeight - 4);
+            bool hoverMinus = minusBtn.Contains(mouse);
+            bool canDeallocate = baseVal > 0;
+            
+            Color minusBtnColor = canDeallocate ? (hoverMinus ? new Color(150, 80, 80) : new Color(120, 50, 50)) : new Color(60, 60, 60);
+            DrawPanel(spriteBatch, minusBtn, minusBtnColor, canDeallocate ? new Color(180, 100, 100) : new Color(80, 80, 80));
+            
+            string minus = "-";
+            Vector2 minusSize = FontAssets.MouseText.Value.MeasureString(minus);
+            Utils.DrawBorderString(spriteBatch, minus, new Vector2(minusBtn.X + minusBtn.Width / 2 - minusSize.X / 2, minusBtn.Y + minusBtn.Height / 2 - minusSize.Y / 2), canDeallocate ? Color.White : Color.Gray);
+            
+            statMinusBtns[stat] = minusBtn;
 
             statRowBounds[stat] = rowRect;
 
@@ -447,8 +475,8 @@ namespace Rpg.Common.UI
                 DrawStatTooltip(spriteBatch, stat, baseVal, autoVal, bonus);
             }
             
-            // Handle click
-            if (hover && leftClick && canAllocate)
+            // Handle clicks
+            if (hoverPlus && leftClick && canAllocate)
             {
                 int amount = 1;
                 if (Main.keyState.IsKeyDown(Keys.LeftControl) && Main.keyState.IsKeyDown(Keys.LeftShift))
@@ -459,6 +487,20 @@ namespace Rpg.Common.UI
                     amount = 5;
                     
                 rpgPlayer.AllocateStatPoint(stat, amount);
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+            else if (hoverMinus && leftClick && canDeallocate)
+            {
+                int amount = 1;
+                if (Main.keyState.IsKeyDown(Keys.LeftControl) && Main.keyState.IsKeyDown(Keys.LeftShift))
+                    amount = baseVal; // Max available
+                else if (Main.keyState.IsKeyDown(Keys.LeftControl))
+                    amount = 10;
+                else if (Main.keyState.IsKeyDown(Keys.LeftShift))
+                    amount = 5;
+                    
+                amount = System.Math.Min(amount, baseVal);
+                rpgPlayer.DeallocateStatPoint(stat, amount);
                 SoundEngine.PlaySound(SoundID.MenuTick);
             }
             
@@ -494,7 +536,51 @@ namespace Rpg.Common.UI
                 
                 // Description
                 Utils.DrawBorderString(spriteBatch, currentJobData.Description, new Vector2(area.X, y), Color.LightGray, 0.85f);
-                y += 40;
+                y += 20;
+                
+                // Resign button (if not Novice)
+                if (currentJobData.Tier != JobTier.Novice)
+                {
+                    Rectangle resignBtn = new Rectangle(area.X + area.Width - 100, y - 35, 90, 30);
+                    bool hoverResign = resignBtn.Contains(MousePosition);
+                    
+                    Color resignColor = hoverResign ? new Color(180, 80, 80) : new Color(150, 60, 60);
+                    DrawPanel(spriteBatch, resignBtn, resignColor, new Color(200, 100, 100));
+                    
+                    string resignText = "Resign";
+                    Vector2 resignSize = FontAssets.MouseText.Value.MeasureString(resignText);
+                    Utils.DrawBorderString(spriteBatch, resignText, 
+                        new Vector2(resignBtn.X + resignBtn.Width / 2 - resignSize.X / 2, resignBtn.Y + resignBtn.Height / 2 - resignSize.Y / 2), 
+                        Color.White);
+                    
+                    // Handle click
+                    if (hoverResign && leftClick)
+                    {
+                        if (!Main.keyState.IsKeyDown(Keys.LeftShift) && !Main.keyState.IsKeyDown(Keys.RightShift))
+                        {
+                            Main.NewText("Hold Shift and click to resign from your current job.", Color.Yellow);
+                        }
+                        else
+                        {
+                            // Resign to Novice
+                            var levelSystem = Main.LocalPlayer.GetModPlayer<Players.PlayerLevel>();
+                            if (levelSystem != null && levelSystem.ResignJob())
+                            {
+                                Main.NewText("You have resigned from your job and returned to Novice.", Color.Orange);
+                                SoundEngine.PlaySound(SoundID.MenuTick);
+                            }
+                        }
+                    }
+                }
+                
+                y += 20;
+            }
+            else
+            {
+                // Fallback if job data not found
+                string fallbackText = $"Current: {rpgPlayer.CurrentJob.ToString()} (Data not found)";
+                Utils.DrawBorderString(spriteBatch, fallbackText, new Vector2(area.X, y), Color.Red, 1.1f);
+                y += 25;
             }
             
             // Separator
@@ -973,7 +1059,7 @@ namespace Rpg.Common.UI
 
             Rectangle iconRect = new Rectangle(rect.X + 8, rect.Y + 8, 32, 32);
             DrawPanel(spriteBatch, iconRect, new Color(30, 40, 60), new Color(70, 90, 120));
-            var icon = AssetLoader.GetSkillIcon(skill.InternalName);
+            var icon = AssetLoader.GetTexture(skill.IconTexture);
             spriteBatch.Draw(icon, iconRect, isLearned ? Color.White : Color.Gray);
 
             if (isLearned && iconRect.Contains(mouse))
@@ -1192,6 +1278,37 @@ namespace Rpg.Common.UI
         
         #endregion
         
+        #region Damage Tab
+        
+        private void DrawDamageTab(SpriteBatch spriteBatch, Rectangle area)
+        {
+            int y = area.Y + 10;
+            
+            Utils.DrawBorderString(spriteBatch, "Damage Class Inheritance Map", new Vector2(area.X + area.Width / 2 - FontAssets.MouseText.Value.MeasureString("Damage Class Inheritance Map").X / 2, y), Color.Gold, 1.2f);
+            y += 40;
+            
+            // Get all damage classes
+            var damageClasses = new List<DamageClass>
+            {
+                DamageClass.Generic,
+                DamageClass.Melee,
+                DamageClass.Ranged,
+                DamageClass.Magic,
+                DamageClass.Summon,
+                DamageClass.Throwing
+            };
+            
+            foreach (var dc in damageClasses)
+            {
+                string baseName = dc == DamageClass.Generic ? "None" : "Generic";
+                string text = $"{dc.DisplayName} -> {baseName}";
+                Utils.DrawBorderString(spriteBatch, text, new Vector2(area.X + 10, y), Color.White, 0.9f);
+                y += 20;
+            }
+        }
+        
+        #endregion
+        
         #region Helpers
 
         private void DrawStatTooltip(SpriteBatch spriteBatch, StatType stat, int baseVal, int autoVal, int bonusVal)
@@ -1249,61 +1366,7 @@ namespace Rpg.Common.UI
                 $"{stat}  (Base {baseVal} / Auto {autoVal} / Bonus {bonusVal})"
             };
 
-            switch (stat)
-            {
-                case StatType.Strength:
-                    lines.Add("+1% Melee Damage per point");
-                    break;
-                case StatType.Dexterity:
-                    lines.Add("+1% Ranged Damage per point");
-                    lines.Add("+0.3% Attack Speed per point");
-                    lines.Add("+0.3% Ranged Crit per point");
-                    break;
-                case StatType.Rogue:
-                    lines.Add("+0.8% Melee/Ranged Damage per point");
-                    lines.Add("+0.3% Critical Chance per point");
-                    break;
-                case StatType.Intelligence:
-                    lines.Add("+1.5% Magic Damage per point");
-                    lines.Add("+0.7% Magic Critical per point");
-                    lines.Add("+0.5% Spell Power per point");
-                    lines.Add("+0.2% Mana Cost Reduction per point");
-                    break;
-                case StatType.Focus:
-                    lines.Add("+1.2% Summon Damage per point");
-                    lines.Add("+1 Minion Slot at 10/30/60/100 FOC");
-                    break;
-                case StatType.Vitality:
-                    lines.Add("+10 Max HP per point");
-                    lines.Add("+0.02 HP Regen per point");
-                    break;
-                case StatType.Stamina:
-                    lines.Add("+2 Max Stamina per point");
-                    lines.Add("+0.05 Stamina Regen per point");
-                    break;
-                case StatType.Defense:
-                    lines.Add("+0.3% Damage Reduction per point");
-                    lines.Add("+1 Armor per 5 points");
-                    break;
-                case StatType.Agility:
-                    lines.Add("+0.3% Move Speed per point");
-                    lines.Add("+0.2% Dodge Chance per point");
-                    break;
-                case StatType.Wisdom:
-                    lines.Add("+5 Max Mana per point");
-                    lines.Add("+0.03 Mana Regen per point");
-                    break;
-                case StatType.Fortitude:
-                    lines.Add("+0.5% Debuff Duration Reduction per point");
-                    lines.Add("+0.3% Knockback Resist per point");
-                    lines.Add("+0.2% Damage Reduction per point");
-                    break;
-                case StatType.Luck:
-                    lines.Add("+0.5% Critical Chance per point");
-                    lines.Add("+0.2% Luck (drops/variance) per point");
-                    lines.Add("+0.2% All Damage per point");
-                    break;
-            }
+            lines.AddRange(StatDefinitions.GetDefinition(stat).EffectLines);
 
             return lines;
         }

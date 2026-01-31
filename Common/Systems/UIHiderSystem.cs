@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Config;
+using RpgMod.Common.Config;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// System to hide default HP/MP bars while keeping buff icons visible

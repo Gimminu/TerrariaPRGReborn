@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Berserker
+namespace RpgMod.Common.Skills.Tier2.Berserker
 {
     /// <summary>
     /// Raging Blow - 격노의 일격.
@@ -49,8 +49,11 @@ namespace Rpg.Common.Skills.Tier2.Berserker
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int damage = (int)(Main.DamageVar(BASE_DAMAGE[rank - 1], player.luck) * damageMultiplier);
-                    npc.SimpleStrikeNPC(damage, player.direction, true, 7f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, BASE_DAMAGE[rank - 1]);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    finalDamage = (int)(finalDamage * damageMultiplier);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 7f, DamageClass.Melee);
                 }
             }
             

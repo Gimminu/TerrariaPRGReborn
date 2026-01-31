@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Guardian
+namespace RpgMod.Common.Skills.Tier3.Guardian
 {
     /// <summary>
     /// Unbreakable - Guardian's ultimate passive.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier3.Guardian
     {
         public override string InternalName => "Unbreakable";
         public override string DisplayName => "Unbreakable";
-        public override string Description => "Your body becomes like steel, greatly increasing defense.";
+        public override string Description => "Your body becomes like steel, greatly increasing defense and knockback resistance (immunity at high rank).";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Guardian;
@@ -27,6 +27,14 @@ namespace Rpg.Common.Skills.Tier3.Guardian
         private static readonly int[] DEFENSE_BONUS = { 12, 18, 24, 32, 45 };
         private static readonly float[] KNOCKBACK_RESIST = { 0.10f, 0.15f, 0.20f, 0.25f, 0.35f };
 
+        public static float GetKnockbackResist(int rank)
+        {
+            if (rank <= 0)
+                return 0f;
+            int index = System.Math.Min(rank, KNOCKBACK_RESIST.Length) - 1;
+            return KNOCKBACK_RESIST[index];
+        }
+
         public override void ApplyPassive(Player player)
         {
             if (CurrentRank <= 0)
@@ -39,10 +47,6 @@ namespace Rpg.Common.Skills.Tier3.Guardian
 
             // Apply knockback resistance
             player.noKnockback = rank >= 5 || player.noKnockback;
-            if (rank < 5)
-            {
-                // Partial knockback resistance handled elsewhere
-            }
         }
     }
 }

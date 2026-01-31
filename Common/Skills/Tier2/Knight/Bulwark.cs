@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Bulwark - 철벽.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier2.Knight
     {
         public override string InternalName => "Bulwark";
         public override string DisplayName => "Bulwark";
-        public override string Description => "Become an immovable fortress, greatly reducing damage but slowing movement.";
+        public override string Description => "Become an immovable fortress, greatly increasing defense but briefly petrifying you.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Knight;

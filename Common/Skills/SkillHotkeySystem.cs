@@ -1,6 +1,6 @@
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Skills
+namespace RpgMod.Common.Skills
 {
     /// <summary>
     /// Manages keybinds for skill hotkeys (1-9)

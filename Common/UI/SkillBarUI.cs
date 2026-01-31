@@ -5,10 +5,10 @@ using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Base;
-using Rpg.Common.Systems;
+using RpgMod.Common.Base;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Always-visible skill bar showing hotkeyed skills and cooldowns
@@ -134,7 +134,7 @@ namespace Rpg.Common.UI
                 (int)dimensions.Height - 6
             );
 
-            Texture2D icon = AssetLoader.GetSkillIcon(skill.InternalName);
+            Texture2D icon = AssetLoader.GetTexture(skill.IconTexture);
             spriteBatch.Draw(icon, iconRect, Color.White);
             
             // Draw cooldown overlay

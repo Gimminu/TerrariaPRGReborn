@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Mage
+namespace RpgMod.Common.Skills.Tier1.Mage
 {
     /// <summary>
     /// Arcane Intellect - Mage's passive skill.

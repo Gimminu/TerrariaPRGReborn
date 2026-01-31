@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Gunmaster
+namespace RpgMod.Common.Skills.Tier3.Gunmaster
 {
     /// <summary>
     /// Infinite Ammo - 무한 탄약.

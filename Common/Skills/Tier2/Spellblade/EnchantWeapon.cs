@@ -3,10 +3,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Spellblade
+namespace RpgMod.Common.Skills.Tier2.Spellblade
 {
     /// <summary>
     /// Enchant Weapon - Spellblade's weapon enhancement skill.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Spellblade
     {
         public override string InternalName => "EnchantWeapon";
         public override string DisplayName => "Enchant Weapon";
-        public override string Description => "Enchant your weapon with arcane energy.";
+        public override string Description => "Enchant your weapon, increasing damage and imbuing it with fire.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Spellblade;

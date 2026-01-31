@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sorcerer
+namespace RpgMod.Common.Skills.Tier2.Sorcerer
 {
     /// <summary>
     /// Meteor Strike - 운석 충돌.
@@ -40,15 +40,24 @@ namespace Rpg.Common.Skills.Tier2.Sorcerer
             Vector2 spawnPos = Main.MouseWorld - new Vector2(0, 600);
             Vector2 direction = new Vector2(Main.rand.NextFloat(-1f, 1f), 5f).SafeNormalize(Vector2.UnitY);
             
-            Projectile.NewProjectile(player.GetSource_FromThis(), spawnPos, direction * 15f,
+            int mainProjId = Projectile.NewProjectile(player.GetSource_FromThis(), spawnPos, direction * 15f,
                 ProjectileID.Meteor1, damage, 8f, player.whoAmI);
+            if (mainProjId >= 0 && mainProjId < Main.maxProjectiles)
+            {
+                Main.projectile[mainProjId].DamageType = DamageClass.Magic;
+            }
             
             // 추가 작은 운석들
+            int smallDamage = damage / 3;
             for (int i = 0; i < 2 + rank / 3; i++)
             {
                 Vector2 offset = new Vector2(Main.rand.NextFloat(-100, 100), Main.rand.NextFloat(-50, 0));
-                Projectile.NewProjectile(player.GetSource_FromThis(), spawnPos + offset, direction * 12f,
-                    ProjectileID.Meteor2, damage / 3, 3f, player.whoAmI);
+                int projId = Projectile.NewProjectile(player.GetSource_FromThis(), spawnPos + offset, direction * 12f,
+                    ProjectileID.Meteor2, smallDamage, 3f, player.whoAmI);
+                if (projId >= 0 && projId < Main.maxProjectiles)
+                {
+                    Main.projectile[projId].DamageType = DamageClass.Magic;
+                }
             }
             
             PlayEffects(player);

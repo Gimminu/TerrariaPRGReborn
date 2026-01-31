@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Necromancer
+namespace RpgMod.Common.Skills.Tier2.Necromancer
 {
     /// <summary>
     /// Death Affinity - 죽음의 친화.

@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Sorcerer
+namespace RpgMod.Common.Skills.Tier2.Sorcerer
 {
     /// <summary>
     /// Arcane Surge - 마력 급증.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier2.Sorcerer
     {
         public override string InternalName => "ArcaneSurge";
         public override string DisplayName => "Arcane Surge";
-        public override string Description => "Surge with arcane power, greatly increasing magic damage.";
+        public override string Description => "Surge with arcane power, greatly increasing magic damage and granting Magic Power and Clairvoyance.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Sorcerer;
@@ -43,7 +43,7 @@ namespace Rpg.Common.Skills.Tier2.Sorcerer
             
             // 추가 피해는 RpgPlayer에서 처리
             var rpg = player.GetModPlayer<RpgPlayer>();
-            rpg.AddTemporaryDamage(DAMAGE_BONUS[rank - 1], durationTicks);
+            rpg.AddTemporaryMagicDamage(DAMAGE_BONUS[rank - 1], durationTicks);
             
             PlayEffects(player);
             ShowMessage(player, "Arcane Surge!", Color.MediumPurple);

@@ -1,6 +1,6 @@
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Input
+namespace RpgMod.Common.Input
 {
     /// <summary>
     /// DEPRECATED: Achievements are now integrated into MasterUI

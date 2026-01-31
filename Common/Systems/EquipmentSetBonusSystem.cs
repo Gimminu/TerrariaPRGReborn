@@ -5,7 +5,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.ID;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Equipment Set Bonus System - Provides RPG stat bonuses for wearing equipment sets

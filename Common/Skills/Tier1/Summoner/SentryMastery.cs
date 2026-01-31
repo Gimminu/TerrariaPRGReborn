@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Summoner
+namespace RpgMod.Common.Skills.Tier1.Summoner
 {
     /// <summary>
     /// Sentry Mastery - 센트리 숙련.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier1.Summoner
     {
         public override string InternalName => "SentryMastery";
         public override string DisplayName => "Sentry Mastery";
-        public override string Description => "Master sentry placement, increasing sentry damage and max sentry slots.";
+        public override string Description => "Master sentry placement, increasing summon damage and max sentry slots.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Summoner;

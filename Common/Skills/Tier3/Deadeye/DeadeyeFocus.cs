@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.Deadeye
+namespace RpgMod.Common.Skills.Tier3.Deadeye
 {
     /// <summary>
     /// Deadeye Focus - Deadeye's ultimate precision skill.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier3.Deadeye
     {
         public override string InternalName => "DeadeyeFocus";
         public override string DisplayName => "Deadeye Focus";
-        public override string Description => "Enter a state of perfect focus, massively increasing crit chance.";
+        public override string Description => "Enter a state of perfect focus, massively increasing ranged damage and critical chance.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Deadeye;
@@ -28,15 +28,18 @@ namespace Rpg.Common.Skills.Tier3.Deadeye
 
         private static readonly int[] DURATION_SECONDS = { 8, 10, 12, 14, 18 };
         private static readonly float[] DAMAGE_BONUS = { 0.20f, 0.28f, 0.36f, 0.45f, 0.60f };
+        private static readonly float[] CRIT_BONUS = { 8f, 12f, 16f, 20f, 25f };
 
         protected override void OnActivate(Player player)
         {
             int rank = System.Math.Max(1, CurrentRank);
             int duration = DURATION_SECONDS[rank - 1] * 60;
             float bonus = DAMAGE_BONUS[rank - 1];
+            float critBonus = CRIT_BONUS[rank - 1];
 
             var rpgPlayer = player.GetModPlayer<RpgPlayer>();
-            rpgPlayer.AddTemporaryDamage(bonus, duration);
+            rpgPlayer.AddTemporaryRangedDamage(bonus, duration);
+            rpgPlayer.AddTemporaryRangedCrit(critBonus, duration);
 
             player.AddBuff(BuffID.Archery, duration);
 

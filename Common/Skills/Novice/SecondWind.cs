@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Novice
+namespace RpgMod.Common.Skills.Novice
 {
     /// <summary>
     /// Second Wind - Novice survival skill.

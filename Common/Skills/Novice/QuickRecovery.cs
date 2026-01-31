@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Novice
+namespace RpgMod.Common.Skills.Novice
 {
     /// <summary>
     /// Quick Recovery - 빠르게 체력을 회복하는 초보자 힐 스킬.

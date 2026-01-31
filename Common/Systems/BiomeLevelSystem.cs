@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common;
+using RpgMod.Common;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Comprehensive biome-based level system

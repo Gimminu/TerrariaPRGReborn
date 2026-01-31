@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Mage
+namespace RpgMod.Common.Skills.Tier1.Mage
 {
     /// <summary>
     /// Magic Barrier - 마법 장벽.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier1.Mage
     {
         public override string InternalName => "MagicBarrier";
         public override string DisplayName => "Magic Barrier";
-        public override string Description => "Conjure a barrier of magical energy that absorbs damage.";
+        public override string Description => "Conjure a magical barrier that boosts defense and mana regeneration.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Mage;

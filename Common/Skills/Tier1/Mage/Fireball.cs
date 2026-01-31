@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Mage
+namespace RpgMod.Common.Skills.Tier1.Mage
 {
     /// <summary>
     /// Fireball - Mage's signature AoE damage skill.
@@ -41,8 +41,8 @@ namespace Rpg.Common.Skills.Tier1.Mage
             float magicScaling = MAGIC_SCALING[rank - 1];
 
             // Calculate total damage with magic damage bonus
-            float magicDamageMultiplier = player.GetDamage(DamageClass.Magic).Additive;
-            int totalDamage = (int)(baseDamage * (1f + (magicDamageMultiplier - 1f) * magicScaling));
+            float scaledDamage = GetScaledDamage(player, DamageClass.Magic, baseDamage);
+            float totalDamage = baseDamage + (scaledDamage - baseDamage) * magicScaling;
 
             int hitCount = 0;
 
@@ -57,12 +57,9 @@ namespace Rpg.Common.Skills.Tier1.Mage
                     continue;
 
                 int hitDirection = npc.Center.X >= player.Center.X ? 1 : -1;
-                float critChance = player.GetCritChance(DamageClass.Magic);
-                bool crit = Main.rand.NextFloat(100f) < critChance;
+                bool crit = RollCrit(player, DamageClass.Magic);
 
-                int damage = Main.DamageVar(totalDamage, player.luck);
-                if (crit) damage = (int)(damage * 1.5f);
-
+                int damage = ApplyDamageVariance(player, totalDamage);
                 player.ApplyDamageToNPC(npc, damage, 4f, hitDirection, crit, DamageClass.Magic, false);
                 hitCount++;
 

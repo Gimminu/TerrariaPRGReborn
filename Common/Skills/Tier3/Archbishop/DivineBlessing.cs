@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Archbishop
+namespace RpgMod.Common.Skills.Tier3.Archbishop
 {
     /// <summary>
     /// Divine Blessing - Archbishop's passive for healing mastery.
@@ -10,7 +10,7 @@ namespace Rpg.Common.Skills.Tier3.Archbishop
     {
         public override string InternalName => "DivineBlessing";
         public override string DisplayName => "Divine Blessing";
-        public override string Description => "Greatly increase life and mana regeneration.";
+        public override string Description => "Greatly increase life, life regen, and mana regeneration.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Archbishop;

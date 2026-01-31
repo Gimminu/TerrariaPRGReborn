@@ -9,9 +9,9 @@ using Terraria.ID;
 using Terraria.GameInput;
 using System.Collections.Generic;
 using System.Linq;
-using Rpg.Common.Players;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Job advancement UI - allows players to change jobs when requirements are met
@@ -138,7 +138,41 @@ namespace Rpg.Common.UI
             // Description
             string desc = currentJobData.Description;
             Vector2 descPos = new Vector2(cardBounds.X + 10, cardBounds.Y + 35);
-            DrawWrappedText(spriteBatch, desc, descPos, cardBounds.Width - 20, Color.LightGray, 0.75f);
+            DrawWrappedText(spriteBatch, desc, descPos, cardBounds.Width - 120, Color.LightGray, 0.75f);
+            
+            // Resign button (only if not Novice)
+            if (currentJobData.Tier != JobTier.Novice)
+            {
+                Rectangle buttonBounds = new Rectangle(
+                    cardBounds.Right - 100,
+                    cardBounds.Y + 30,
+                    90,
+                    30
+                );
+                
+                Color buttonColor = new Color(150, 60, 60);
+                if (buttonBounds.Contains(MousePosition))
+                {
+                    buttonColor = new Color(200, 80, 80);
+                    
+                    // Handle click
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        ResignJob();
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                }
+                
+                DrawPanel(spriteBatch, buttonBounds, buttonColor, Color.Black);
+                
+                string buttonText = "Resign";
+                Vector2 textSize = FontAssets.MouseText.Value.MeasureString(buttonText);
+                Vector2 textPos = new Vector2(
+                    buttonBounds.X + buttonBounds.Width / 2 - textSize.X / 2,
+                    buttonBounds.Y + buttonBounds.Height / 2 - textSize.Y / 2
+                );
+                DrawText(spriteBatch, buttonText, textPos, Color.White, 0.8f);
+            }
             
             yOffset += 90;
         }
@@ -279,6 +313,21 @@ namespace Rpg.Common.UI
             // Close UI
             var uiSystem = ModContent.GetInstance<JobUISystem>();
             uiSystem.HideUI();
+        }
+        
+        private void ResignJob()
+        {
+            // Confirm resignation
+            if (!Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) && 
+                !Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
+            {
+                Main.NewText("Hold Shift and click to resign from your current job.", Color.Yellow);
+                return;
+            }
+            
+            // Change to Novice (resign)
+            ChangeJob(JobType.Novice);
+            Main.NewText("You have resigned from your job and returned to Novice.", Color.Orange);
         }
         
         private string GetBonusText(Jobs.JobData jobData)

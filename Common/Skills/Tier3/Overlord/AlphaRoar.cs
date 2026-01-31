@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.Overlord
+namespace RpgMod.Common.Skills.Tier3.Overlord
 {
     /// <summary>
     /// Alpha Roar - Overlord's battle cry that boosts all summons.

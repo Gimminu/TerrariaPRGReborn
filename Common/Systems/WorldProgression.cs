@@ -2,9 +2,9 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using System.Collections.Generic;
-using Rpg.Common.Compatibility;
+using RpgMod.Common.Compatibility;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Tracks boss progression and updates World Level accordingly

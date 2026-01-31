@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Gunslinger
+namespace RpgMod.Common.Skills.Tier2.Gunslinger
 {
     /// <summary>
     /// Gun Mastery - 총기 숙련.

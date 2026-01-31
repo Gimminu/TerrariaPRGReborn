@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Summoner
+namespace RpgMod.Common.Skills.Tier1.Summoner
 {
     /// <summary>
     /// Spirit Endurance - 정령 내구.
@@ -36,7 +36,7 @@ namespace Rpg.Common.Skills.Tier1.Summoner
             for (int i = 0; i < Main.maxProjectiles; i++)
             {
                 var proj = Main.projectile[i];
-                if (proj.active && proj.owner == player.whoAmI && proj.minion)
+                if (proj.active && proj.owner == player.whoAmI && (proj.minion || proj.sentry || proj.minionSlots > 0f))
                     minionCount++;
             }
             

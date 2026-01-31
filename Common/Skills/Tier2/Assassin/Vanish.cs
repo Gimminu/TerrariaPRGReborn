@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Vanish - Assassin's stealth skill.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier2.Assassin
     {
         public override string InternalName => "Vanish";
         public override string DisplayName => "Vanish";
-        public override string Description => "Become invisible and gain increased movement speed.";
+        public override string Description => "Become invisible, move faster, and take reduced damage.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Assassin;

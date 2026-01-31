@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Novice
+namespace RpgMod.Common.Skills.Novice
 {
     /// <summary>
     /// Basic Strike - Novice starting skill.
@@ -63,6 +63,7 @@ namespace Rpg.Common.Skills.Novice
             Item weapon = player.HeldItem;
             int baseDamage = weapon.damage;
             int skillDamage = (int)(baseDamage * damageMultiplier);
+            DamageClass damageClass = weapon.DamageType;
 
             Vector2 strikePosition = player.Center + new Vector2(player.direction * 40, 0);
             int strikeRadius = 60;
@@ -83,9 +84,11 @@ namespace Rpg.Common.Skills.Novice
                     knockbackDir.Normalize();
 
                 float totalKnockback = weapon.knockBack + knockbackBonus;
-                int damage = Main.DamageVar(skillDamage, player.luck);
+                float scaledDamage = GetScaledDamage(player, damageClass, skillDamage);
+                int damage = ApplyDamageVariance(player, scaledDamage);
+                bool crit = RollCrit(player, damageClass);
 
-                player.ApplyDamageToNPC(npc, damage, totalKnockback, player.direction, false);
+                player.ApplyDamageToNPC(npc, damage, totalKnockback, player.direction, crit, damageClass, false);
                 npc.velocity += knockbackDir * knockbackBonus;
 
                 hitEnemy = true;

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Rpg.Common.Config;
-using Rpg.Common.Systems;
+using RpgMod.Common.Config;
+using RpgMod.Common.Systems;
+using Rpg;
 
-namespace Rpg.Common.Compatibility
+namespace RpgMod.Common.Compatibility
 {
     /// <summary>
     /// Handles compatibility with other popular mods
@@ -21,6 +22,9 @@ namespace Rpg.Common.Compatibility
         
         private static Mod calamityMod;
         private static Mod thoriumMod;
+        private static DamageClass calamityRogueClass;
+        private static DamageClass thoriumBardClass;
+        private static DamageClass thoriumHealerClass;
         
         /// <summary>
         /// Boss progression data for mod bosses
@@ -44,6 +48,8 @@ namespace Rpg.Common.Compatibility
             
             if (ThoriumLoaded)
                 RegisterThoriumBosses();
+
+            CacheModDamageClasses();
             
             LogModCompatibility();
         }
@@ -53,6 +59,9 @@ namespace Rpg.Common.Compatibility
             modBossData.Clear();
             calamityMod = null;
             thoriumMod = null;
+            calamityRogueClass = null;
+            thoriumBardClass = null;
+            thoriumHealerClass = null;
             defeatedModBosses.Clear();
             totalModLevelCapBonus = 0;
         }
@@ -169,6 +178,69 @@ namespace Rpg.Common.Compatibility
         }
         
         #endregion
+
+        #region Damage Class Compatibility
+
+        private static void CacheModDamageClasses()
+        {
+            if (CalamityLoaded)
+            {
+                calamityRogueClass = FindDamageClass(calamityMod, new[]
+                {
+                    "RogueDamageClass",
+                    "RogueDamage",
+                    "Rogue"
+                });
+            }
+
+            if (ThoriumLoaded)
+            {
+                thoriumBardClass = FindDamageClass(thoriumMod, new[]
+                {
+                    "BardDamage",
+                    "BardDamageClass",
+                    "Bard"
+                });
+
+                thoriumHealerClass = FindDamageClass(thoriumMod, new[]
+                {
+                    "HealerDamage",
+                    "HealerDamageClass",
+                    "Healer"
+                });
+            }
+        }
+
+        private static DamageClass FindDamageClass(Mod mod, string[] names)
+        {
+            if (mod == null || names == null)
+                return null;
+
+            foreach (string name in names)
+            {
+                if (mod.TryFind<DamageClass>(name, out var damageClass))
+                    return damageClass;
+            }
+
+            return null;
+        }
+
+        public static DamageClass GetCalamityRogueClass()
+        {
+            return calamityRogueClass;
+        }
+
+        public static DamageClass GetThoriumBardClass()
+        {
+            return thoriumBardClass;
+        }
+
+        public static DamageClass GetThoriumHealerClass()
+        {
+            return thoriumHealerClass;
+        }
+
+        #endregion
         
         #region Boss Registration
         
@@ -211,7 +283,7 @@ namespace Rpg.Common.Compatibility
 
             if (!silent)
             {
-                var logger = ModContent.GetInstance<Rpg>().Logger;
+                var logger = ModContent.GetInstance<global::Rpg.Rpg>().Logger;
                 logger?.Info($"Registered mod boss kill ({npcType}), level cap +{data.levelCap}");
             }
 

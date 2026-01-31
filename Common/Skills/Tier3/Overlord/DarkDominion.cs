@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Overlord
+namespace RpgMod.Common.Skills.Tier3.Overlord
 {
     /// <summary>
     /// Dark Dominion - 암흑 지배.

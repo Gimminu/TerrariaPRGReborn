@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Overlord
+namespace RpgMod.Common.Skills.Tier3.Overlord
 {
     /// <summary>
     /// Overlord Command - Overlord's passive for ultimate summoner power.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier3.Overlord
     {
         public override string InternalName => "OverlordCommand";
         public override string DisplayName => "Overlord Command";
-        public override string Description => "Your command over beasts is absolute, granting extra minion slots and damage.";
+        public override string Description => "Your command over beasts is absolute, granting extra minion slots, summon damage, and defense.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Overlord;

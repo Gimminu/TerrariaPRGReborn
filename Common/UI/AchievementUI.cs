@@ -6,9 +6,9 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Systems;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Achievement UI - displays achievement progress and unlocked achievements

@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Warlock
+namespace RpgMod.Common.Skills.Tier2.Warlock
 {
     /// <summary>
     /// Shadow Bolt - 어둠의 화살.
@@ -59,8 +59,10 @@ namespace Rpg.Common.Skills.Tier2.Warlock
             
             if (target != null)
             {
-                int finalDamage = Main.DamageVar(damage, player.luck);
-                target.SimpleStrikeNPC(finalDamage, player.direction, true, 3f, DamageClass.Magic, true);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                bool crit = RollCrit(player, DamageClass.Magic);
+                target.SimpleStrikeNPC(finalDamage, player.direction, crit, 3f, DamageClass.Magic);
                 
                 PlayEffects(player, target);
             }

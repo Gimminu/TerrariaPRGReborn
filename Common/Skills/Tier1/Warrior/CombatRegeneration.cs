@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Combat Regeneration - 전투 재생.

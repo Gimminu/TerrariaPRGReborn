@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Necromancer
+namespace RpgMod.Common.Skills.Tier2.Necromancer
 {
     /// <summary>
     /// Raise Dead - 죽은 자를 일으켜라.
@@ -41,8 +41,14 @@ namespace Rpg.Common.Skills.Tier2.Necromancer
             for (int i = 0; i < count; i++)
             {
                 Vector2 offset = new Vector2(Main.rand.NextFloat(-60, 60), -10);
-                Projectile.NewProjectile(player.GetSource_FromThis(), player.Center + offset, Vector2.Zero,
+                int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center + offset, Vector2.Zero,
                     ProjectileID.BabySlime, damage, 2f, player.whoAmI);
+                if (projId >= 0 && projId < Main.maxProjectiles)
+                {
+                    Projectile proj = Main.projectile[projId];
+                    proj.DamageType = DamageClass.Summon;
+                    proj.ContinuouslyUpdateDamageStats = true;
+                }
             }
             
             PlayEffects(player);

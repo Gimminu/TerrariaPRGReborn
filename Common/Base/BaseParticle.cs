@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Base
+namespace RpgMod.Common.Base
 {
     /// <summary>
     /// Reusable particle system base class

@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Manages World Level - increases as bosses are defeated

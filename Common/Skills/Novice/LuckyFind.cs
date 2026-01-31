@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Novice
+namespace RpgMod.Common.Skills.Novice
 {
     /// <summary>
     /// Lucky Find - 행운의 발견.

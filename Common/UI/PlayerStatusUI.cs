@@ -5,11 +5,11 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
 using System;
-using Rpg.Common.Config;
-using Rpg.Common.Players;
-using Rpg.Common.Systems;
+using RpgMod.Common.Config;
+using RpgMod.Common.Players;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Main player status display - shows Level, XP, Job, and Resource bars

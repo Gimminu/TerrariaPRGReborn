@@ -7,12 +7,12 @@ using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common;
-using Rpg.Common.Jobs;
-using Rpg.Common.Players;
-using Rpg.Common.Systems;
+using RpgMod.Common;
+using RpgMod.Common.Jobs;
+using RpgMod.Common.Players;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Debug panel for testing RPG progression and biome levels.

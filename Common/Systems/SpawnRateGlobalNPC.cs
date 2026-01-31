@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Content.Buffs;
+using RpgMod.Content.Buffs;
 
-namespace Rpg.Common.GlobalClasses
+namespace RpgMod.Common.GlobalClasses
 {
     public class SpawnRateGlobalNPC : GlobalNPC
     {

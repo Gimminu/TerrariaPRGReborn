@@ -1,10 +1,10 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills
+namespace RpgMod.Common.Skills
 {
     /// <summary>
     /// Data-driven skill implementation for common effects.
@@ -130,9 +130,10 @@ namespace Rpg.Common.Skills
                     continue;
 
                 int hitDirection = npc.Center.X >= player.Center.X ? 1 : -1;
-                float critChance = player.GetCritChance(definition.AoEDamageClass);
-                bool crit = Main.rand.NextFloat(100f) < critChance;
-                player.ApplyDamageToNPC(npc, damage, definition.AoEKnockback, hitDirection, crit, definition.AoEDamageClass, false);
+                float scaledDamage = GetScaledDamage(player, definition.AoEDamageClass, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                bool crit = RollCrit(player, definition.AoEDamageClass);
+                player.ApplyDamageToNPC(npc, finalDamage, definition.AoEKnockback, hitDirection, crit, definition.AoEDamageClass, false);
             }
         }
     }

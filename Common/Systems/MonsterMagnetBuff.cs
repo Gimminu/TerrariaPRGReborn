@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace Rpg.Content.Buffs
+namespace RpgMod.Content.Buffs
 {
     public class MonsterMagnetBuff : ModBuff
     {

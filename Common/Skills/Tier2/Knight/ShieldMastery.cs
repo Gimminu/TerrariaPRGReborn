@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Shield Mastery - 방패 숙련.
@@ -25,12 +25,21 @@ namespace Rpg.Common.Skills.Tier2.Knight
         public override ResourceType ResourceType => ResourceType.None;
 
         private static readonly float[] DR_BONUS = { 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f, 0.10f, 0.12f };
+        private static readonly float[] KB_RESIST = { 0.05f, 0.07f, 0.09f, 0.11f, 0.13f, 0.15f, 0.17f, 0.19f, 0.22f, 0.25f };
+
+        public static float GetKnockbackResist(int rank)
+        {
+            if (rank <= 0)
+                return 0f;
+            int index = System.Math.Min(rank, KB_RESIST.Length) - 1;
+            return KB_RESIST[index];
+        }
 
         public override void ApplyPassive(Player player)
         {
             if (CurrentRank <= 0) return;
             int rank = CurrentRank;
-            
+
             player.endurance += DR_BONUS[rank - 1];
             player.noKnockback = rank >= 5; // 5랭크 이상이면 넉백 면역
         }

@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Deadeye
+namespace RpgMod.Common.Skills.Tier3.Deadeye
 {
     /// <summary>
     /// Marked Shot - Deadeye's ultimate precision attack.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier3.Deadeye
     {
         public override string InternalName => "MarkedShot";
         public override string DisplayName => "Marked Shot";
-        public override string Description => "Exploit enemy weak points with a devastating marked shot.";
+        public override string Description => "Exploit enemy weak points with guaranteed critical hits and massive critical damage.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Deadeye;
@@ -61,7 +61,8 @@ namespace Rpg.Common.Skills.Tier3.Deadeye
 
                 // Always crit with massive damage
                 int hitDirection = npc.Center.X >= player.Center.X ? 1 : -1;
-                int critDamage = (int)(totalDamage * critMult);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, totalDamage);
+                int critDamage = (int)(scaledDamage * critMult);
 
                 player.ApplyDamageToNPC(npc, critDamage, 3f, hitDirection, true, DamageClass.Ranged, false);
                 

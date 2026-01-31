@@ -3,11 +3,11 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common;
-using Rpg.Common.Effects;
-using Rpg.Common.Jobs;
+using RpgMod.Common;
+using RpgMod.Common.Effects;
+using RpgMod.Common.Jobs;
 
-namespace Rpg.Common.Base
+namespace RpgMod.Common.Base
 {
     /// <summary>
     /// Abstract base class for all skills - inherit from this for maximum reusability
@@ -387,6 +387,46 @@ namespace Rpg.Common.Base
         {
             float cdr = player.GetModPlayer<Players.RpgPlayer>().CooldownReduction;
             return CooldownSeconds * (1f - cdr);
+        }
+
+        /// <summary>
+        /// Get damage scaled by the player's total modifiers for the given damage class.
+        /// </summary>
+        protected static float GetScaledDamage(Player player, DamageClass damageClass, float baseDamage)
+        {
+            if (player == null)
+                return baseDamage;
+
+            if (damageClass == null)
+                damageClass = DamageClass.Generic;
+
+            return player.GetTotalDamage(damageClass).ApplyTo(baseDamage);
+        }
+
+        /// <summary>
+        /// Apply damage variance using the player's luck.
+        /// </summary>
+        protected static int ApplyDamageVariance(Player player, float damage)
+        {
+            int baseDamage = (int)damage;
+            if (player == null)
+                return baseDamage;
+
+            return Main.DamageVar(baseDamage, player.luck);
+        }
+
+        /// <summary>
+        /// Roll crit chance for the given damage class.
+        /// </summary>
+        protected static bool RollCrit(Player player, DamageClass damageClass)
+        {
+            if (player == null)
+                return false;
+
+            if (damageClass == null)
+                damageClass = DamageClass.Generic;
+
+            return Main.rand.NextFloat(100f) < player.GetCritChance(damageClass);
         }
 
         /// <summary>

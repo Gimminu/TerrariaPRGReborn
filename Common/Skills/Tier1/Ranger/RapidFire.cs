@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Ranger
+namespace RpgMod.Common.Skills.Tier1.Ranger
 {
     /// <summary>
     /// Rapid Fire - Ranger's attack speed buff.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier1.Ranger
     {
         public override string InternalName => "RapidFire";
         public override string DisplayName => "Rapid Fire";
-        public override string Description => "Increase ranged attack speed for a short time.";
+        public override string Description => "Increase ranged attack speed and movement speed for a short time.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Ranger;
@@ -42,7 +42,7 @@ namespace Rpg.Common.Skills.Tier1.Ranger
 
             // Apply attack speed via RpgPlayer
             var rpgPlayer = player.GetModPlayer<Players.RpgPlayer>();
-            rpgPlayer.AddTemporaryAttackSpeed(attackSpeedBonus, duration);
+            rpgPlayer.AddTemporaryRangedAttackSpeed(attackSpeedBonus, duration);
 
             PlaySkillEffects(player);
             ShowMessage(player, $"Rapid Fire! (+{(int)(attackSpeedBonus * 100)}% Speed)", Color.LightGreen);

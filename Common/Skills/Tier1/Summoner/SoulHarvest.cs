@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Summoner
+namespace RpgMod.Common.Skills.Tier1.Summoner
 {
     /// <summary>
     /// Soul Harvest - 영혼 수확.
@@ -48,8 +48,10 @@ namespace Rpg.Common.Skills.Tier1.Summoner
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= RADIUS)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 3f, DamageClass.Summon, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Summon, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Summon);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 3f, DamageClass.Summon);
                         totalHeal += healPerHit;
                         
                         // 영혼 흡수 이펙트

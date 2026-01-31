@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Config;
+using RpgMod.Common.Config;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// UI System for managing Player Status UI (always visible)

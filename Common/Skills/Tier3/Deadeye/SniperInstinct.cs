@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Deadeye
+namespace RpgMod.Common.Skills.Tier3.Deadeye
 {
     /// <summary>
     /// Sniper Instinct - Deadeye's passive for ranged mastery.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier3.Deadeye
     {
         public override string InternalName => "SniperInstinct";
         public override string DisplayName => "Sniper Instinct";
-        public override string Description => "Greatly increase ranged damage and crit damage.";
+        public override string Description => "Greatly increase ranged damage and critical chance.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Deadeye;

@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Rpg.Common;
+using RpgMod.Common;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Basic quest system for RPG feel
@@ -237,7 +238,20 @@ namespace Rpg.Common.Systems
 
         public void OnNPCKilled(NPC npc)
         {
-            if (npc.FullName.Contains(TargetNPC) || npc.TypeName.Contains(TargetNPC))
+            bool isTarget = false;
+            
+            // Special handling for zombies (include all zombie variants)
+            if (TargetNPC == "Zombie")
+            {
+                isTarget = NPCID.Sets.Zombies[npc.type];
+            }
+            else
+            {
+                // Default check for other targets
+                isTarget = npc.FullName.Contains(TargetNPC) || npc.TypeName.Contains(TargetNPC);
+            }
+            
+            if (isTarget)
             {
                 CurrentKills++;
                 if (CheckCompletion(null))

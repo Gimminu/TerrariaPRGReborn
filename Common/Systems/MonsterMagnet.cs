@@ -2,9 +2,9 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
-using Rpg.Content.Buffs;
+using RpgMod.Content.Buffs;
 
-namespace Rpg.Content.Items.Tools
+namespace RpgMod.Content.Items.Tools
 {
     public class MonsterMagnet : ModItem
     {

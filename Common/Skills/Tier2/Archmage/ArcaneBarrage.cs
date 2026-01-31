@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Archmage
+namespace RpgMod.Common.Skills.Tier2.Archmage
 {
     /// <summary>
     /// Arcane Barrage - 신비탄막.
@@ -46,8 +46,12 @@ namespace Rpg.Common.Skills.Tier2.Archmage
                 Vector2 shotDir = direction.RotatedBy(spread);
                 float speed = 12f + Main.rand.NextFloat(-2f, 2f);
                 
-                Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, shotDir * speed,
+                int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, shotDir * speed,
                     ProjectileID.NebulaBlaze1, damage, 2f, player.whoAmI);
+                if (projId >= 0 && projId < Main.maxProjectiles)
+                {
+                    Main.projectile[projId].DamageType = DamageClass.Magic;
+                }
             }
             
             PlayEffects(player);

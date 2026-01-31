@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Ranger
+namespace RpgMod.Common.Skills.Tier1.Ranger
 {
     /// <summary>
     /// Explosive Arrow - 폭발 화살.
@@ -73,8 +73,11 @@ namespace Rpg.Common.Skills.Tier1.Ranger
                     if (dist <= radius)
                     {
                         float distFactor = 1f - (dist / radius) * 0.5f;
-                        int finalDamage = (int)(Main.DamageVar(damage, player.luck) * distFactor);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 6f, DamageClass.Ranged, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        finalDamage = (int)(finalDamage * distFactor);
+                        bool crit = RollCrit(player, DamageClass.Ranged);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 6f, DamageClass.Ranged);
                     }
                 }
             }

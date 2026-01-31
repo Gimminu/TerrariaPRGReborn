@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier3.BloodKnight
+namespace RpgMod.Common.Skills.Tier3.BloodKnight
 {
     /// <summary>
     /// Crimson Frenzy - Blood Knight's damage boost at low health.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier3.BloodKnight
     {
         public override string InternalName => "CrimsonFrenzy";
         public override string DisplayName => "Crimson Frenzy";
-        public override string Description => "Enter a blood frenzy, gaining massive damage at the cost of life drain.";
+        public override string Description => "Enter a blood frenzy, gaining massive damage and lifesteal.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.BloodKnight;

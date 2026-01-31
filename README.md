@@ -4,7 +4,7 @@ Transform your Terraria experience into a full-fledged RPG adventure. This mod a
 
 Inspired by classic RPGs, you can build a tanky Knight, a devastating Mage, or a tactical Sniper—and swap stat builds freely to fit your playstyle.
 
-## ⚠️ Known Issues (v0.1.7)
+## ⚠️ Known Issues (v0.1.8)
 - Some players report freezing on world load (NPCs/player/time stop); may require Alt+F4.
 - Reports of crashes while loading other mods, and crashes when this mod is the only one enabled.
 - Boss summoning item not spawning the boss in some setups.
@@ -80,7 +80,7 @@ Each level grants **Stat Points** plus **Auto-Growth** based on your class so yo
 ## ⚠️ Balance Note
 Enemies are tougher to match your infinite scaling. Expert/Master recommended.
 
-## Current Version: Beta 0.1.8
+## Current Version: Beta 0.1.9
 ## Developed by: Gimminu
 
 Found a bug or class idea? Let us know in the comments!

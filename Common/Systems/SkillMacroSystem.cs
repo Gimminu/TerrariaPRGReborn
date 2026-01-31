@@ -5,10 +5,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Rpg.Common.Players;
-using Rpg.Common.Skills;
+using RpgMod.Common.Players;
+using RpgMod.Common.Skills;
 
-namespace Rpg.Common.Systems
+namespace RpgMod.Common.Systems
 {
     /// <summary>
     /// Skill Macro System - allows players to bind multiple skills to a single key

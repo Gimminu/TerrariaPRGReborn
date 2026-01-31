@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
-namespace Rpg.Common.Config
+namespace RpgMod.Common.Config
 {
     /// <summary>
     /// Server-side balance configuration.

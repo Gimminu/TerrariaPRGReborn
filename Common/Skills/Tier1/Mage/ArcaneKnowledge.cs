@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Mage
+namespace RpgMod.Common.Skills.Tier1.Mage
 {
     /// <summary>
     /// Arcane Knowledge - 비전 지식.

@@ -3,10 +3,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Backstab - Assassin's high crit damage skill.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Assassin
     {
         public override string InternalName => "Backstab";
         public override string DisplayName => "Backstab";
-        public override string Description => "Strike from the shadows with a guaranteed critical hit.";
+        public override string Description => "Strike from the shadows with a guaranteed critical hit and increased critical damage. If no target is in range, gain a brief damage boost instead.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Assassin;
@@ -39,9 +39,14 @@ namespace Rpg.Common.Skills.Tier2.Assassin
             NPC nearestEnemy = FindNearestEnemy(player, 200f);
             if (nearestEnemy != null)
             {
-                int finalDamage = (int)(baseDamage * critMult);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Melee, baseDamage);
+                float critScale = critMult * 0.5f;
+                int appliedDamage = (int)(scaledDamage * critScale);
+                if (appliedDamage < 1)
+                    appliedDamage = 1;
+                int finalDamage = appliedDamage * 2;
                 int dir = nearestEnemy.Center.X >= player.Center.X ? 1 : -1;
-                player.ApplyDamageToNPC(nearestEnemy, finalDamage, 5f, dir, true, DamageClass.Melee, false);
+                player.ApplyDamageToNPC(nearestEnemy, appliedDamage, 5f, dir, true, DamageClass.Melee, false);
                 PlayEffects(player, nearestEnemy);
                 ShowMessage(nearestEnemy, $"-{finalDamage} CRIT!", Color.Red);
             }

@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Berserker
+namespace RpgMod.Common.Skills.Tier2.Berserker
 {
     /// <summary>
     /// Undying Rage - 불사의 분노.
@@ -26,6 +26,11 @@ namespace Rpg.Common.Skills.Tier2.Berserker
         // 실제 효과는 RpgPlayer에서 처리
         // 랭크에 따라 생존 시 남는 체력 증가
         private static readonly int[] SURVIVE_HP = { 5, 10, 15, 20, 30, 40, 50, 65, 80, 100 };
+
+        public static int GetSurviveHp(int rank)
+        {
+            return SURVIVE_HP[System.Math.Clamp(rank - 1, 0, 9)];
+        }
 
         public override void ApplyPassive(Player player)
         {

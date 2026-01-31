@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.BloodKnight
+namespace RpgMod.Common.Skills.Tier3.BloodKnight
 {
     /// <summary>
     /// Sanguine Armor - Blood Knight's passive for life-based defense.

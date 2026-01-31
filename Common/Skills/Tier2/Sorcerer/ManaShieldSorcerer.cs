@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sorcerer
+namespace RpgMod.Common.Skills.Tier2.Sorcerer
 {
     /// <summary>
     /// Mana Shield - 마나 보호막.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Sorcerer
     {
         public override string InternalName => "ManaShieldSorcerer";
         public override string DisplayName => "Mana Shield";
-        public override string Description => "Create a shield that absorbs damage using mana.";
+        public override string Description => "Boost mana regeneration and empower mana for a short time.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Sorcerer;

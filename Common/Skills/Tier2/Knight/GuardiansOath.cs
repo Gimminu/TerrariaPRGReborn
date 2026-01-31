@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Guardian's Oath - 수호자의 맹세.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier2.Knight
     {
         public override string InternalName => "GuardiansOath";
         public override string DisplayName => "Guardian's Oath";
-        public override string Description => "Swear an oath to protect, greatly increasing defense for you and nearby allies.";
+        public override string Description => "Swear an oath to protect, greatly increasing your defense.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Knight;

@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Overlord
+namespace RpgMod.Common.Skills.Tier3.Overlord
 {
     /// <summary>
     /// Beast Stampede - Overlord's AoE damage skill.
@@ -43,8 +43,10 @@ namespace Rpg.Common.Skills.Tier3.Overlord
                 if (Vector2.Distance(npc.Center, player.Center) > radius) continue;
 
                 int dir = npc.Center.X >= player.Center.X ? 1 : -1;
-                bool crit = Main.rand.NextFloat(100f) < player.GetCritChance(DamageClass.Summon);
-                player.ApplyDamageToNPC(npc, damage, 8f, dir, crit, DamageClass.Summon, false);
+                bool crit = RollCrit(player, DamageClass.Summon);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Summon, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                player.ApplyDamageToNPC(npc, finalDamage, 8f, dir, crit, DamageClass.Summon, false);
                 CreateStampedeEffect(npc);
             }
 

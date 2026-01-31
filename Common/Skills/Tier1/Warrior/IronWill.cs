@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Iron Will - 철의 의지로 방어력을 높이고 넉백 저항을 얻는다.
@@ -32,6 +32,7 @@ namespace Rpg.Common.Skills.Tier1.Warrior
 
         private static readonly int[] DURATION_SECONDS = { 15, 18, 20, 22, 24, 26, 27, 28, 29, 30 };
         private static readonly int[] DEFENSE_BONUS = { 5, 7, 9, 12, 15, 18, 21, 24, 27, 30 };
+        private static readonly float[] KNOCKBACK_RESIST = { 0.05f, 0.07f, 0.09f, 0.12f, 0.15f, 0.18f, 0.21f, 0.24f, 0.27f, 0.30f };
 
         protected override void OnActivate(Player player)
         {
@@ -43,6 +44,7 @@ namespace Rpg.Common.Skills.Tier1.Warrior
             // RpgPlayer를 통해 추가 방어력 부여
             var rpgPlayer = player.GetModPlayer<RpgPlayer>();
             rpgPlayer.AddTemporaryDefense(DEFENSE_BONUS[rank - 1], duration);
+            rpgPlayer.AddTemporaryKnockbackResist(KNOCKBACK_RESIST[rank - 1], duration);
 
             PlayEffects(player);
             ShowMessage(player, "Iron Will!", Color.Silver);

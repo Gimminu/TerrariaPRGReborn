@@ -6,10 +6,10 @@ using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Rpg.Common.Base;
-using Rpg.Common.Systems;
+using RpgMod.Common.Base;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.Skills
+namespace RpgMod.Common.Skills
 {
     /// <summary>
     /// Manages player skills: learning, cooldowns, passive effects, hotbar use.
@@ -252,6 +252,7 @@ namespace Rpg.Common.Skills
                 return;
             }
 
+            Player.GetModPlayer<Players.RpgPlayer>().RegisterAttack();
             skill.Activate(Player);
         }
 

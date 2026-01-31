@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Berserker
+namespace RpgMod.Common.Skills.Tier2.Berserker
 {
     /// <summary>
     /// Raging Strike - 분노의 일격.
@@ -53,8 +53,10 @@ namespace Rpg.Common.Skills.Tier2.Berserker
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int finalDamage = Main.DamageVar(finalBaseDamage, player.luck);
-                    npc.SimpleStrikeNPC(finalDamage, player.direction, true, 6f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, finalBaseDamage);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 6f, DamageClass.Melee);
                 }
             }
             

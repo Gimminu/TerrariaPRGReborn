@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Archbishop
+namespace RpgMod.Common.Skills.Tier3.Archbishop
 {
     /// <summary>
     /// Sacred Ward - Archbishop's protection skill.
@@ -13,7 +13,7 @@ namespace Rpg.Common.Skills.Tier3.Archbishop
     {
         public override string InternalName => "SacredWard";
         public override string DisplayName => "Sacred Ward";
-        public override string Description => "Create a sacred ward that protects and heals.";
+        public override string Description => "Protect yourself with regeneration, defense, and mana regeneration.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Archbishop;

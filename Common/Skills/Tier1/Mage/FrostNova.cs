@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Mage
+namespace RpgMod.Common.Skills.Tier1.Mage
 {
     /// <summary>
     /// Frost Nova - 서리 신성.
@@ -48,8 +48,11 @@ namespace Rpg.Common.Skills.Tier1.Mage
                     if (dist <= radius)
                     {
                         float distFactor = 1f - (dist / radius) * 0.4f;
-                        int finalDamage = (int)(Main.DamageVar(damage, player.luck) * distFactor);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 2f, DamageClass.Magic, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        finalDamage = (int)(finalDamage * distFactor);
+                        bool crit = RollCrit(player, DamageClass.Magic);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 2f, DamageClass.Magic);
                         
                         // 동상/느림 부여
                         npc.AddBuff(BuffID.Frostburn, SLOW_DURATION[rank - 1]);

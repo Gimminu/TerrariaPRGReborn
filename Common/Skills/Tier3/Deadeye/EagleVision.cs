@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Deadeye
+namespace RpgMod.Common.Skills.Tier3.Deadeye
 {
     /// <summary>
     /// Eagle Vision - 독수리의 시야.

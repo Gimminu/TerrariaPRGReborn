@@ -3,11 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Rpg.Common.Skills;
-using Rpg.Common.Systems;
-using Rpg.Common.Base;
+using RpgMod.Common.Skills;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// Global system for managing skill drag-and-drop operations
@@ -156,7 +156,7 @@ namespace Rpg.Common.UI
                     return;
 
                 displayName = skill.DisplayName;
-                icon = AssetLoader.GetSkillIcon(skill.InternalName);
+                icon = AssetLoader.GetTexture(skill.IconTexture);
             }
 
             if (displayName.Length > 12)

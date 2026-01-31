@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellblade
+namespace RpgMod.Common.Skills.Tier2.Spellblade
 {
     /// <summary>
     /// Mana Blade - 마나 칼날.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Spellblade
     {
         public override string InternalName => "ManaBlade";
         public override string DisplayName => "Mana Blade";
-        public override string Description => "Restore mana when striking enemies with melee.";
+        public override string Description => "Restore mana on melee hits and improve mana regeneration.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Spellblade;

@@ -1,4 +1,4 @@
-namespace Rpg.Common
+namespace RpgMod.Common
 {
     /// <summary>
     /// All job tiers in progression order

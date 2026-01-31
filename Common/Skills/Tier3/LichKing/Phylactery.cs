@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.LichKing
+namespace RpgMod.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Phylactery - Lich King's passive for survivability.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier3.LichKing
     {
         public override string InternalName => "Phylactery";
         public override string DisplayName => "Phylactery";
-        public override string Description => "Your dark pact grants you increased damage and summon slots.";
+        public override string Description => "Your dark pact grants increased summon damage and minion slots.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.LichKing;

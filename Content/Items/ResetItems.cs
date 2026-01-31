@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Players;
-using Rpg.Common.Config;
+using RpgMod.Common.Players;
+using RpgMod.Common.Config;
 
-namespace Rpg.Content.Items
+namespace RpgMod.Content.Items
 {
     /// <summary>
     /// Stat Reset Orb - Allows player to reset all manually allocated stat points
@@ -13,6 +13,13 @@ namespace Rpg.Content.Items
     /// </summary>
     public class StatResetOrb : ModItem
     {
+        public override string Texture => "Rpg/Content/Items/StatResetOrb";
+
+        public override void SetStaticDefaults()
+        {
+            
+        }
+
         public override void SetDefaults()
         {
             Item.width = 32;
@@ -97,6 +104,13 @@ namespace Rpg.Content.Items
     /// </summary>
     public class SkillResetScroll : ModItem
     {
+        public override string Texture => "Rpg/Content/Items/SkillResetScroll";
+
+        public override void SetStaticDefaults()
+        {
+            
+        }
+
         public override void SetDefaults()
         {
             Item.width = 28;
@@ -179,6 +193,13 @@ namespace Rpg.Content.Items
     /// </summary>
     public class CompleteResetCrystal : ModItem
     {
+        public override string Texture => "Rpg/Content/Items/CompleteResetCrystal";
+
+        public override void SetStaticDefaults()
+        {
+            
+        }
+
         public override void SetDefaults()
         {
             Item.width = 24;

@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.DeathKnight
+namespace RpgMod.Common.Skills.Tier2.DeathKnight
 {
     /// <summary>
     /// Death Strike - 죽음의 일격.
@@ -57,8 +57,10 @@ namespace Rpg.Common.Skills.Tier2.DeathKnight
             
             if (target != null)
             {
-                int finalDamage = Main.DamageVar(damage, player.luck);
-                target.SimpleStrikeNPC(finalDamage, player.direction, true, 3f, DamageClass.Melee, true);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Melee, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                bool crit = RollCrit(player, DamageClass.Melee);
+                target.SimpleStrikeNPC(finalDamage, player.direction, crit, 3f, DamageClass.Melee);
                 
                 int healAmount = (int)(finalDamage * lifestealPercent);
                 player.Heal(healAmount);

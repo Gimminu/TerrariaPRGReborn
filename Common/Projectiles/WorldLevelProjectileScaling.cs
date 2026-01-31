@@ -2,10 +2,10 @@ using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
-using Rpg.Common.NPCs;
-using Rpg.Common.Systems;
+using RpgMod.Common.NPCs;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.Projectiles
+namespace RpgMod.Common.Projectiles
 {
     /// <summary>
     /// Boosts hostile projectile damage in line with world level so enemies keep up with NPC scaling.

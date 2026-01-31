@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Druid
+namespace RpgMod.Common.Skills.Tier2.Druid
 {
     /// <summary>
     /// Vine Whip - 덩굴 채찍.
@@ -46,8 +46,10 @@ namespace Rpg.Common.Skills.Tier2.Druid
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= range)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 4f, DamageClass.Summon, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Summon, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Summon);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 4f, DamageClass.Summon);
                         npc.AddBuff(BuffID.Poisoned, 180 + rank * 20);
                     }
                 }

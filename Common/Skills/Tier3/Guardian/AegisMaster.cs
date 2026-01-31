@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Guardian
+namespace RpgMod.Common.Skills.Tier3.Guardian
 {
     /// <summary>
     /// Aegis Master - 방패의 달인.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier3.Guardian
     {
         public override string InternalName => "AegisMaster";
         public override string DisplayName => "Aegis Master";
-        public override string Description => "Reduce damage taken and gain knockback immunity.";
+        public override string Description => "Reduce damage taken and gain knockback immunity at higher ranks.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Guardian;

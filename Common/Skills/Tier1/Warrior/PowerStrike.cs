@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Power Strike - Warrior's signature melee skill.
@@ -63,6 +63,7 @@ namespace Rpg.Common.Skills.Tier1.Warrior
             Item weapon = player.HeldItem;
             int baseDamage = weapon.damage;
             int skillDamage = (int)(baseDamage * damageMultiplier);
+            DamageClass damageClass = weapon.DamageType;
 
             Vector2 strikeCenter = player.Center + new Vector2(player.direction * 40, 0);
             int hitCount = 0;
@@ -78,15 +79,13 @@ namespace Rpg.Common.Skills.Tier1.Warrior
                     continue;
 
                 int hitDirection = npc.Center.X >= player.Center.X ? 1 : -1;
-                float critChance = player.GetCritChance(DamageClass.Melee);
-                bool crit = Main.rand.NextFloat(100f) < critChance;
+                bool crit = RollCrit(player, damageClass);
                 
                 float totalKnockback = weapon.knockBack + knockbackBonus;
-                int damage = Main.DamageVar(skillDamage, player.luck);
-                
-                if (crit) damage = (int)(damage * 1.5f);
+                float scaledDamage = GetScaledDamage(player, damageClass, skillDamage);
+                int damage = ApplyDamageVariance(player, scaledDamage);
 
-                player.ApplyDamageToNPC(npc, damage, totalKnockback, hitDirection, crit);
+                player.ApplyDamageToNPC(npc, damage, totalKnockback, hitDirection, crit, damageClass, false);
                 hitCount++;
 
                 // Impact effect per enemy

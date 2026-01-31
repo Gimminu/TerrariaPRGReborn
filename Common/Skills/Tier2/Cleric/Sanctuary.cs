@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Cleric
+namespace RpgMod.Common.Skills.Tier2.Cleric
 {
     /// <summary>
     /// Sanctuary - Cleric's defensive zone skill.
@@ -13,7 +13,7 @@ namespace Rpg.Common.Skills.Tier2.Cleric
     {
         public override string InternalName => "Sanctuary";
         public override string DisplayName => "Sanctuary";
-        public override string Description => "Create a holy zone that provides regeneration and protection.";
+        public override string Description => "Bless yourself with regeneration and protection.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Cleric;

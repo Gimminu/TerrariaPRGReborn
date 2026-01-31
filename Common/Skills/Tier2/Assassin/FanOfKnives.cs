@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Assassin
+namespace RpgMod.Common.Skills.Tier2.Assassin
 {
     /// <summary>
     /// Fan of Knives - 표창 난무.
@@ -44,8 +44,10 @@ namespace Rpg.Common.Skills.Tier2.Assassin
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= RADIUS)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 3f, DamageClass.Ranged, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Ranged);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 3f, DamageClass.Ranged);
                         npc.AddBuff(BuffID.Poisoned, 300 + rank * 30);
                     }
                 }

@@ -1,13 +1,16 @@
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Rpg.Common.Skills;
-using Rpg.Common.Systems;
-using Rpg.Common.Config;
+using Terraria.DataStructures;
+using RpgMod.Common.Skills;
+using RpgMod.Common.Compatibility;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Config;
 
-namespace Rpg.Common.Players
+namespace RpgMod.Common.Players
 {
     /// <summary>
     /// Core RPG player data - all stats, levels, XP, jobs stored here
@@ -37,6 +40,9 @@ namespace Rpg.Common.Players
 
         public JobType CurrentJob { get; set; } = JobType.Novice;
         public JobTier CurrentTier => RpgFormulas.GetJobTier(CurrentJob);
+        
+        // Track selected jobs per tier for proper cancellation
+        public Dictionary<JobTier, JobType> SelectedJobs { get; set; } = new Dictionary<JobTier, JobType>();
 
         #endregion
 
@@ -121,12 +127,28 @@ namespace Rpg.Common.Players
         
         private float tempAttackSpeedBonus = 0f;
         private int tempAttackSpeedDuration = 0;
+
+        private float tempRangedAttackSpeedBonus = 0f;
+        private int tempRangedAttackSpeedDuration = 0;
         
         private float tempSummonDamageBonus = 0f;
         private int tempSummonDamageDuration = 0;
         
         private float tempDamageBonus = 0f;
         private int tempDamageDuration = 0;
+
+        private float tempRangedDamageBonus = 0f;
+        private int tempRangedDamageDuration = 0;
+
+        private float tempMagicDamageBonus = 0f;
+        private int tempMagicDamageDuration = 0;
+
+        private float tempRangedCritBonus = 0f;
+        private int tempRangedCritDuration = 0;
+
+        private float tempKnockbackResist = 0f;
+        private int tempKnockbackResistDuration = 0;
+        private int tempNoKnockbackDuration = 0;
         
         private float tempDamageTakenMult = 0f;
         private int tempDamageTakenDuration = 0;
@@ -136,6 +158,29 @@ namespace Rpg.Common.Players
         
         private float tempLifesteal = 0f;
         private int tempLifestealDuration = 0;
+
+        #endregion
+
+        #region Debug DPS Test
+
+        public bool DpsTestActive { get; private set; } = false;
+        private int dpsTestFramesRemaining = 0;
+        private long dpsTestTotalDamage = 0;
+        private int dpsTestDurationFrames = 0;
+
+        #endregion
+
+        #region Passive Stack Buffs
+
+        private int righteousFuryStacks = 0;
+        private int righteousFuryTimer = 0;
+        private int carnageStacks = 0;
+        private int carnageTimer = 0;
+        private int lastStandCooldownFrames = 0;
+        private bool undyingRageUsed = false;
+        private int lastAttackFrame = 0;
+
+        private const int CamouflageIdleFrames = 120;
 
         #endregion
 
@@ -180,6 +225,8 @@ namespace Rpg.Common.Players
             Level = 1;
             CurrentXP = 0;
             CurrentJob = JobType.Novice;
+            SelectedJobs = new Dictionary<JobTier, JobType>();
+            SelectedJobs[JobTier.Novice] = JobType.Novice;
             
             // Initialize all 12 stats to 0
             Strength = Dexterity = Rogue = Intelligence = Focus = Vitality = 0;
@@ -202,11 +249,29 @@ namespace Rpg.Common.Players
             DropRateBonus = 0f;
 
             autoGrowthRemainders = new float[System.Enum.GetValues(typeof(StatType)).Length];
+
+            righteousFuryStacks = 0;
+            righteousFuryTimer = 0;
+            carnageStacks = 0;
+            carnageTimer = 0;
+            lastStandCooldownFrames = 0;
+            undyingRageUsed = false;
+            lastAttackFrame = 0;
         }
 
         public override void OnEnterWorld()
         {
             RequestProgressSync();
+        }
+
+        public override void OnRespawn()
+        {
+            righteousFuryStacks = 0;
+            righteousFuryTimer = 0;
+            carnageStacks = 0;
+            carnageTimer = 0;
+            lastStandCooldownFrames = 0;
+            undyingRageUsed = false;
         }
 
         public override void ResetEffects()
@@ -275,6 +340,17 @@ namespace Rpg.Common.Players
 
             // Reduce debuff durations from Fortitude
             ApplyStatusResistance();
+
+            // Track active attacking to support stealth/aggro effects
+            if (Player.itemAnimation > 0 || Player.itemTime > 0)
+            {
+                RegisterAttack();
+            }
+
+            UpdateStackTimers();
+
+            // Update DPS test timer
+            UpdateDpsTest();
         }
 
         #endregion
@@ -319,6 +395,8 @@ namespace Rpg.Common.Players
 
             // Apply temporary skill buffs
             ApplyTemporaryBuffs();
+            ApplyStackedDamageBonuses();
+            ApplyCamouflageAggro();
 
             // Mana from Wisdom
             int bonusMana = TotalWisdom * RpgConstants.WISDOM_MANA_PER_POINT;
@@ -335,6 +413,10 @@ namespace Rpg.Common.Players
             
             // Stamina regen from Stamina stat
             StaminaRegen = RpgConstants.BASE_STAMINA_REGEN + (TotalStaminaStat * RpgConstants.STAMINA_REGEN_PER_POINT);
+            if (Stamina > MaxStamina)
+                Stamina = MaxStamina;
+            if (Stamina < 0)
+                Stamina = 0;
 
             // Attack speed from Dexterity
             float attackSpeed = TotalDexterity * RpgConstants.DEXTERITY_ATTACK_SPEED_PER_POINT;
@@ -401,6 +483,28 @@ namespace Rpg.Common.Players
             {
                 Player.GetDamage(DamageClass.Generic) += lukBonus;
             }
+
+            // Mod damage classes (best-effort mappings)
+            DamageClass calamityRogue = ModCompatibilitySystem.GetCalamityRogueClass();
+            if (calamityRogue != null && rogueBonus != 0f)
+            {
+                Player.GetDamage(calamityRogue) += rogueBonus;
+            }
+
+            DamageClass thoriumBard = ModCompatibilitySystem.GetThoriumBardClass();
+            if (thoriumBard != null)
+            {
+                if (dexBonus != 0f)
+                    Player.GetDamage(thoriumBard) += dexBonus;
+                if (rogueBonus != 0f)
+                    Player.GetDamage(thoriumBard) += rogueBonus;
+            }
+
+            DamageClass thoriumHealer = ModCompatibilitySystem.GetThoriumHealerClass();
+            if (thoriumHealer != null && magicBonus != 0f)
+            {
+                Player.GetDamage(thoriumHealer) += magicBonus;
+            }
         }
 
         private void ApplyStatCritBonuses()
@@ -410,13 +514,14 @@ namespace Rpg.Common.Players
             {
                 Player.GetCritChance(DamageClass.Ranged) += dexCrit;
             }
-
+            
             float rogueCrit = TotalRogue * RpgConstants.ROGUE_CRIT_CHANCE_PER_POINT;
             if (rogueCrit != 0f)
             {
-                Player.GetCritChance(DamageClass.Generic) += rogueCrit;
+                Player.GetCritChance(DamageClass.Melee) += rogueCrit;
+                Player.GetCritChance(DamageClass.Ranged) += rogueCrit;
             }
-
+            
             float intCrit = TotalIntelligence * RpgConstants.INTELLIGENCE_MAGIC_CRIT_PER_POINT;
             if (intCrit != 0f)
             {
@@ -427,6 +532,29 @@ namespace Rpg.Common.Players
             if (lukCrit != 0f)
             {
                 Player.GetCritChance(DamageClass.Generic) += lukCrit;
+            }
+
+            // Mod damage classes (best-effort crit mappings)
+            DamageClass calamityRogue = ModCompatibilitySystem.GetCalamityRogueClass();
+            if (calamityRogue != null && rogueCrit != 0f)
+            {
+                Player.GetCritChance(calamityRogue) += rogueCrit;
+            }
+
+            DamageClass thoriumBard = ModCompatibilitySystem.GetThoriumBardClass();
+            if (thoriumBard != null && dexCrit != 0f)
+            {
+                Player.GetCritChance(thoriumBard) += dexCrit;
+            }
+            if (thoriumBard != null && rogueCrit != 0f)
+            {
+                Player.GetCritChance(thoriumBard) += rogueCrit;
+            }
+
+            DamageClass thoriumHealer = ModCompatibilitySystem.GetThoriumHealerClass();
+            if (thoriumHealer != null && intCrit != 0f)
+            {
+                Player.GetCritChance(thoriumHealer) += intCrit;
             }
         }
 
@@ -519,6 +647,15 @@ namespace Rpg.Common.Players
         }
 
         /// <summary>
+        /// Add temporary ranged attack speed bonus from skills
+        /// </summary>
+        public void AddTemporaryRangedAttackSpeed(float bonus, int durationFrames)
+        {
+            tempRangedAttackSpeedBonus = bonus;
+            tempRangedAttackSpeedDuration = durationFrames;
+        }
+
+        /// <summary>
         /// Add temporary summon damage bonus from skills
         /// </summary>
         public void AddTemporarySummonDamage(float bonus, int durationFrames)
@@ -534,6 +671,50 @@ namespace Rpg.Common.Players
         {
             tempDamageBonus = bonus;
             tempDamageDuration = durationFrames;
+        }
+
+        /// <summary>
+        /// Add temporary ranged damage bonus from skills
+        /// </summary>
+        public void AddTemporaryRangedDamage(float bonus, int durationFrames)
+        {
+            tempRangedDamageBonus = bonus;
+            tempRangedDamageDuration = durationFrames;
+        }
+
+        /// <summary>
+        /// Add temporary magic damage bonus from skills
+        /// </summary>
+        public void AddTemporaryMagicDamage(float bonus, int durationFrames)
+        {
+            tempMagicDamageBonus = bonus;
+            tempMagicDamageDuration = durationFrames;
+        }
+
+        /// <summary>
+        /// Add temporary ranged crit bonus from skills
+        /// </summary>
+        public void AddTemporaryRangedCrit(float bonus, int durationFrames)
+        {
+            tempRangedCritBonus = bonus;
+            tempRangedCritDuration = durationFrames;
+        }
+
+        /// <summary>
+        /// Add temporary knockback resistance from skills
+        /// </summary>
+        public void AddTemporaryKnockbackResist(float bonus, int durationFrames)
+        {
+            tempKnockbackResist = bonus;
+            tempKnockbackResistDuration = durationFrames;
+        }
+
+        /// <summary>
+        /// Add temporary knockback immunity from skills
+        /// </summary>
+        public void AddTemporaryNoKnockback(int durationFrames)
+        {
+            tempNoKnockbackDuration = durationFrames;
         }
 
         /// <summary>
@@ -575,11 +756,29 @@ namespace Rpg.Common.Players
             if (tempAttackSpeedDuration > 0 && --tempAttackSpeedDuration <= 0)
                 tempAttackSpeedBonus = 0f;
 
+            if (tempRangedAttackSpeedDuration > 0 && --tempRangedAttackSpeedDuration <= 0)
+                tempRangedAttackSpeedBonus = 0f;
+
             if (tempSummonDamageDuration > 0 && --tempSummonDamageDuration <= 0)
                 tempSummonDamageBonus = 0f;
 
             if (tempDamageDuration > 0 && --tempDamageDuration <= 0)
                 tempDamageBonus = 0f;
+
+            if (tempRangedDamageDuration > 0 && --tempRangedDamageDuration <= 0)
+                tempRangedDamageBonus = 0f;
+
+            if (tempMagicDamageDuration > 0 && --tempMagicDamageDuration <= 0)
+                tempMagicDamageBonus = 0f;
+
+            if (tempRangedCritDuration > 0 && --tempRangedCritDuration <= 0)
+                tempRangedCritBonus = 0f;
+
+            if (tempKnockbackResistDuration > 0 && --tempKnockbackResistDuration <= 0)
+                tempKnockbackResist = 0f;
+
+            if (tempNoKnockbackDuration > 0)
+                tempNoKnockbackDuration--;
 
             if (tempDamageTakenDuration > 0 && --tempDamageTakenDuration <= 0)
                 tempDamageTakenMult = 0f;
@@ -598,7 +797,10 @@ namespace Rpg.Common.Players
         {
             // Early exit if no buffs active
             if (tempDefenseBonus == 0 && tempAttackSpeedBonus == 0f && 
-                tempSummonDamageBonus == 0f && tempDamageBonus == 0f)
+                tempRangedAttackSpeedBonus == 0f &&
+                tempSummonDamageBonus == 0f && tempDamageBonus == 0f &&
+                tempRangedDamageBonus == 0f && tempMagicDamageBonus == 0f &&
+                tempRangedCritBonus == 0f && tempNoKnockbackDuration <= 0)
                 return;
 
             // Apply active buffs
@@ -608,11 +810,107 @@ namespace Rpg.Common.Players
             if (tempAttackSpeedBonus > 0f)
                 Player.GetAttackSpeed(DamageClass.Generic) += tempAttackSpeedBonus;
 
+            if (tempRangedAttackSpeedBonus > 0f)
+                Player.GetAttackSpeed(DamageClass.Ranged) += tempRangedAttackSpeedBonus;
+
             if (tempSummonDamageBonus > 0f)
                 Player.GetDamage(DamageClass.Summon) += tempSummonDamageBonus;
 
             if (tempDamageBonus > 0f)
                 Player.GetDamage(DamageClass.Generic) += tempDamageBonus;
+
+            if (tempRangedDamageBonus > 0f)
+                Player.GetDamage(DamageClass.Ranged) += tempRangedDamageBonus;
+
+            if (tempMagicDamageBonus > 0f)
+                Player.GetDamage(DamageClass.Magic) += tempMagicDamageBonus;
+
+            if (tempRangedCritBonus > 0f)
+                Player.GetCritChance(DamageClass.Ranged) += tempRangedCritBonus;
+
+            if (tempNoKnockbackDuration > 0)
+                Player.noKnockback = true;
+        }
+
+        private void ApplyStackedDamageBonuses()
+        {
+            if (righteousFuryStacks > 0)
+            {
+                int rank = GetLearnedSkillRank("RighteousFury");
+                if (rank > 0)
+                {
+                    float perStack = RpgMod.Common.Skills.Tier2.Paladin.RighteousFury.GetDamagePerStack(rank);
+                    Player.GetDamage(DamageClass.Generic) += perStack * righteousFuryStacks;
+                }
+            }
+
+            if (carnageStacks > 0)
+            {
+                int rank = GetLearnedSkillRank("Carnage");
+                if (rank > 0)
+                {
+                    float perStack = RpgMod.Common.Skills.Tier2.Berserker.Carnage.GetDamagePerStack(rank);
+                    Player.GetDamage(DamageClass.Melee) += perStack * carnageStacks;
+                }
+            }
+        }
+
+        private void ApplyCamouflageAggro()
+        {
+            int rank = GetLearnedSkillRank("CamouflageExpert");
+            if (rank <= 0)
+                return;
+
+            int framesSinceAttack = (int)Main.GameUpdateCount - lastAttackFrame;
+            if (framesSinceAttack < CamouflageIdleFrames)
+                return;
+
+            int reduction = 20 * rank;
+            Player.aggro -= reduction;
+        }
+
+        private void UpdateStackTimers()
+        {
+            if (lastStandCooldownFrames > 0)
+                lastStandCooldownFrames--;
+
+            if (righteousFuryTimer > 0 && --righteousFuryTimer <= 0)
+                righteousFuryStacks = 0;
+
+            if (carnageTimer > 0 && --carnageTimer <= 0)
+                carnageStacks = 0;
+        }
+
+        public void RegisterAttack()
+        {
+            lastAttackFrame = (int)Main.GameUpdateCount;
+        }
+
+        public void RegisterCarnageKill()
+        {
+            AddCarnageStack();
+        }
+
+        private void AddRighteousFuryStack()
+        {
+            int rank = GetLearnedSkillRank("RighteousFury");
+            if (rank <= 0)
+                return;
+
+            int maxStacks = RpgMod.Common.Skills.Tier2.Paladin.RighteousFury.GetMaxStacks(rank);
+            righteousFuryStacks = System.Math.Min(righteousFuryStacks + 1, maxStacks);
+            righteousFuryTimer = RpgMod.Common.Skills.Tier2.Paladin.RighteousFury.GetDurationSeconds(rank) * 60;
+        }
+
+        private void AddCarnageStack()
+        {
+            int rank = GetLearnedSkillRank("Carnage");
+            if (rank <= 0)
+                return;
+
+            int maxStacks = RpgMod.Common.Skills.Tier2.Berserker.Carnage.GetMaxStacks(rank);
+            carnageStacks = System.Math.Min(carnageStacks + 1, maxStacks);
+            carnageTimer = RpgMod.Common.Skills.Tier2.Berserker.Carnage.GetDurationSeconds(rank) * 60;
         }
 
         private void ApplyStatusResistance()
@@ -642,11 +940,24 @@ namespace Rpg.Common.Players
 
         private void ApplyFortitudeKnockbackResistance(ref Player.HurtModifiers modifiers)
         {
-            float resist = TotalFortitude * RpgConstants.FORTITUDE_KNOCKBACK_RESIST_PER_POINT;
+            if (Player.noKnockback || tempNoKnockbackDuration > 0)
+            {
+                modifiers.Knockback *= 0f;
+                return;
+            }
+
+            float resist = 0f;
+            if (TotalFortitude > 0)
+            {
+                resist = TotalFortitude * RpgConstants.FORTITUDE_KNOCKBACK_RESIST_PER_POINT;
+                resist = System.Math.Min(resist, 0.5f);
+            }
+
+            resist += GetSkillKnockbackResist() + tempKnockbackResist;
             if (resist <= 0f)
                 return;
 
-            resist = System.Math.Min(resist, 0.5f);
+            resist = MathHelper.Clamp(resist, 0f, 1f);
             modifiers.Knockback *= (1f - resist);
         }
 
@@ -738,6 +1049,41 @@ namespace Rpg.Common.Players
             }
         }
 
+        public override void OnHitByNPC(NPC npc, Player.HurtInfo hurtInfo)
+        {
+            if (hurtInfo.Damage <= 0)
+                return;
+
+            AddRighteousFuryStack();
+        }
+
+        public override void OnHitByProjectile(Projectile proj, Player.HurtInfo hurtInfo)
+        {
+            if (hurtInfo.Damage <= 0)
+                return;
+
+            AddRighteousFuryStack();
+        }
+
+        public override void ModifyHitNPCWithItem(Item item, NPC target, ref NPC.HitModifiers modifiers)
+        {
+            if (item == null)
+                return;
+
+            ApplySkillHitDamageBonuses(target, ref modifiers, item.DamageType, isMinion: false);
+        }
+
+        public override void ModifyHitNPCWithProj(Projectile proj, NPC target, ref NPC.HitModifiers modifiers)
+        {
+            if (proj == null)
+                return;
+
+            bool isMinion = IsMinionProjectile(proj);
+            bool applySummonFallback = isMinion || IsSummonDamageClass(proj.DamageType);
+            ApplySummonMinionDamageFallback(proj.DamageType, applySummonFallback, ref modifiers);
+            ApplySkillHitDamageBonuses(target, ref modifiers, proj.DamageType, isMinion);
+        }
+
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             // Apply lifesteal
@@ -750,6 +1096,349 @@ namespace Rpg.Common.Players
                     Player.HealEffect(heal, true);
                 }
             }
+
+            TryApplyBloodPactLifesteal(damageDone);
+
+            // DPS test tracking
+            if (DpsTestActive && damageDone > 0)
+            {
+                dpsTestTotalDamage += damageDone;
+            }
+        }
+
+        public override void OnHitNPCWithItem(Item item, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            if (damageDone <= 0 || item == null)
+                return;
+
+            RegisterAttack();
+            TryTriggerManaSiphon(isMinion: false);
+            TryRestoreManaBlade(item.DamageType, isMinion: false);
+        }
+
+        public override void OnHitNPCWithProj(Projectile proj, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            if (damageDone <= 0 || proj == null)
+                return;
+
+            RegisterAttack();
+            bool isMinion = IsMinionProjectile(proj);
+            TryTriggerManaSiphon(isMinion);
+            TryRestoreManaBlade(proj.DamageType, isMinion);
+            TryApplySoulBondLifesteal(damageDone, isMinion);
+        }
+
+        public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource)
+        {
+            int lastStandRank = GetLearnedSkillRank("LastStand");
+            if (lastStandRank > 0 && lastStandCooldownFrames <= 0)
+            {
+                lastStandCooldownFrames = RpgMod.Common.Skills.Tier2.Knight.LastStand.GetCooldownSeconds(lastStandRank) * 60;
+                Player.statLife = 1;
+                Player.immune = true;
+                Player.immuneTime = 60;
+                if (Main.netMode != NetmodeID.Server)
+                    CombatText.NewText(Player.Hitbox, Color.Gold, "Last Stand!");
+                return false;
+            }
+
+            int undyingRank = GetLearnedSkillRank("UndyingRage");
+            if (undyingRank > 0 && !undyingRageUsed)
+            {
+                Player.statLife = System.Math.Max(1, RpgMod.Common.Skills.Tier2.Berserker.UndyingRage.GetSurviveHp(undyingRank));
+                undyingRageUsed = true;
+                Player.immune = true;
+                Player.immuneTime = 60;
+                if (Main.netMode != NetmodeID.Server)
+                    CombatText.NewText(Player.Hitbox, Color.DarkRed, "Undying Rage!");
+                return false;
+            }
+
+            return true;
+        }
+
+        public override bool CanConsumeAmmo(Item weapon, Item ammo)
+        {
+            var skillManager = Player.GetModPlayer<SkillManager>();
+            if (skillManager == null || skillManager.LearnedSkills == null || skillManager.LearnedSkills.Count == 0)
+                return true;
+
+            if (TryGetSkillRank(skillManager, "AmmoExpert", out int ammoExpertRank) &&
+                Main.rand.NextFloat() < RpgMod.Common.Skills.Tier2.Gunslinger.AmmoExpert.GetAmmoSaveChance(ammoExpertRank))
+            {
+                return false;
+            }
+
+            if (TryGetSkillRank(skillManager, "InfiniteAmmo", out int infiniteAmmoRank) &&
+                Main.rand.NextFloat() < Skills.Tier3.Gunmaster.InfiniteAmmo.GetAmmoSaveChance(infiniteAmmoRank))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ApplySkillHitDamageBonuses(NPC target, ref NPC.HitModifiers modifiers, DamageClass damageClass, bool isMinion)
+        {
+            var skillManager = Player.GetModPlayer<SkillManager>();
+            if (skillManager == null || skillManager.LearnedSkills == null || skillManager.LearnedSkills.Count == 0)
+                return;
+
+            if (!isMinion && Player.HasBuff(BuffID.Invisibility) &&
+                TryGetSkillRank(skillManager, "AmbushMaster", out int ambushRank))
+            {
+                float bonus = RpgMod.Common.Skills.Tier2.Assassin.AmbushMaster.GetAmbushBonus(ambushRank);
+                modifiers.SourceDamage += bonus;
+            }
+
+            if (TryGetSkillRank(skillManager, "CrimsonVitality", out int crimsonRank))
+            {
+                float hpRatio = Player.statLifeMax2 > 0 ? Player.statLife / (float)Player.statLifeMax2 : 1f;
+                float scale = 0f;
+
+                if (hpRatio <= 0.25f)
+                    scale = 1f;
+                else if (hpRatio < 1f)
+                    scale = 1f - ((hpRatio - 0.25f) / 0.75f);
+
+                if (scale > 0f)
+                {
+                    float bonus = Skills.Tier3.BloodKnight.CrimsonVitality.GetLowHpBonus(crimsonRank) * scale;
+                    modifiers.SourceDamage += bonus;
+                }
+            }
+
+            if (damageClass != null && damageClass.CountsAsClass(DamageClass.Ranged) &&
+                TryGetSkillRank(skillManager, "LongRange", out int longRangeRank))
+            {
+                float distance = Vector2.Distance(Player.Center, target.Center);
+                if (distance > RpgConstants.LONG_RANGE_MIN_DISTANCE)
+                {
+                    float denom = System.Math.Max(1f, RpgConstants.LONG_RANGE_MAX_DISTANCE - RpgConstants.LONG_RANGE_MIN_DISTANCE);
+                    float scale = MathHelper.Clamp((distance - RpgConstants.LONG_RANGE_MIN_DISTANCE) / denom, 0f, 1f);
+                    if (scale > 0f)
+                    {
+                        float bonus = RpgMod.Common.Skills.Tier2.Sniper.LongRange.GetDistanceBonus(longRangeRank) * scale;
+                        modifiers.SourceDamage += bonus;
+                    }
+                }
+            }
+        }
+
+        private static bool IsMinionProjectile(Projectile proj)
+        {
+            if (proj == null)
+                return false;
+
+            if (proj.minion || proj.sentry || proj.minionSlots > 0f)
+                return true;
+
+            int type = proj.type;
+            return type >= 0 &&
+                   type < ProjectileID.Sets.MinionShot.Length &&
+                   ProjectileID.Sets.MinionShot[type];
+        }
+
+        private static bool IsSummonDamageClass(DamageClass damageClass)
+        {
+            return damageClass != null && damageClass.CountsAsClass(DamageClass.Summon);
+        }
+
+        private void ApplySummonMinionDamageFallback(DamageClass damageClass, bool applyFallback, ref NPC.HitModifiers modifiers)
+        {
+            if (!applyFallback)
+                return;
+
+            float genericAdditive = Player.GetDamage(DamageClass.Generic).Additive;
+            float summonSpecific = Player.GetDamage(DamageClass.Summon).Additive - genericAdditive;
+            if (summonSpecific <= 0f)
+                return;
+
+            float classSpecific = 0f;
+            if (damageClass != null)
+            {
+                float classAdditive = Player.GetDamage(damageClass).Additive;
+                classSpecific = classAdditive - genericAdditive;
+            }
+
+            float bonus = summonSpecific - classSpecific;
+            if (bonus > 0f)
+                modifiers.SourceDamage += bonus;
+        }
+
+        private float GetSkillKnockbackResist()
+        {
+            float resist = 0f;
+
+            int shieldExpertiseRank = GetLearnedSkillRank("ShieldExpertise");
+            if (shieldExpertiseRank > 0)
+            {
+                resist += RpgMod.Common.Skills.Tier2.Knight.ShieldExpertise.GetKnockbackResist(shieldExpertiseRank);
+            }
+
+            int shieldMasteryRank = GetLearnedSkillRank("ShieldMastery");
+            if (shieldMasteryRank > 0)
+            {
+                resist += RpgMod.Common.Skills.Tier2.Knight.ShieldMastery.GetKnockbackResist(shieldMasteryRank);
+            }
+
+            int unbreakableRank = GetLearnedSkillRank("Unbreakable");
+            if (unbreakableRank > 0)
+            {
+                resist += RpgMod.Common.Skills.Tier3.Guardian.Unbreakable.GetKnockbackResist(unbreakableRank);
+            }
+
+            return resist;
+        }
+
+        private void TryTriggerManaSiphon(bool isMinion)
+        {
+            if (isMinion)
+                return;
+
+            int rank = GetLearnedSkillRank("ManaSiphon");
+            if (rank <= 0)
+                return;
+
+            float chance = Skills.Tier2.Spellthief.ManaSiphon.GetSiphonChance(rank);
+            if (chance <= 0f || Main.rand.NextFloat() >= chance)
+                return;
+
+            RestoreMana(Skills.Tier2.Spellthief.ManaSiphon.GetManaAmount(rank));
+        }
+
+        private void TryRestoreManaBlade(DamageClass damageClass, bool isMinion)
+        {
+            if (isMinion || damageClass == null || !damageClass.CountsAsClass(DamageClass.Melee))
+                return;
+
+            int rank = GetLearnedSkillRank("ManaBlade");
+            if (rank <= 0)
+                return;
+
+            RestoreMana(Skills.Tier2.Spellblade.ManaBlade.GetManaOnHit(rank));
+        }
+
+        private void TryApplySoulBondLifesteal(int damageDone, bool isMinion)
+        {
+            if (!isMinion || damageDone <= 0)
+                return;
+
+            int rank = GetLearnedSkillRank("SoulBond");
+            if (rank <= 0)
+                return;
+
+            float lifesteal = RpgMod.Common.Skills.Tier1.Summoner.SoulBond.GetLifeSteal(rank);
+            if (lifesteal <= 0f)
+                return;
+
+            int heal = (int)System.Math.Floor(damageDone * lifesteal);
+            if (heal <= 0)
+                return;
+
+            Player.statLife = System.Math.Min(Player.statLife + heal, Player.statLifeMax2);
+            Player.HealEffect(heal, true);
+        }
+
+        private void TryApplyBloodPactLifesteal(int damageDone)
+        {
+            if (damageDone <= 0)
+                return;
+
+            int rank = GetLearnedSkillRank("BloodPact");
+            if (rank <= 0)
+                return;
+
+            float lifesteal = Skills.Tier3.BloodKnight.BloodPact.GetLifesteal(rank);
+            if (lifesteal <= 0f)
+                return;
+
+            int heal = (int)System.Math.Floor(damageDone * lifesteal);
+            if (heal <= 0)
+                return;
+
+            Player.statLife = System.Math.Min(Player.statLife + heal, Player.statLifeMax2);
+            Player.HealEffect(heal, true);
+        }
+
+        private void RestoreMana(int amount)
+        {
+            if (amount <= 0)
+                return;
+
+            int before = Player.statMana;
+            Player.statMana = System.Math.Min(Player.statMana + amount, Player.statManaMax2);
+            int gained = Player.statMana - before;
+            if (gained <= 0)
+                return;
+
+            if (Main.netMode != NetmodeID.Server && Player.whoAmI == Main.myPlayer)
+            {
+                CombatText.NewText(Player.Hitbox, Color.LightBlue, $"+{gained} Mana");
+            }
+        }
+
+        private int GetLearnedSkillRank(string internalName)
+        {
+            var skillManager = Player.GetModPlayer<SkillManager>();
+            if (skillManager == null || skillManager.LearnedSkills == null)
+                return 0;
+
+            return skillManager.LearnedSkills.TryGetValue(internalName, out var skill) ? skill.CurrentRank : 0;
+        }
+
+        private static bool TryGetSkillRank(SkillManager skillManager, string internalName, out int rank)
+        {
+            rank = 0;
+            if (skillManager == null || skillManager.LearnedSkills == null)
+                return false;
+
+            if (!skillManager.LearnedSkills.TryGetValue(internalName, out var skill) || skill.CurrentRank <= 0)
+                return false;
+
+            rank = skill.CurrentRank;
+            return true;
+        }
+
+        public void StartDpsTest(int durationSeconds)
+        {
+            int seconds = System.Math.Max(1, durationSeconds);
+            dpsTestDurationFrames = seconds * 60;
+            dpsTestFramesRemaining = dpsTestDurationFrames;
+            dpsTestTotalDamage = 0;
+            DpsTestActive = true;
+        }
+
+        public void CancelDpsTest()
+        {
+            DpsTestActive = false;
+            dpsTestFramesRemaining = 0;
+            dpsTestDurationFrames = 0;
+            dpsTestTotalDamage = 0;
+        }
+
+        private void UpdateDpsTest()
+        {
+            if (!DpsTestActive)
+                return;
+
+            if (dpsTestFramesRemaining > 0)
+            {
+                dpsTestFramesRemaining--;
+                return;
+            }
+
+            DpsTestActive = false;
+
+            if (dpsTestDurationFrames <= 0)
+                return;
+
+            float seconds = dpsTestDurationFrames / 60f;
+            float dps = dpsTestTotalDamage / System.Math.Max(1f, seconds);
+            if (Main.netMode != NetmodeID.Server)
+            {
+                Main.NewText($"[DPS Test] {dpsTestTotalDamage} total in {seconds:0.0}s → {dps:0.0} DPS", Microsoft.Xna.Framework.Color.Gold);
+            }
         }
 
         #endregion
@@ -761,6 +1450,14 @@ namespace Rpg.Common.Players
             tag["level"] = Level;
             tag["currentXP"] = CurrentXP;
             tag["job"] = (int)CurrentJob;
+            
+            // Save selected jobs per tier
+            var selectedJobsTag = new TagCompound();
+            foreach (var kvp in SelectedJobs)
+            {
+                selectedJobsTag[kvp.Key.ToString()] = (int)kvp.Value;
+            }
+            tag["selectedJobs"] = selectedJobsTag;
             
             // Save all 12 stats
             tag["strength"] = Strength;
@@ -814,6 +1511,25 @@ namespace Rpg.Common.Players
             else
             {
                 CurrentJob = JobType.Novice;
+            }
+            
+            // Load selected jobs per tier
+            SelectedJobs = new Dictionary<JobTier, JobType>();
+            if (tag.ContainsKey("selectedJobs"))
+            {
+                var selectedJobsTag = tag.Get<TagCompound>("selectedJobs");
+                foreach (var key in selectedJobsTag)
+                {
+                    JobTier tier = (JobTier)int.Parse(key.Key);
+                    JobType job = (JobType)selectedJobsTag.GetInt(key.Key);
+                    SelectedJobs[tier] = job;
+                }
+            }
+            else
+            {
+                // Fallback for old saves
+                SelectedJobs[JobTier.Novice] = JobType.Novice;
+                SelectedJobs[CurrentTier] = CurrentJob;
             }
             
             // Load all 12 stats
@@ -910,6 +1626,41 @@ namespace Rpg.Common.Players
             }
 
             StatPoints -= amount;
+            return true;
+        }
+
+        /// <summary>
+        /// Deallocates stat points from a specific stat (removes allocated points)
+        /// </summary>
+        /// <param name="stat">The stat to deallocate from</param>
+        /// <param name="amount">Number of points to deallocate</param>
+        /// <returns>True if successful</returns>
+        public bool DeallocateStatPoint(StatType stat, int amount = 1)
+        {
+            // Clamp amount to allocated points
+            int currentValue = GetBaseStatValue(stat);
+            amount = System.Math.Min(amount, currentValue);
+            
+            if (amount <= 0)
+                return false;
+
+            switch (stat)
+            {
+                case StatType.Strength: Strength -= amount; break;
+                case StatType.Dexterity: Dexterity -= amount; break;
+                case StatType.Rogue: Rogue -= amount; break;
+                case StatType.Intelligence: Intelligence -= amount; break;
+                case StatType.Focus: Focus -= amount; break;
+                case StatType.Vitality: Vitality -= amount; break;
+                case StatType.Stamina: StaminaStat -= amount; break;
+                case StatType.Defense: Defense -= amount; break;
+                case StatType.Agility: Agility -= amount; break;
+                case StatType.Wisdom: Wisdom -= amount; break;
+                case StatType.Fortitude: Fortitude -= amount; break;
+                case StatType.Luck: Luck -= amount; break;
+            }
+
+            StatPoints += amount;
             return true;
         }
 

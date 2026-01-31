@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellthief
+namespace RpgMod.Common.Skills.Tier2.Spellthief
 {
     /// <summary>
     /// Magic Rogue - Spellthief's passive for hybrid damage.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier2.Spellthief
     {
         public override string InternalName => "MagicRogue";
         public override string DisplayName => "Magic Rogue";
-        public override string Description => "Increase ranged and magic damage.";
+        public override string Description => "Increase ranged and magic damage while reducing mana costs.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Spellthief;

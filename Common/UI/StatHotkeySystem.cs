@@ -1,7 +1,7 @@
 using Terraria.GameInput;
 using Terraria.ModLoader;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// DEPRECATED: Stat UI is now integrated into MasterUI

@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Necromancer
+namespace RpgMod.Common.Skills.Tier2.Necromancer
 {
     /// <summary>
     /// Bone Armor - Necromancer's defensive skill.

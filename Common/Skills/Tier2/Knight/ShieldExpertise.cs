@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Shield Expertise - 방패 전문가.
@@ -25,11 +25,19 @@ namespace Rpg.Common.Skills.Tier2.Knight
 
         private static readonly float[] KB_RESIST = { 0.05f, 0.10f, 0.15f, 0.20f, 0.25f, 0.30f, 0.35f, 0.40f, 0.45f, 0.50f };
 
+        public static float GetKnockbackResist(int rank)
+        {
+            if (rank <= 0)
+                return 0f;
+            int index = System.Math.Min(rank, KB_RESIST.Length) - 1;
+            return KB_RESIST[index];
+        }
+
         public override void ApplyPassive(Player player)
         {
             if (CurrentRank <= 0) return;
             int rank = CurrentRank;
-            
+
             player.noKnockback = rank >= 10;
             player.statDefense += rank * 2;
         }

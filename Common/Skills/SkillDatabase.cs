@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Rpg.Common.Base;
-using Rpg.Common;
+using RpgMod.Common.Base;
+using RpgMod.Common;
 using Terraria.ModLoader;
+using Rpg;
 
-namespace Rpg.Common.Skills
+namespace RpgMod.Common.Skills
 {
     /// <summary>
     /// Central registry for all skills in the mod
@@ -292,7 +293,7 @@ namespace Rpg.Common.Skills
 
         private static void LogWarning(string message, Exception ex = null)
         {
-            var logger = ModContent.GetInstance<Rpg>()?.Logger;
+            var logger = ModContent.GetInstance<global::Rpg.Rpg>()?.Logger;
             if (logger == null)
                 return;
 

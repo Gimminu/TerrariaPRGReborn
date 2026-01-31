@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Warlock
+namespace RpgMod.Common.Skills.Tier2.Warlock
 {
     /// <summary>
     /// Dark Bolt - 암흑 화살.
@@ -38,8 +38,12 @@ namespace Rpg.Common.Skills.Tier2.Warlock
             
             Vector2 direction = (Main.MouseWorld - player.Center).SafeNormalize(Vector2.UnitX);
             
-            Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, direction * 14f,
+            int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, direction * 14f,
                 ProjectileID.ShadowBeamFriendly, damage, 4f, player.whoAmI);
+            if (projId >= 0 && projId < Main.maxProjectiles)
+            {
+                Main.projectile[projId].DamageType = DamageClass.Magic;
+            }
             
             PlayEffects(player, direction);
         }

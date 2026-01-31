@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Rpg.Common;
-using Rpg.Common.Base;
+using RpgMod.Common;
+using RpgMod.Common.Base;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Skills
+namespace RpgMod.Common.Skills
 {
     public sealed class SkillDefinition
     {
@@ -128,12 +128,12 @@ namespace Rpg.Common.Skills
                 CreatePassiveSkill("Lichdom", "Lichdom", "Improve mana efficiency and damage.", JobType.DeathKnight, t2Skill3, maxRank, skillPointCost, damageBonus: 0.04f, manaCostReduction: 0.05f),
 
                 // Sniper
-                CreateAoeSkill("Headshot", "Headshot", "Strike with a precise lethal shot.", JobType.Sniper, t2Skill1, ResourceType.Stamina, 20, 12f, 60, 80f, DamageClass.Ranged, maxRank, skillPointCost),
+                CreateAoeSkill("Headshot", "Headshot", "Strike with a precise lethal shot that always critically hits and boosts critical damage.", JobType.Sniper, t2Skill1, ResourceType.Stamina, 20, 12f, 60, 80f, DamageClass.Ranged, maxRank, skillPointCost),
                 CreateBuffSkill("SteadyBreath", "Steady Breath", "Focus to boost critical precision.", JobType.Sniper, t2Skill2, ResourceType.Stamina, 15, 18f, new[] { BuffID.Archery, BuffID.Rage }, 10, maxRank, skillPointCost),
                 CreatePassiveSkill("Sharpshooter", "Sharpshooter", "Increase crit chance and damage.", JobType.Sniper, t2Skill3, maxRank, skillPointCost, damageBonus: 0.05f, critBonus: 8f),
 
                 // Assassin
-                CreateAoeSkill("Backstab", "Backstab", "Deliver a devastating close strike.", JobType.Assassin, t2Skill1, ResourceType.Stamina, 20, 12f, 55, 90f, DamageClass.Melee, maxRank, skillPointCost),
+                CreateAoeSkill("Backstab", "Backstab", "Strike from the shadows with a guaranteed critical hit and increased critical damage. If no target is in range, gain a brief damage boost instead.", JobType.Assassin, t2Skill1, ResourceType.Stamina, 20, 12f, 55, 90f, DamageClass.Melee, maxRank, skillPointCost),
                 CreateBuffSkill("Vanish", "Vanish", "Fade from sight briefly.", JobType.Assassin, t2Skill2, ResourceType.Stamina, 15, 20f, new[] { BuffID.Invisibility, BuffID.Swiftness }, 6, maxRank, skillPointCost),
                 CreatePassiveSkill("PoisonMastery", "Poison Mastery", "Improve damage output and crit chance.", JobType.Assassin, t2Skill3, maxRank, skillPointCost, damageBonus: 0.04f, critBonus: 4f),
 
@@ -164,7 +164,7 @@ namespace Rpg.Common.Skills
 
                 // Spellblade
                 CreateBuffSkill("EnchantWeapon", "Enchant Weapon", "Infuse your weapon with magic.", JobType.Spellblade, t2Skill1, ResourceType.Mana, 20, 18f, new[] { BuffID.Wrath, BuffID.MagicPower }, 10, maxRank, skillPointCost),
-                CreateAoeSkill("ArcaneSlash", "Arcane Slash", "Strike enemies with magic-infused blades.", JobType.Spellblade, t2Skill2, ResourceType.Mana, 15, 12f, 45, 110f, DamageClass.Magic, maxRank, skillPointCost),
+                CreateAoeSkill("ArcaneSlash", "Arcane Slash", "Strike enemies with magic-infused blades.", JobType.Spellblade, t2Skill2, ResourceType.Mana, 15, 12f, 45, 110f, DamageClass.Melee, maxRank, skillPointCost),
                 CreatePassiveSkill("SpellStrike", "Spell Strike", "Improve mana efficiency and damage.", JobType.Spellblade, t2Skill3, maxRank, skillPointCost, damageBonus: 0.03f, manaCostReduction: 0.04f),
 
                 // Battle Mage
@@ -189,7 +189,7 @@ namespace Rpg.Common.Skills
 
                 // Shadow
                 CreateBuffSkill("ShadowStep", "Shadow Step", "Blink through the shadows.", JobType.Shadow, t2Skill1, ResourceType.Stamina, 15, 14f, new[] { BuffID.Invisibility, BuffID.Swiftness }, 6, maxRank, skillPointCost),
-                CreateAoeSkill("Ambush", "Ambush", "Strike nearby foes unexpectedly.", JobType.Shadow, t2Skill2, ResourceType.Stamina, 20, 12f, 55, 100f, DamageClass.Melee, maxRank, skillPointCost),
+                CreateAoeSkill("Ambush", "Ambush", "Strike from the shadows with a guaranteed critical hit and bonus damage.", JobType.Shadow, t2Skill2, ResourceType.Stamina, 20, 12f, 55, 100f, DamageClass.Melee, maxRank, skillPointCost),
                 CreatePassiveSkill("SilentBlades", "Silent Blades", "Increase critical potential.", JobType.Shadow, t2Skill3, maxRank, skillPointCost, critBonus: 6f),
 
                 // Spellthief
@@ -208,7 +208,7 @@ namespace Rpg.Common.Skills
                 CreatePassiveSkill("SanguineArmor", "Sanguine Armor", "Increase damage and regeneration.", JobType.BloodKnight, t3Skill3, maxRank, skillPointCost, damageBonus: 0.08f, lifeRegenBonus: 2),
 
                 // Deadeye
-                CreateAoeSkill("MarkedShot", "Marked Shot", "Exploit enemy weak points.", JobType.Deadeye, t3Skill1, ResourceType.Stamina, 30, 20f, 80, 90f, DamageClass.Ranged, maxRank, skillPointCost),
+                CreateAoeSkill("MarkedShot", "Marked Shot", "Exploit enemy weak points with guaranteed critical hits and massive critical damage.", JobType.Deadeye, t3Skill1, ResourceType.Stamina, 30, 20f, 80, 90f, DamageClass.Ranged, maxRank, skillPointCost),
                 CreateBuffSkill("DeadeyeFocus", "Deadeye Focus", "Sharpen your aim for critical strikes.", JobType.Deadeye, t3Skill2, ResourceType.Stamina, 25, 20f, new[] { BuffID.Archery, BuffID.Rage }, 10, maxRank, skillPointCost),
                 CreatePassiveSkill("SniperInstinct", "Sniper Instinct", "Greatly increase critical chance.", JobType.Deadeye, t3Skill3, maxRank, skillPointCost, critBonus: 10f),
 
@@ -224,7 +224,7 @@ namespace Rpg.Common.Skills
 
                 // Overlord
                 CreateBuffSkill("AlphaRoar", "Alpha Roar", "Empower all summons.", JobType.Overlord, t3Skill1, ResourceType.Mana, 35, 25f, new[] { BuffID.Summoning, BuffID.Wrath }, 12, maxRank, skillPointCost),
-                CreateAoeSkill("BeastStampede", "Beast Stampede", "Charge through nearby enemies.", JobType.Overlord, t3Skill2, ResourceType.Mana, 30, 20f, 70, 160f, DamageClass.Melee, maxRank, skillPointCost),
+                CreateAoeSkill("BeastStampede", "Beast Stampede", "Charge through nearby enemies.", JobType.Overlord, t3Skill2, ResourceType.Mana, 30, 20f, 70, 160f, DamageClass.Summon, maxRank, skillPointCost),
                 CreatePassiveSkill("OverlordCommand", "Overlord Command", "Increase summon potency.", JobType.Overlord, t3Skill3, maxRank, skillPointCost, minionSlots: 2, damageBonus: 0.05f),
 
                 // Lich King

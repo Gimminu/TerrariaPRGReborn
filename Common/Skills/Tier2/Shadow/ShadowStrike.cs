@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Shadow
+namespace RpgMod.Common.Skills.Tier2.Shadow
 {
     /// <summary>
     /// Shadow Strike - 그림자 일격.
@@ -51,8 +51,10 @@ namespace Rpg.Common.Skills.Tier2.Shadow
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int finalDamage = Main.DamageVar(damage, player.luck);
-                    npc.SimpleStrikeNPC(finalDamage, player.direction, true, 4f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, damage);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 4f, DamageClass.Melee);
                     npc.AddBuff(BuffID.Bleeding, 180 + rank * 20);
                 }
             }

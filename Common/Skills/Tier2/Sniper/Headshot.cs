@@ -3,9 +3,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using Terraria.ModLoader;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sniper
+namespace RpgMod.Common.Skills.Tier2.Sniper
 {
     /// <summary>
     /// Headshot - Sniper's precision attack.
@@ -15,7 +16,7 @@ namespace Rpg.Common.Skills.Tier2.Sniper
     {
         public override string InternalName => "Headshot";
         public override string DisplayName => "Headshot";
-        public override string Description => "Strike with a precise lethal shot that always critically hits.";
+        public override string Description => "Strike with a precise lethal shot that always critically hits and boosts critical damage.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Sniper;
@@ -85,7 +86,8 @@ namespace Rpg.Common.Skills.Tier2.Sniper
             {
                 // Always crit with bonus crit damage
                 int hitDirection = target.Center.X >= player.Center.X ? 1 : -1;
-                int critDamage = (int)(totalDamage * critMult);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, totalDamage);
+                int critDamage = (int)(scaledDamage * critMult);
 
                 player.ApplyDamageToNPC(target, critDamage, 2f, hitDirection, true, Terraria.ModLoader.DamageClass.Ranged, false);
                 

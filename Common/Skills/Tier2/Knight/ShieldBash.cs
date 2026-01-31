@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Shield Bash - 방패 강타.
@@ -46,8 +46,10 @@ namespace Rpg.Common.Skills.Tier2.Knight
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int damage = Main.DamageVar(DAMAGE[rank - 1], player.luck);
-                    npc.SimpleStrikeNPC(damage, player.direction, true, 8f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, DAMAGE[rank - 1]);
+                    int damage = ApplyDamageVariance(player, scaledDamage);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(damage, player.direction, crit, 8f, DamageClass.Melee);
                     
                     // 기절 (Confused 버프로 대체)
                     npc.AddBuff(BuffID.Confused, STUN_FRAMES[rank - 1]);

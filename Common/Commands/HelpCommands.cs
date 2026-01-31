@@ -1,10 +1,10 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Players;
-using Rpg.Common.Systems;
+using RpgMod.Common.Players;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.Commands
+namespace RpgMod.Common.Commands
 {
     /// <summary>
     /// Help command to show available RPG commands

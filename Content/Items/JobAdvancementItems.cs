@@ -2,13 +2,13 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common;
-using Rpg.Common.Players;
-using Rpg.Common.UI;
-using Rpg.Common.Jobs;
-using Rpg.Common.Config;
+using RpgMod.Common;
+using RpgMod.Common.Players;
+using RpgMod.Common.UI;
+using RpgMod.Common.Jobs;
+using RpgMod.Common.Config;
 
-namespace Rpg.Content.Items
+namespace RpgMod.Content.Items
 {
     /// <summary>
     /// Base class for job advancement scrolls
@@ -126,12 +126,15 @@ namespace Rpg.Content.Items
     /// </summary>
     public class FirstJobScroll : JobAdvancementScroll
     {
+        public override string Texture => "Rpg/Content/Items/FirstJobScroll";
+
         public override JobTier RequiredTier => JobTier.Novice;
         public override string ScrollName => "First Job Scroll";
         public override string ScrollDescription => "Choose your first job class";
         
         public override void SetStaticDefaults()
         {
+            
             // DisplayName.SetDefault("First Job Advancement Scroll");
             // Tooltip.SetDefault("Use to choose your first job class\nRequires Level 10+");
         }
@@ -151,12 +154,15 @@ namespace Rpg.Content.Items
     /// </summary>
     public class SecondJobScroll : JobAdvancementScroll
     {
+        public override string Texture => "Rpg/Content/Items/SecondJobScroll";
+
         public override JobTier RequiredTier => JobTier.Tier1;
         public override string ScrollName => "Second Job Scroll";
         public override string ScrollDescription => "Advance to a specialized job class";
         
         public override void SetStaticDefaults()
         {
+            
             // DisplayName.SetDefault("Second Job Advancement Scroll");
             // Tooltip.SetDefault("Use to advance to your second job\nRequires defeating Wall of Flesh");
         }
@@ -177,12 +183,15 @@ namespace Rpg.Content.Items
     /// </summary>
     public class ThirdJobScroll : JobAdvancementScroll
     {
+        public override string Texture => "Rpg/Content/Items/ThirdJobScroll";
+
         public override JobTier RequiredTier => JobTier.Tier2;
         public override string ScrollName => "Third Job Scroll";
         public override string ScrollDescription => "Master your ultimate job class";
         
         public override void SetStaticDefaults()
         {
+            
             // DisplayName.SetDefault("Third Job Advancement Scroll");
             // Tooltip.SetDefault("Use to advance to your final job\nRequires defeating Plantera");
         }
@@ -204,8 +213,11 @@ namespace Rpg.Content.Items
     /// </summary>
     public class JobManual : ModItem
     {
+        public override string Texture => "Rpg/Content/Items/JobManual";
+
         public override void SetStaticDefaults()
         {
+            
             // DisplayName.SetDefault("Job Manual");
             // Tooltip.SetDefault("Reference guide for all job classes\nRight-click to view job tree");
         }

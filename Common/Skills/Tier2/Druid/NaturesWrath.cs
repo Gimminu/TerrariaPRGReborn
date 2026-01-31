@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Druid
+namespace RpgMod.Common.Skills.Tier2.Druid
 {
     /// <summary>
     /// Nature's Wrath - Druid's AoE nature damage skill.
@@ -43,8 +43,10 @@ namespace Rpg.Common.Skills.Tier2.Druid
                 if (Vector2.Distance(npc.Center, player.Center) > radius) continue;
 
                 int dir = npc.Center.X >= player.Center.X ? 1 : -1;
-                bool crit = Main.rand.NextFloat(100f) < player.GetCritChance(DamageClass.Magic);
-                player.ApplyDamageToNPC(npc, damage, 4f, dir, crit, DamageClass.Magic, false);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                bool crit = RollCrit(player, DamageClass.Magic);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                player.ApplyDamageToNPC(npc, finalDamage, 4f, dir, crit, DamageClass.Magic, false);
                 npc.AddBuff(BuffID.Poisoned, 180);
             }
 

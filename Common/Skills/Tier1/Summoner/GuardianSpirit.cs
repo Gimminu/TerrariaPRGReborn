@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Summoner
+namespace RpgMod.Common.Skills.Tier1.Summoner
 {
     /// <summary>
     /// Guardian Spirit - 수호 정령.
@@ -16,7 +16,7 @@ namespace Rpg.Common.Skills.Tier1.Summoner
     {
         public override string InternalName => "GuardianSpirit";
         public override string DisplayName => "Guardian Spirit";
-        public override string Description => "Summon a protective spirit that shields you, increasing defense.";
+        public override string Description => "Summon a protective spirit that increases defense and reduces damage taken.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Summoner;

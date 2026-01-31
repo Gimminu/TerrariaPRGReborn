@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Gunslinger
+namespace RpgMod.Common.Skills.Tier2.Gunslinger
 {
     /// <summary>
     /// Gun Tempo - 총격 템포.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Gunslinger
     {
         public override string InternalName => "GunTempo";
         public override string DisplayName => "Gun Tempo";
-        public override string Description => "Enter a rhythm of rapid fire, increasing ranged attack speed.";
+        public override string Description => "Enter a rhythm of rapid fire, increasing ranged attack speed and regeneration.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Gunslinger;
@@ -30,15 +30,18 @@ namespace Rpg.Common.Skills.Tier2.Gunslinger
         public override ResourceType ResourceType => ResourceType.Stamina;
 
         private static readonly int[] DURATION_SECONDS = { 12, 13, 14, 15, 16, 16, 17, 18, 19, 20 };
+        private static readonly float[] ATTACK_SPEED_BONUS = { 0.10f, 0.12f, 0.14f, 0.16f, 0.18f, 0.20f, 0.23f, 0.26f, 0.30f, 0.35f };
 
         protected override void OnActivate(Player player)
         {
             int rank = System.Math.Max(1, CurrentRank);
             int duration = DURATION_SECONDS[rank - 1] * 60;
+            float attackSpeed = ATTACK_SPEED_BONUS[rank - 1];
             
             player.AddBuff(BuffID.RapidHealing, duration);
-            // 원거리 공속 증가는 Archery Potion 효과에 포함
-            player.AddBuff(BuffID.Archery, duration);
+
+            var rpgPlayer = player.GetModPlayer<Players.RpgPlayer>();
+            rpgPlayer.AddTemporaryRangedAttackSpeed(attackSpeed, duration);
             
             PlayEffects(player);
             ShowMessage(player, "Gun Tempo!", Color.Yellow);

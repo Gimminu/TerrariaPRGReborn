@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.LichKing
+namespace RpgMod.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Death's Embrace - 죽음의 포옹.
@@ -48,18 +48,26 @@ namespace Rpg.Common.Skills.Tier3.LichKing
                     float dist = Vector2.Distance(player.Center, npc.Center);
                     if (dist <= radius)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 5f, DamageClass.Magic, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Magic);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 5f, DamageClass.Magic);
                     }
                 }
             }
-            
+
             // 언데드 소환
             for (int i = 0; i < summonCount; i++)
             {
                 Vector2 offset = new Vector2(Main.rand.NextFloat(-60, 60), -10);
-                Projectile.NewProjectile(player.GetSource_FromThis(), player.Center + offset, Vector2.Zero,
+                int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center + offset, Vector2.Zero,
                     ProjectileID.BabySlime, damage / 3, 2f, player.whoAmI);
+                if (projId >= 0 && projId < Main.maxProjectiles)
+                {
+                    Projectile proj = Main.projectile[projId];
+                    proj.DamageType = DamageClass.Summon;
+                    proj.ContinuouslyUpdateDamageStats = true;
+                }
             }
             
             PlayEffects(player, radius);

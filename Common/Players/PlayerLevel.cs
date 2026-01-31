@@ -4,12 +4,13 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using System;
-using Rpg.Common.Config;
-using Rpg.Common.UI;
-using Rpg.Common.Systems;
-using Rpg.Common.Jobs;
+using System.Collections.Generic;
+using RpgMod.Common.Config;
+using RpgMod.Common.UI;
+using RpgMod.Common.Systems;
+using RpgMod.Common.Jobs;
 
-namespace Rpg.Common.Players
+namespace RpgMod.Common.Players
 {
     /// <summary>
     /// Handles all leveling logic - XP gain, level-up, point awards
@@ -401,12 +402,24 @@ namespace Rpg.Common.Players
             if (!JobDatabase.CanUnlockJob(rpgPlayer, newJob))
                 return false;
 
-            // Validate job tier progression
-            if (newTier != rpgPlayer.CurrentTier + 1)
-                return false;
+            // Special handling for tier regression (changing to lower tier)
+            if (newTier < oldTier)
+            {
+                // Cancel higher tier jobs and refund resources
+                CancelHigherTierJobs();
+                RefundTierResources();
+            }
+            // Same tier changes are allowed without cancelling higher tiers
+            else
+            {
+                // Normal progression validation
+                if (newTier != rpgPlayer.CurrentTier + 1)
+                    return false;
+            }
 
             // Change job
             rpgPlayer.CurrentJob = newJob;
+            rpgPlayer.SelectedJobs[newTier] = newJob;
 
             if (newTier > oldTier)
             {
@@ -422,6 +435,40 @@ namespace Rpg.Common.Players
             ShowJobChangeMessage(newJob);
 
             return true;
+        }
+
+        private void CancelHigherTierJobs()
+        {
+            // Remove selected jobs from higher tiers
+            var tiersToRemove = new List<JobTier>();
+            foreach (var kvp in rpgPlayer.SelectedJobs)
+            {
+                if (kvp.Key > JobTier.Tier1)
+                {
+                    tiersToRemove.Add(kvp.Key);
+                }
+            }
+            
+            foreach (var tier in tiersToRemove)
+            {
+                rpgPlayer.SelectedJobs.Remove(tier);
+            }
+            
+            // Reset CurrentJob to Tier 1 if it was higher
+            if (rpgPlayer.CurrentTier > JobTier.Tier1)
+            {
+                rpgPlayer.CurrentJob = rpgPlayer.SelectedJobs.ContainsKey(JobTier.Tier1) 
+                    ? rpgPlayer.SelectedJobs[JobTier.Tier1] 
+                    : JobType.Novice;
+            }
+        }
+
+        private void RefundTierResources()
+        {
+            // For now, no resource refund on tier regression to prevent exploits
+            // In future, track per-tier investments for accurate refunds
+            // rpgPlayer.SkillPoints += refundedSkillPoints;
+            // rpgPlayer.StatPoints += refundedStatPoints;
         }
 
         #endregion
@@ -774,6 +821,29 @@ namespace Rpg.Common.Players
         public long GetRemainingXP()
         {
             return rpgPlayer.RequiredXP - rpgPlayer.CurrentXP;
+        }
+
+        /// <summary>
+        /// Resign from current job and return to Novice (without cancelling higher tiers)
+        /// </summary>
+        public bool ResignJob()
+        {
+            if (rpgPlayer.CurrentJob == JobType.Novice)
+                return false; // Already Novice
+
+            // Change to Novice without cancelling higher tiers
+            rpgPlayer.CurrentJob = JobType.Novice;
+            rpgPlayer.SelectedJobs[JobTier.Novice] = JobType.Novice;
+
+            rpgPlayer.RequestJobSync();
+
+            // Play job change effects
+            PlayJobChangeEffects();
+
+            // Show message
+            ShowJobChangeMessage(JobType.Novice);
+
+            return true;
         }
 
         #endregion

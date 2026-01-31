@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.BattleMage
+namespace RpgMod.Common.Skills.Tier2.BattleMage
 {
     /// <summary>
     /// Battle Caster - Battle Mage's passive for combat magic.

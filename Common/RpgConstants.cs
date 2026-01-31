@@ -1,4 +1,4 @@
-namespace Rpg.Common
+namespace RpgMod.Common
 {
     /// <summary>
     /// Central constants for the entire mod - modify here for balance adjustments
@@ -81,11 +81,11 @@ namespace Rpg.Common
         public const float STRENGTH_MELEE_DAMAGE_PER_POINT = 0.01f;         // 1% melee damage
         public const float DEXTERITY_RANGED_DAMAGE_PER_POINT = 0.01f;      // 1% ranged damage
         public const float DEXTERITY_ATTACK_SPEED_PER_POINT = 0.003f;      // 0.3% attack speed
-        public const float DEXTERITY_RANGED_CRIT_PER_POINT = 0.003f;       // 0.3% ranged crit
+        public const float DEXTERITY_RANGED_CRIT_PER_POINT = 0.3f;         // 0.3% ranged crit
         public const float ROGUE_FINESSE_DAMAGE_PER_POINT = 0.008f;        // 0.8% melee/ranged damage
-        public const float ROGUE_CRIT_CHANCE_PER_POINT = 0.003f;           // 0.3% crit chance
+        public const float ROGUE_CRIT_CHANCE_PER_POINT = 0.3f;             // 0.3% crit chance
         public const float INTELLIGENCE_MAGIC_DAMAGE_PER_POINT = 0.015f;   // 1.5% magic damage
-        public const float INTELLIGENCE_MAGIC_CRIT_PER_POINT = 0.007f;     // 0.7% magic crit
+        public const float INTELLIGENCE_MAGIC_CRIT_PER_POINT = 0.7f;       // 0.7% magic crit
         public const float INTELLIGENCE_SPELL_POWER_PER_POINT = 0.005f;    // 0.5% spell power
         public const float INTELLIGENCE_MANA_COST_REDUCTION_PER_POINT = 0.002f; // 0.2% mana cost reduction
         public const float INTELLIGENCE_MAX_MANA_COST_REDUCTION = 0.5f;    // 50% max
@@ -107,7 +107,7 @@ namespace Rpg.Common
         public const float FORTITUDE_STATUS_RESISTANCE_PER_POINT = 0.005f; // 0.5% status resist
         public const float FORTITUDE_KNOCKBACK_RESIST_PER_POINT = 0.003f;  // 0.3% knockback resist
         public const float FORTITUDE_DEFENSE_PER_POINT = 0.002f;           // 0.2% defense
-        public const float LUCK_CRIT_PER_POINT = 0.005f;                   // 0.5% crit
+        public const float LUCK_CRIT_PER_POINT = 0.5f;                     // 0.5% crit
         public const float LUCK_DROP_RATE_PER_POINT = 0.002f;              // 0.2% drop rate
         public const float LUCK_ALL_DAMAGE_PER_POINT = 0.002f;             // 0.2% all damage
 
@@ -139,6 +139,10 @@ namespace Rpg.Common
 
         // Cooldown reduction cap
         public const float MAX_COOLDOWN_REDUCTION = 0.8f; // 80% max CDR
+
+        // Sniper Long Range bonus distances (pixels)
+        public const float LONG_RANGE_MIN_DISTANCE = 200f;
+        public const float LONG_RANGE_MAX_DISTANCE = 1200f;
 
         #endregion
 

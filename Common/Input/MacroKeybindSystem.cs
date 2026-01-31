@@ -1,10 +1,10 @@
 using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Players;
-using Rpg.Common.Systems;
+using RpgMod.Common.Players;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common.Input
+namespace RpgMod.Common.Input
 {
     /// <summary>
     /// Handles keybinds for skill macros

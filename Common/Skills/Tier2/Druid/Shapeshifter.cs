@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Druid
+namespace RpgMod.Common.Skills.Tier2.Druid
 {
     /// <summary>
     /// Shapeshifter - Druid's passive for hybrid bonuses.
@@ -11,7 +11,7 @@ namespace Rpg.Common.Skills.Tier2.Druid
     {
         public override string InternalName => "Shapeshifter";
         public override string DisplayName => "Shapeshifter";
-        public override string Description => "Gain bonuses to both summoning and magic.";
+        public override string Description => "Gain bonuses to summoning, magic, and life regeneration.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Druid;

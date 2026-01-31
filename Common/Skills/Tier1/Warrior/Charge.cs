@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Charge - 전방으로 돌진하여 적에게 피해를 입히고 밀쳐낸다.
@@ -65,8 +65,10 @@ namespace Rpg.Common.Skills.Tier1.Warrior
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(chargeHitbox))
                 {
-                    int finalDamage = Main.DamageVar(baseDamage, player.luck);
-                    npc.SimpleStrikeNPC(finalDamage, player.direction, true, 10f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, baseDamage);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 10f, DamageClass.Melee);
                 }
             }
             

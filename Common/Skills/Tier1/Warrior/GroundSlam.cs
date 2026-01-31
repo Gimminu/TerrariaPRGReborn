@@ -3,10 +3,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Effects;
+using RpgMod.Common.Base;
+using RpgMod.Common.Effects;
 
-namespace Rpg.Common.Skills.Tier1.Warrior
+namespace RpgMod.Common.Skills.Tier1.Warrior
 {
     /// <summary>
     /// Ground Slam - 땅을 강타하여 주변 적에게 피해를 입힌다.
@@ -56,8 +56,11 @@ namespace Rpg.Common.Skills.Tier1.Warrior
                     {
                         // 거리에 따른 피해 감소
                         float distFactor = 1f - (dist / radius) * 0.3f;
-                        int finalDamage = (int)(Main.DamageVar(baseDamage, player.luck) * distFactor);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 8f, DamageClass.Melee, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Melee, baseDamage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        finalDamage = (int)(finalDamage * distFactor);
+                        bool crit = RollCrit(player, DamageClass.Melee);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 8f, DamageClass.Melee);
                     }
                 }
             }

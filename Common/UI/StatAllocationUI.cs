@@ -8,9 +8,10 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.ID;
 using System.Collections.Generic;
-using Rpg.Common.Players;
+using RpgMod.Common.Players;
+using RpgMod.Common.Stats;
 
-namespace Rpg.Common.UI
+namespace RpgMod.Common.UI
 {
     /// <summary>
     /// UI for allocating stat points
@@ -26,7 +27,7 @@ namespace Rpg.Common.UI
         private UIList statList;
         private UIScrollbar scrollbar;
         
-        private Dictionary<StatType, UIPanel> statButtons = new Dictionary<StatType, UIPanel>();
+        private Dictionary<StatType, (UIPanel plus, UIPanel minus)> statButtons = new Dictionary<StatType, (UIPanel plus, UIPanel minus)>();
 
         // UI scale helpers
         private Point MousePosition => GetScaledMouse();
@@ -130,9 +131,14 @@ namespace Rpg.Common.UI
             {
                 foreach (var kvp in statButtons)
                 {
-                    if (kvp.Value.IsMouseHovering)
+                    if (kvp.Value.plus.IsMouseHovering)
                     {
-                        HandleStatClick(kvp.Key);
+                        HandleStatPlusClick(kvp.Key);
+                        break;
+                    }
+                    if (kvp.Value.minus.IsMouseHovering)
+                    {
+                        HandleStatMinusClick(kvp.Key);
                         break;
                     }
                 }
@@ -166,7 +172,7 @@ namespace Rpg.Common.UI
             statList.Add(pointsElement);
             
             // Instructions
-            var instructions = new UIText("Left Click: +1  |  Shift: +5  |  Ctrl: +10  |  Ctrl+Shift: All", 0.8f);
+            var instructions = new UIText("Left Click: +1/-1  |  Shift: +5/-5  |  Ctrl: +10/-10  |  Ctrl+Shift: All/Max", 0.8f);
             instructions.TextColor = Color.LightGray;
             statList.Add(instructions);
             
@@ -223,24 +229,41 @@ namespace Rpg.Common.UI
             statCard.Append(detailElement);
             
             // [+] Button
-            var buttonPanel = new UIPanel();
-            buttonPanel.Width.Set(50, 0f);
-            buttonPanel.Height.Set(STAT_ROW_HEIGHT - 12, 0f);
-            buttonPanel.Left.Set(-60, 1f);
-            buttonPanel.Top.Set(4, 0f);
-            buttonPanel.BackgroundColor = rpgPlayer.StatPoints > 0 
+            var plusButtonPanel = new UIPanel();
+            plusButtonPanel.Width.Set(25, 0f);
+            plusButtonPanel.Height.Set(STAT_ROW_HEIGHT - 12, 0f);
+            plusButtonPanel.Left.Set(-60, 1f);
+            plusButtonPanel.Top.Set(4, 0f);
+            plusButtonPanel.BackgroundColor = rpgPlayer.StatPoints > 0 
                 ? new Color(60, 150, 60)
                 : new Color(80, 80, 80);
-            statCard.Append(buttonPanel);
+            statCard.Append(plusButtonPanel);
             
-            var buttonText = new UIText("+", 1f);
-            buttonText.HAlign = 0.5f;
-            buttonText.VAlign = 0.5f;
-            buttonText.TextColor = Color.White;
-            buttonPanel.Append(buttonText);
+            var plusButtonText = new UIText("+", 1f);
+            plusButtonText.HAlign = 0.5f;
+            plusButtonText.VAlign = 0.5f;
+            plusButtonText.TextColor = Color.White;
+            plusButtonPanel.Append(plusButtonText);
             
-            // Store button for click handling
-            statButtons[stat] = buttonPanel;
+            // [-] Button
+            var minusButtonPanel = new UIPanel();
+            minusButtonPanel.Width.Set(25, 0f);
+            minusButtonPanel.Height.Set(STAT_ROW_HEIGHT - 12, 0f);
+            minusButtonPanel.Left.Set(-30, 1f);
+            minusButtonPanel.Top.Set(4, 0f);
+            minusButtonPanel.BackgroundColor = baseValue > 0 
+                ? new Color(150, 60, 60)
+                : new Color(80, 80, 80);
+            statCard.Append(minusButtonPanel);
+            
+            var minusButtonText = new UIText("-", 1f);
+            minusButtonText.HAlign = 0.5f;
+            minusButtonText.VAlign = 0.5f;
+            minusButtonText.TextColor = Color.White;
+            minusButtonPanel.Append(minusButtonText);
+            
+            // Store buttons for click handling
+            statButtons[stat] = (plusButtonPanel, minusButtonPanel);
             
             // Handle clicks on the button
             // Click handling moved to Update method
@@ -248,36 +271,36 @@ namespace Rpg.Common.UI
             statList.Add(statCard);
         }
         
-        private void HandleStatClick(StatType stat)
+        private void HandleStatPlusClick(StatType stat)
         {
             if (rpgPlayer == null || rpgPlayer.StatPoints <= 0)
                 return;
                 
-            int amount = 1;
-            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) || 
-                Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
-            {
-                amount = 5;
-            }
-            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftControl) || 
-                Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightControl))
-            {
-                if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift) || 
-                    Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightShift))
-                {
-                    amount = rpgPlayer.StatPoints; // All remaining
-                }
-                else
-                {
-                    amount = 10;
-                }
-            }
-            
+            int amount = GetClickAmount();
             amount = System.Math.Min(amount, rpgPlayer.StatPoints);
             
             if (amount > 0)
             {
                 rpgPlayer.AllocateStatPoint(stat, amount);
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
+        }
+        
+        private void HandleStatMinusClick(StatType stat)
+        {
+            if (rpgPlayer == null)
+                return;
+                
+            int baseValue = rpgPlayer.GetBaseStatValue(stat);
+            if (baseValue <= 0)
+                return;
+                
+            int amount = GetClickAmount();
+            amount = System.Math.Min(amount, baseValue);
+            
+            if (amount > 0)
+            {
+                rpgPlayer.DeallocateStatPoint(stat, amount);
                 SoundEngine.PlaySound(SoundID.MenuTick);
             }
         }
@@ -289,7 +312,7 @@ namespace Rpg.Common.UI
             bool ctrl = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftControl) || 
                        Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightControl);
             
-            if (ctrl && shift) return rpgPlayer.StatPoints; // All
+            if (ctrl && shift) return int.MaxValue; // Will be clamped by caller
             if (ctrl) return 10;
             if (shift) return 5;
             return 1;
@@ -300,73 +323,9 @@ namespace Rpg.Common.UI
         {
             var lines = new List<string>();
             
-            switch (stat)
-            {
-                case StatType.Strength:
-                    lines.Add("Strength - Physical Power");
-                    lines.Add("+1% Melee Damage per point");
-                    break;
-                case StatType.Dexterity:
-                    lines.Add("Dexterity - Precision");
-                    lines.Add("+1% Ranged Damage per point");
-                    lines.Add("+0.3% Attack Speed per point");
-                    lines.Add("+0.3% Ranged Crit per point");
-                    break;
-                case StatType.Rogue:
-                    lines.Add("Rogue - Finesse");
-                    lines.Add("+0.8% Melee/Ranged Damage per point");
-                    lines.Add("+0.3% Critical Chance per point");
-                    break;
-                case StatType.Intelligence:
-                    lines.Add("Intelligence - Arcane Power");
-                    lines.Add("+1.5% Magic Damage per point");
-                    lines.Add("+0.7% Magic Critical per point");
-                    lines.Add("+0.5% Spell Power per point");
-                    lines.Add("+0.2% Mana Cost Reduction per point");
-                    break;
-                case StatType.Focus:
-                    lines.Add("Focus - Summoning");
-                    lines.Add("+1.2% Summon Damage per point");
-                    lines.Add("+1 Minion Slot at 10/30/60/100 FOC");
-                    break;
-                case StatType.Vitality:
-                    lines.Add("Vitality - Life Force");
-                    lines.Add("+10 Max HP per point");
-                    lines.Add("+0.02 HP Regen per point");
-                    break;
-                case StatType.Stamina:
-                    lines.Add("Stamina - Endurance");
-                    lines.Add("+2 Max Stamina per point");
-                    lines.Add("+0.05 Stamina Regen per point");
-                    break;
-                case StatType.Defense:
-                    lines.Add("Defense - Protection");
-                    lines.Add("+0.3% Damage Reduction per point");
-                    lines.Add("+1 Armor per 5 points");
-                    break;
-                case StatType.Agility:
-                    lines.Add("Agility - Mobility");
-                    lines.Add("+0.3% Move Speed per point");
-                    lines.Add("+0.2% Dodge Chance per point");
-                    break;
-                case StatType.Wisdom:
-                    lines.Add("Wisdom - Mystic Knowledge");
-                    lines.Add("+5 Max Mana per point");
-                    lines.Add("+0.03 Mana Regen per point");
-                    break;
-                case StatType.Fortitude:
-                    lines.Add("Fortitude - Resilience");
-                    lines.Add("+0.5% Debuff Duration Reduction per point");
-                    lines.Add("+0.3% Knockback Resist per point");
-                    lines.Add("+0.2% Damage Reduction per point");
-                    break;
-                case StatType.Luck:
-                    lines.Add("Luck - Fortune");
-                    lines.Add("+0.5% Critical Chance per point");
-                    lines.Add("+0.2% Luck (drops/variance) per point");
-                    lines.Add("+0.2% All Damage per point");
-                    break;
-            }
+            var def = StatDefinitions.GetDefinition(stat);
+            lines.Add(def.Title);
+            lines.AddRange(def.EffectLines);
             
             return lines;
         }
@@ -381,42 +340,12 @@ namespace Rpg.Common.UI
         
         private string GetStatName(StatType stat)
         {
-            return stat switch
-            {
-                StatType.Strength => "STR",
-                StatType.Dexterity => "DEX",
-                StatType.Rogue => "ROG",
-                StatType.Intelligence => "INT",
-                StatType.Focus => "FOC",
-                StatType.Vitality => "VIT",
-                StatType.Stamina => "STA",
-                StatType.Defense => "DEF",
-                StatType.Agility => "AGI",
-                StatType.Wisdom => "WIS",
-                StatType.Fortitude => "FOR",
-                StatType.Luck => "LUK",
-                _ => "???"
-            };
+            return StatDefinitions.GetDefinition(stat).Abbrev;
         }
         
         private Color GetStatColor(StatType stat)
         {
-            return stat switch
-            {
-                StatType.Strength => new Color(255, 100, 100),
-                StatType.Dexterity => new Color(100, 255, 100),
-                StatType.Rogue => new Color(180, 100, 255),
-                StatType.Intelligence => new Color(100, 150, 255),
-                StatType.Focus => new Color(150, 200, 255),
-                StatType.Vitality => new Color(255, 80, 80),
-                StatType.Stamina => new Color(255, 200, 80),
-                StatType.Defense => new Color(200, 200, 200),
-                StatType.Agility => new Color(100, 255, 200),
-                StatType.Wisdom => new Color(200, 150, 255),
-                StatType.Fortitude => new Color(160, 120, 80),
-                StatType.Luck => new Color(255, 215, 0),
-                _ => Color.White
-            };
+            return StatDefinitions.GetDefinition(stat).Color;
         }
         
         public override void Draw(SpriteBatch spriteBatch)

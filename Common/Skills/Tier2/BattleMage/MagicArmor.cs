@@ -2,10 +2,10 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.BattleMage
+namespace RpgMod.Common.Skills.Tier2.BattleMage
 {
     /// <summary>
     /// Magic Armor - Battle Mage's defensive buff.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier2.BattleMage
     {
         public override string InternalName => "MagicArmor";
         public override string DisplayName => "Magic Armor";
-        public override string Description => "Cloak yourself in magical armor for defense.";
+        public override string Description => "Cloak yourself in magical armor, increasing defense and magic power.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.BattleMage;

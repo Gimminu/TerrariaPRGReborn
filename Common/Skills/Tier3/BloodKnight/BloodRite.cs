@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.BloodKnight
+namespace RpgMod.Common.Skills.Tier3.BloodKnight
 {
     /// <summary>
     /// Blood Rite - Blood Knight's signature skill.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier3.BloodKnight
     {
         public override string InternalName => "BloodRite";
         public override string DisplayName => "Blood Rite";
-        public override string Description => "Sacrifice health to unleash devastating power.";
+        public override string Description => "Sacrifice health to gain massive damage and lifesteal.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.BloodKnight;

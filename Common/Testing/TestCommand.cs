@@ -2,7 +2,7 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using Terraria;
 
-namespace Rpg.Common.Testing
+namespace RpgMod.Common.Testing
 {
     /// <summary>
     /// Chat command to run RPG system tests.

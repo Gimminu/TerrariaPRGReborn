@@ -1,6 +1,6 @@
 using Terraria.ModLoader;
 
-namespace Rpg.Common.Skills
+namespace RpgMod.Common.Skills
 {
     /// <summary>
     /// Mod system to initialize skill database

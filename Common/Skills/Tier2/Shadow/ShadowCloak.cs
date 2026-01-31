@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Shadow
+namespace RpgMod.Common.Skills.Tier2.Shadow
 {
     /// <summary>
     /// Shadow Cloak - 그림자 외투.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Shadow
     {
         public override string InternalName => "ShadowCloak";
         public override string DisplayName => "Shadow Cloak";
-        public override string Description => "Cloak yourself in shadows, becoming invisible and evasive.";
+        public override string Description => "Cloak yourself in shadows, becoming invisible and faster.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Shadow;

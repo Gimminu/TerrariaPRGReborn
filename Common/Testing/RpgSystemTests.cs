@@ -4,12 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
-using Rpg.Common.Jobs;
-using Rpg.Common.Skills;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Jobs;
+using RpgMod.Common.Skills;
+using RpgMod.Common.Players;
+using Rpg;
 
-namespace Rpg.Common.Testing
+namespace RpgMod.Common.Testing
 {
     /// <summary>
     /// Comprehensive testing system for the RPG mod.
@@ -569,7 +570,7 @@ namespace Rpg.Common.Testing
             }
             
             // Also log to mod logger
-            Mod mod = ModContent.GetInstance<Rpg>();
+            Mod mod = ModContent.GetInstance<global::Rpg.Rpg>();
             mod?.Logger.Info(message);
         }
 

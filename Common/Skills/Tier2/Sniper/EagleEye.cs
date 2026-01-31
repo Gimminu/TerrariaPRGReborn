@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sniper
+namespace RpgMod.Common.Skills.Tier2.Sniper
 {
     /// <summary>
     /// Eagle Eye - 매의 눈.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Sniper
     {
         public override string InternalName => "EagleEye";
         public override string DisplayName => "Eagle Eye";
-        public override string Description => "Your vision sharpens like an eagle, increasing range and accuracy.";
+        public override string Description => "Your vision sharpens like an eagle, increasing ranged crit and granting scope vision.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Sniper;

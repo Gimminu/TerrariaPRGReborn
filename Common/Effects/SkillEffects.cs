@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 
-namespace Rpg.Common.Effects
+namespace RpgMod.Common.Effects
 {
     /// <summary>
     /// Centralized skill visual and audio effects

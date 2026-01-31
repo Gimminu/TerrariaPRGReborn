@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sniper
+namespace RpgMod.Common.Skills.Tier2.Sniper
 {
     /// <summary>
     /// Long Range - 장거리 전문가.
@@ -13,7 +13,7 @@ namespace Rpg.Common.Skills.Tier2.Sniper
     {
         public override string InternalName => "LongRange";
         public override string DisplayName => "Long Range";
-        public override string Description => "Deal more damage to distant enemies.";
+        public override string Description => "Gain ranged damage and deal more to distant enemies.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Sniper;
@@ -35,6 +35,11 @@ namespace Rpg.Common.Skills.Tier2.Sniper
             int rank = CurrentRank;
             
             player.GetDamage(DamageClass.Ranged) += DAMAGE_BONUS[rank - 1];
+        }
+
+        public static float GetDistanceBonus(int rank)
+        {
+            return DAMAGE_BONUS[System.Math.Clamp(rank - 1, 0, 9)];
         }
     }
 }

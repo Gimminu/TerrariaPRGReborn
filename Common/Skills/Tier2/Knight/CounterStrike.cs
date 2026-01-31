@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Knight
+namespace RpgMod.Common.Skills.Tier2.Knight
 {
     /// <summary>
     /// Counter Strike - 반격.
@@ -15,7 +15,7 @@ namespace Rpg.Common.Skills.Tier2.Knight
     {
         public override string InternalName => "CounterStrike";
         public override string DisplayName => "Counter Strike";
-        public override string Description => "When hit, automatically counter-attack nearby enemies.";
+        public override string Description => "When hit, reflect damage back at attackers.";
 
         public override SkillType SkillType => SkillType.Buff;
         public override JobType RequiredJob => JobType.Knight;

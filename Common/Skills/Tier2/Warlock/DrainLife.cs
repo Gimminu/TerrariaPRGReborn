@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Warlock
+namespace RpgMod.Common.Skills.Tier2.Warlock
 {
     /// <summary>
     /// Drain Life - Warlock's life steal spell.
@@ -45,10 +45,12 @@ namespace Rpg.Common.Skills.Tier2.Warlock
                 if (Vector2.Distance(npc.Center, player.Center) > RANGE) continue;
 
                 int dir = npc.Center.X >= player.Center.X ? 1 : -1;
-                bool crit = Main.rand.NextFloat(100f) < player.GetCritChance(DamageClass.Magic);
-                player.ApplyDamageToNPC(npc, damage, 2f, dir, crit, DamageClass.Magic, false);
+                bool crit = RollCrit(player, DamageClass.Magic);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Magic, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                player.ApplyDamageToNPC(npc, finalDamage, 2f, dir, crit, DamageClass.Magic, false);
 
-                int heal = (int)(damage * lifesteal);
+                int heal = (int)(finalDamage * lifesteal);
                 totalHeal += heal;
                 CreateDrainEffect(player, npc);
             }

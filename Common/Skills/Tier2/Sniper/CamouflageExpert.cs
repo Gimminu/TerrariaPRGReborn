@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sniper
+namespace RpgMod.Common.Skills.Tier2.Sniper
 {
     /// <summary>
     /// Camouflage Expert - 위장 전문가.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier2.Sniper
     {
         public override string InternalName => "CamouflageExpert";
         public override string DisplayName => "Camouflage Expert";
-        public override string Description => "Blend into shadows when not attacking, reducing aggro.";
+        public override string Description => "Blend into the shadows when idle, reducing aggro and gaining bonus defense while stationary.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Sniper;

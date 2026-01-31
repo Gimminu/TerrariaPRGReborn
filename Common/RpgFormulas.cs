@@ -2,11 +2,11 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Compatibility;
-using Rpg.Common.Config;
-using Rpg.Common.Systems;
+using RpgMod.Common.Compatibility;
+using RpgMod.Common.Config;
+using RpgMod.Common.Systems;
 
-namespace Rpg.Common
+namespace RpgMod.Common
 {
     /// <summary>
     /// Core formula calculations for the entire mod

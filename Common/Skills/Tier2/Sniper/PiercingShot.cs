@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Sniper
+namespace RpgMod.Common.Skills.Tier2.Sniper
 {
     /// <summary>
     /// Piercing Shot - 관통탄.
@@ -49,8 +49,10 @@ namespace Rpg.Common.Skills.Tier2.Sniper
                     
                     if (dot > 0.9f && dist < 1000f)
                     {
-                        int finalDamage = Main.DamageVar(damage, player.luck);
-                        npc.SimpleStrikeNPC(finalDamage, player.direction, true, 4f, DamageClass.Ranged, true);
+                        float scaledDamage = GetScaledDamage(player, DamageClass.Ranged, damage);
+                        int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                        bool crit = RollCrit(player, DamageClass.Ranged);
+                        npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 4f, DamageClass.Ranged);
                     }
                 }
             }

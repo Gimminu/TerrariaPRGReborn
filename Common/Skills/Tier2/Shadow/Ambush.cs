@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Shadow
+namespace RpgMod.Common.Skills.Tier2.Shadow
 {
     /// <summary>
     /// Ambush - Shadow's surprise attack skill.
@@ -14,7 +14,7 @@ namespace Rpg.Common.Skills.Tier2.Shadow
     {
         public override string InternalName => "Ambush";
         public override string DisplayName => "Ambush";
-        public override string Description => "Strike from the shadows with bonus damage.";
+        public override string Description => "Strike from the shadows with a guaranteed critical hit and bonus damage.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Shadow;
@@ -37,9 +37,11 @@ namespace Rpg.Common.Skills.Tier2.Shadow
             if (target != null)
             {
                 int dir = target.Center.X >= player.Center.X ? 1 : -1;
-                player.ApplyDamageToNPC(target, damage, 8f, dir, true, DamageClass.Melee, false);
+                float scaledDamage = GetScaledDamage(player, DamageClass.Melee, damage);
+                int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                player.ApplyDamageToNPC(target, finalDamage, 8f, dir, true, DamageClass.Melee, false);
                 PlayEffects(target);
-                ShowMessage(target, $"-{damage} Ambush!", Color.Red);
+                ShowMessage(target, $"-{finalDamage} Ambush!", Color.Red);
             }
             else
             {

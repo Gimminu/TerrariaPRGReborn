@@ -1,7 +1,7 @@
 using Terraria;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier1.Summoner
+namespace RpgMod.Common.Skills.Tier1.Summoner
 {
     /// <summary>
     /// Soul Bond - 영혼 결속.
@@ -12,7 +12,7 @@ namespace Rpg.Common.Skills.Tier1.Summoner
     {
         public override string InternalName => "SoulBond";
         public override string DisplayName => "Soul Bond";
-        public override string Description => "Form a bond with your minions, healing when they deal damage.";
+        public override string Description => "Form a bond with your minions, healing on their hits and boosting life regen.";
 
         public override SkillType SkillType => SkillType.Passive;
         public override JobType RequiredJob => JobType.Summoner;
@@ -24,8 +24,13 @@ namespace Rpg.Common.Skills.Tier1.Summoner
         public override int ResourceCost => 0;
         public override ResourceType ResourceType => ResourceType.None;
 
-        // 흡혈량은 RpgPlayer에서 OnHit 이벤트로 처리 필요
+        // 흡혈량은 RpgPlayer에서 OnHit 이벤트로 처리
         private static readonly float[] LIFESTEAL = { 0.01f, 0.015f, 0.02f, 0.025f, 0.03f, 0.035f, 0.04f, 0.045f, 0.05f, 0.06f };
+
+        public static float GetLifeSteal(int rank)
+        {
+            return LIFESTEAL[System.Math.Clamp(rank - 1, 0, 9)];
+        }
 
         public override void ApplyPassive(Player player)
         {

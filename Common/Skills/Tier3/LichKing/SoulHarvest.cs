@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.LichKing
+namespace RpgMod.Common.Skills.Tier3.LichKing
 {
     /// <summary>
     /// Soul Harvest - Lich King's signature skill.
@@ -56,12 +56,10 @@ namespace Rpg.Common.Skills.Tier3.LichKing
                     continue;
 
                 int hitDirection = npc.Center.X >= player.Center.X ? 1 : -1;
-                float critChance = player.GetCritChance(DamageClass.Magic);
-                bool crit = Main.rand.NextFloat(100f) < critChance;
+                bool crit = RollCrit(player, DamageClass.Magic);
 
-                int damage = Main.DamageVar(baseDamage, player.luck);
-                if (crit) damage = (int)(damage * 1.5f);
-
+                float scaledDamage = GetScaledDamage(player, DamageClass.Magic, baseDamage);
+                int damage = ApplyDamageVariance(player, scaledDamage);
                 player.ApplyDamageToNPC(npc, damage, 2f, hitDirection, crit, DamageClass.Magic, false);
                 
                 // Heal per hit

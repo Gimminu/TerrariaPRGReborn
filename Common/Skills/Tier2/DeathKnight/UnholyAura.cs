@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.DeathKnight
+namespace RpgMod.Common.Skills.Tier2.DeathKnight
 {
     /// <summary>
     /// Unholy Aura - Death Knight's dark buff.

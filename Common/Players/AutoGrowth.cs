@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Rpg.Common.Players
+namespace RpgMod.Common.Players
 {
     /// <summary>
     /// Auto-growth system (30~40% of total growth)

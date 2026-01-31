@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier3.Deadeye
+namespace RpgMod.Common.Skills.Tier3.Deadeye
 {
     /// <summary>
     /// Perfect Shot - 완벽한 사격.
@@ -39,8 +39,12 @@ namespace Rpg.Common.Skills.Tier3.Deadeye
             Vector2 direction = (Main.MouseWorld - player.Center).SafeNormalize(Vector2.UnitX);
             
             // 초고속 관통탄
-            Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, direction * 30f,
+            int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, direction * 30f,
                 ProjectileID.BulletHighVelocity, damage, 10f, player.whoAmI);
+            if (projId >= 0 && projId < Main.maxProjectiles)
+            {
+                Main.projectile[projId].DamageType = DamageClass.Ranged;
+            }
             
             PlayEffects(player, direction);
         }

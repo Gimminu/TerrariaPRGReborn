@@ -2,19 +2,19 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Rpg.Common.Base;
-using Rpg.Common.Players;
+using RpgMod.Common.Base;
+using RpgMod.Common.Players;
 
-namespace Rpg.Common.Skills.Tier2.Beastmaster
+namespace RpgMod.Common.Skills.Tier2.Beastmaster
 {
     /// <summary>
-    /// Pack Tactics - Beastmaster's buff when minions are active.
+    /// Pack Tactics - Beastmaster's summoning damage buff.
     /// </summary>
     public class PackTactics : BaseSkill
     {
         public override string InternalName => "PackTactics";
         public override string DisplayName => "Pack Tactics";
-        public override string Description => "Boost summon damage and your own damage when minions are active.";
+        public override string Description => "Boost summon damage for a short time.";
 
         public override SkillType SkillType => SkillType.Active;
         public override JobType RequiredJob => JobType.Beastmaster;

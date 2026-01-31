@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Rpg.Common.Base;
+using RpgMod.Common.Base;
 
-namespace Rpg.Common.Skills.Tier2.Spellblade
+namespace RpgMod.Common.Skills.Tier2.Spellblade
 {
     /// <summary>
     /// Arcane Strike - 마력 일격.
@@ -47,13 +47,20 @@ namespace Rpg.Common.Skills.Tier2.Spellblade
                 NPC npc = Main.npc[i];
                 if (npc.active && !npc.friendly && npc.Hitbox.Intersects(hitbox))
                 {
-                    int finalDamage = Main.DamageVar(damage, player.luck);
-                    npc.SimpleStrikeNPC(finalDamage, player.direction, true, 4f, DamageClass.Melee, true);
+                    float scaledDamage = GetScaledDamage(player, DamageClass.Melee, damage);
+                    int finalDamage = ApplyDamageVariance(player, scaledDamage);
+                    bool crit = RollCrit(player, DamageClass.Melee);
+                    npc.SimpleStrikeNPC(finalDamage, player.direction, crit, 4f, DamageClass.Melee);
                     
                     // 추가 마법 탄환
                     Vector2 toNpc = (npc.Center - player.Center).SafeNormalize(Vector2.UnitX);
-                    Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, toNpc * 10f,
-                        ProjectileID.AmethystBolt, damage / 3, 1f, player.whoAmI);
+                    int boltDamage = damage / 3;
+                    int projId = Projectile.NewProjectile(player.GetSource_FromThis(), player.Center, toNpc * 10f,
+                        ProjectileID.AmethystBolt, boltDamage, 1f, player.whoAmI);
+                    if (projId >= 0 && projId < Main.maxProjectiles)
+                    {
+                        Main.projectile[projId].DamageType = DamageClass.Magic;
+                    }
                 }
             }
             
